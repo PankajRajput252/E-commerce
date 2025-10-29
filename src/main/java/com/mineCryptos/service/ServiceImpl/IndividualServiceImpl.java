@@ -3,14 +3,8 @@ package com.mineCryptos.service.ServiceImpl;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.RankReward;
-import com.mineCryptos.model.entitities.enduser.DepositFund;
-import com.mineCryptos.model.entitities.enduser.IndividualIncomeSummary;
-import com.mineCryptos.model.entitities.enduser.MiningPackage;
-import com.mineCryptos.model.entitities.enduser.Wallet;
-import com.mineCryptos.repo.enduser.DepositFundRepository;
-import com.mineCryptos.repo.enduser.IndividualIncomeSummaryRepository;
-import com.mineCryptos.repo.enduser.MiningPackageRepository;
-import com.mineCryptos.repo.enduser.WalletRepository;
+import com.mineCryptos.model.entitities.enduser.*;
+import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +24,8 @@ public class IndividualServiceImpl implements IndividualService {
     private MiningPackageRepository miningPackageRepository;
     @Autowired
     private DepositFundRepository depositFundRepository;
+    @Autowired
+    private WalletTransactionRepository walletTransactionRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -350,6 +346,85 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteDepositFund(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         depositFundRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getWalletTransaction(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<WalletTransaction> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<WalletTransaction> walletTransactionList = populateWalletTransactionView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateWalletTransactionCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(walletTransactionList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private int populateWalletTransactionCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = walletTransactionRepository.countByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }  else {
+            count = walletTransactionRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<WalletTransaction> populateWalletTransactionView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<WalletTransaction> walletTransactionList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            WalletTransaction walletTransaction = walletTransactionRepository.findByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            walletTransactionList.add(walletTransaction);
+        } else {
+            walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return walletTransactionList;
+    }
+    @Override
+    public FinalResponse addWalletTransaction(WalletTransaction walletTransaction) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        walletTransaction.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(walletTransaction.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(walletTransaction);
+
+        walletTransactionRepository.save(walletTransaction);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateWalletTransaction(Integer id, WalletTransaction walletTransaction) {
+        FinalResponse finalResponse = new FinalResponse();
+        walletTransactionRepository.findById(id)
+                .map(existing -> {
+                    existing.setTransactionId(walletTransaction.getTransactionId());
+                    existing.setFromUserId(walletTransaction.getFromUserId());
+                    existing.setToUserId(walletTransaction.getToUserId());
+                    existing.setFromWallet(walletTransaction.getFromWallet());
+                    existing.setToWallet(walletTransaction.getToWallet());
+                    existing.setAmount(walletTransaction.getAmount());
+                    existing.setStatus(walletTransaction.getStatus());
+                    existing.setRemarks(walletTransaction.getRemarks());
+                    existing.setCreatedAt(walletTransaction.getCreatedAt());
+                    return walletTransactionRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Wallet Txn    not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteWalletTransaction(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        walletTransactionRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

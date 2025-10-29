@@ -5,10 +5,7 @@ import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
-import com.mineCryptos.model.entitities.enduser.DepositFund;
-import com.mineCryptos.model.entitities.enduser.IndividualIncomeSummary;
-import com.mineCryptos.model.entitities.enduser.MiningPackage;
-import com.mineCryptos.model.entitities.enduser.Wallet;
+import com.mineCryptos.model.entitities.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -123,6 +120,7 @@ public class IndividualController {
         return individualService.updateMiningPackage(id, miningPackage);
     }
 
+
     @DeleteMapping("/deleteMiningPackage/{id}")
     public FinalResponse deleteMiningPackage(@PathVariable Integer id) {
         return individualService.deleteMiningPackage(id);
@@ -161,5 +159,41 @@ public class IndividualController {
     @DeleteMapping("/deleteDepositFund/{id}")
     public FinalResponse deleteDepositFund(@PathVariable Integer id) {
         return individualService.deleteDepositFund(id);
+    }
+
+
+    @GetMapping("/getWalletTransaction")
+    public FinalResponse getWalletTransaction(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        Integer inputFkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        if (Util.isDefined(inputFkId)) {
+            inputFkIdInt = Util.convertStringToInteger(inputFkId);
+        }
+        return individualService.getWalletTransaction(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addWalletTransaction")
+    public FinalResponse addWalletTransaction(@RequestBody WalletTransaction walletTransaction) throws FinalException {
+        return this.individualService.addWalletTransaction(walletTransaction);
+    }
+
+    @PutMapping("/updateWalletTransaction/{id}")
+    public FinalResponse updateWalletTransaction(@PathVariable Integer id, @RequestBody WalletTransaction walletTransaction) {
+        return individualService.updateWalletTransaction(id, walletTransaction);
+    }
+
+    @DeleteMapping("/deleteWalletTransaction/{id}")
+    public FinalResponse deleteWalletTransaction(@PathVariable Integer id) {
+        return individualService.deleteWalletTransaction(id);
     }
 }
