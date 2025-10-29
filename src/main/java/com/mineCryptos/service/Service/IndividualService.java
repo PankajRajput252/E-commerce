@@ -1,7 +1,9 @@
 package com.mineCryptos.service.Service;
 
 import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.entitities.enduser.DepositFund;
 import com.mineCryptos.model.entitities.enduser.IndividualIncomeSummary;
+import com.mineCryptos.model.entitities.enduser.MiningPackage;
 import com.mineCryptos.model.entitities.enduser.Wallet;
 
 public interface IndividualService {
@@ -20,4 +22,20 @@ public interface IndividualService {
     FinalResponse updateIndividualIncomeSummary(Integer id, IndividualIncomeSummary individualIncomeSummary);
 
     FinalResponse deleteIndividualIncomeSummary(Integer id);
+
+    FinalResponse getIndividualMiningPackage(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addMiningPackage(MiningPackage miningPackage);
+
+    FinalResponse updateMiningPackage(Integer id, MiningPackage miningPackage);
+
+    FinalResponse deleteMiningPackage(Integer id);
+
+    FinalResponse getIndividualDepositFund(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addDepositFund(DepositFund depositFund);
+
+    FinalResponse updateDepositFund(Integer id, DepositFund depositFund);
+
+    FinalResponse deleteDepositFund(Integer id);
 }

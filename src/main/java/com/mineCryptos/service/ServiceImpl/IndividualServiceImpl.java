@@ -3,9 +3,13 @@ package com.mineCryptos.service.ServiceImpl;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.RankReward;
+import com.mineCryptos.model.entitities.enduser.DepositFund;
 import com.mineCryptos.model.entitities.enduser.IndividualIncomeSummary;
+import com.mineCryptos.model.entitities.enduser.MiningPackage;
 import com.mineCryptos.model.entitities.enduser.Wallet;
+import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.IndividualIncomeSummaryRepository;
+import com.mineCryptos.repo.enduser.MiningPackageRepository;
 import com.mineCryptos.repo.enduser.WalletRepository;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,10 @@ public class IndividualServiceImpl implements IndividualService {
     private WalletRepository walletRepository;
     @Autowired
     private IndividualIncomeSummaryRepository individualIncomeSummaryRepository;
+    @Autowired
+    private MiningPackageRepository miningPackageRepository;
+    @Autowired
+    private DepositFundRepository depositFundRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -177,4 +185,174 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
+
+    @Override
+    public FinalResponse getIndividualMiningPackage(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue){
+        FinalResponse<MiningPackage> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<MiningPackage> miningPackageList = populateMiningPackageView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateMiningPackageCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(miningPackageList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private int populateMiningPackageCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = miningPackageRepository.countByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }  else {
+            count = miningPackageRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<MiningPackage> populateMiningPackageView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<MiningPackage> miningPackageList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            MiningPackage miningPackage = miningPackageRepository.findByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            miningPackageList.add(miningPackage);
+        } else {
+            miningPackageList = miningPackageRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return miningPackageList;
+    }
+
+
+    @Override
+    public FinalResponse addMiningPackage(MiningPackage miningPackage) {
+        FinalResponse finalResponse=new FinalResponse();
+        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
+            throw new IllegalArgumentException("Amount must be >= 100 and in multiples of 10");
+        }
+
+        // 2. Validate transaction password and OTP
+        // (Assume validateTransactionPassword() and validateOtp() are implemented)
+//        if (!validateTransactionPassword(request.getUserId(), request.getTransactionPassword())) {
+//            throw new IllegalArgumentException("Invalid transaction password");
+//        }
+//
+//        if (!validateOtp(request.getUserId(), request.getOtp())) {
+//            throw new IllegalArgumentException("Invalid OTP");
+//        }
+
+         miningPackageRepository.save(miningPackage);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private boolean validateTransactionPassword(String userId, String password) {
+        // TODO: integrate with user auth table
+        return "mySecurePass".equals(password);
+    }
+
+    private boolean validateOtp(String userId, String otp) {
+        // TODO: integrate OTP validation logic
+        return "894512".equals(otp);
+    }
+
+    @Override
+    public FinalResponse updateMiningPackage(Integer id, MiningPackage miningPackage) {
+        FinalResponse finalResponse = new FinalResponse();
+        miningPackageRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeCode(miningPackage.getUserNodeCode());
+                    existing.setPackageAmount(miningPackage.getPackageAmount());
+                    existing.setRemarks(miningPackage.getRemarks());
+                    existing.setMode(miningPackage.getMode());
+                    existing.setTransactionPassword(miningPackage.getTransactionPassword());
+                    return miningPackageRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Mining package   not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteMiningPackage(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        miningPackageRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getIndividualDepositFund(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<DepositFund> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<DepositFund> depositFundList = populateDepositFundView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateDepositFundCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(depositFundList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private int populateDepositFundCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = depositFundRepository.countByDepositPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }  else {
+            count = depositFundRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<DepositFund> populateDepositFundView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<DepositFund> depositFundList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            DepositFund depositFund = depositFundRepository.findByDepositPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            depositFundList.add(depositFund);
+        } else {
+            depositFundList = depositFundRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return depositFundList;
+    }
+
+    @Override
+    public FinalResponse addDepositFund(DepositFund depositFund) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        depositFund.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(depositFund.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(depositFund);
+
+        depositFundRepository.save(depositFund);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateDepositFund(Integer id, DepositFund depositFund) {
+        FinalResponse finalResponse = new FinalResponse();
+        depositFundRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeCode(depositFund.getUserNodeCode());
+                    existing.setCurrency(depositFund.getCurrency());
+                    existing.setAmount(depositFund.getAmount());
+                    existing.setStatus(depositFund.getStatus());
+                    existing.setTransactionPassword(depositFund.getTransactionPassword());
+                    existing.setConfirmedAt(depositFund.getConfirmedAt());
+                    return depositFundRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Mining package   not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteDepositFund(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        depositFundRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
 }
