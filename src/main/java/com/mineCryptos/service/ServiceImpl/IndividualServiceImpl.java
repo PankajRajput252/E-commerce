@@ -414,7 +414,7 @@ public class IndividualServiceImpl implements IndividualService {
                     existing.setAmount(walletTransaction.getAmount());
                     existing.setStatus(walletTransaction.getStatus());
                     existing.setRemarks(walletTransaction.getRemarks());
-                    existing.setCreatedAt(walletTransaction.getCreatedAt());
+                    existing.setConfirmedAt(walletTransaction.getConfirmedAt());
                     return walletTransactionRepository.save(existing);
                 }).orElseThrow(() -> new RuntimeException(" Wallet Txn    not found"));
         finalResponse = Util.setSuccessMessage(finalResponse);
