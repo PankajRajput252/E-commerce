@@ -20,4 +20,8 @@ public interface AdminService {
     FinalResponse updateIncomeType(Integer id, IncomeType incomeType);
 
     FinalResponse deleteIncomeType(Integer id);
+
+    FinalResponse confirmDeposit(Integer depositId);
+
+    FinalResponse confirmWalletTransaction(Integer depositId);
 }

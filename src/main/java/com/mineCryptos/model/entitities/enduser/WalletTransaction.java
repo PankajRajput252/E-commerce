@@ -39,8 +39,8 @@ public class WalletTransaction extends StandardFieldClass {
     @Column(name = "REMARKS")
     private String remarks;
 
-    @Column(name = "CREATED_AT")
-    private LocalDateTime createdAt;
+    @Column(name = "CONFIRMED_AT")
+    private LocalDateTime confirmedAt;
 
     public Integer getWalletTxnPkId() {
         return walletTxnPkId;
@@ -114,11 +114,11 @@ public class WalletTransaction extends StandardFieldClass {
         this.remarks = remarks;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getConfirmedAt() {
+        return confirmedAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setConfirmedAt(LocalDateTime confirmedAt) {
+        this.confirmedAt = confirmedAt;
     }
 }

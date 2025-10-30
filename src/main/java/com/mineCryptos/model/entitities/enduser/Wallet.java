@@ -30,8 +30,8 @@ public class Wallet extends StandardFieldClass {
     @Column(name = "TOTAL_DEBIT")
     private double totalDebit;
 
-    @Column(name = "USER_FK_ID")
-    private  Integer userFkId;
+    @Column(name = "USER_NODE_CODE")
+    private String userNodeCode;
 
 
 
@@ -91,11 +91,11 @@ public class Wallet extends StandardFieldClass {
         this.totalDebit = totalDebit;
     }
 
-    public Integer getUserFkId() {
-        return userFkId;
+    public String getUserNodeCode() {
+        return userNodeCode;
     }
 
-    public void setUserFkId(Integer userFkId) {
-        this.userFkId = userFkId;
+    public void setUserNodeCode(String userNodeCode) {
+        this.userNodeCode = userNodeCode;
     }
 }

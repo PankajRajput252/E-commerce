@@ -88,4 +88,19 @@ public class AdminController {
     public FinalResponse deleteIncomeType(@PathVariable Integer id) {
         return adminService.deleteIncomeType(id);
     }
+
+
+    // For admin or webhook confirmation
+    @PostMapping("/confirmDeposit/{depositId}")
+    public FinalResponse confirmDeposit(@PathVariable Integer depositId) {
+         return adminService.confirmDeposit(depositId);
+
+    }
+
+    // For admin or webhook confirmation
+    @PostMapping("/confirmWalletTransaction/{walletTxnPkId}")
+    public FinalResponse confirmWalletTransaction(@PathVariable Integer walletTxnPkId) {
+        return adminService.confirmWalletTransaction(walletTxnPkId);
+
+    }
 }

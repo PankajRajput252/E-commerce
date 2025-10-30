@@ -6,16 +6,24 @@ import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
+import com.mineCryptos.model.entitities.enduser.DepositFund;
+import com.mineCryptos.model.entitities.enduser.WalletTransaction;
 import com.mineCryptos.repo.admin.IncomeTypeRepository;
 import com.mineCryptos.repo.admin.RankRewardRepository;
+import com.mineCryptos.repo.enduser.DepositFundRepository;
+import com.mineCryptos.repo.enduser.WalletRepository;
+import com.mineCryptos.repo.enduser.WalletTransactionRepository;
 import com.mineCryptos.service.Service.AdminService;
+import net.bytebuddy.dynamic.DynamicType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -24,6 +32,12 @@ public class AdminServiceImpl implements AdminService {
     private RankRewardRepository rankRewardRepository;
     @Autowired
     private IncomeTypeRepository incomeTypeRepository;
+    @Autowired
+    private DepositFundRepository depositFundRepository;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private WalletTransactionRepository walletTransactionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -182,6 +196,103 @@ public class AdminServiceImpl implements AdminService {
     public FinalResponse deleteIncomeType(Integer id){
         FinalResponse finalResponse = new FinalResponse();
         incomeTypeRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse confirmDeposit(Integer depositId) {
+        FinalResponse finalResponse = new FinalResponse();
+        DepositFund depositFund = depositFundRepository.findByDepositPkIdAndActiveStateCodeFkId(depositId, "ACTIVE");
+        if (Util.isDefined(depositFund)) {
+            Optional<DepositFund> depositFunds = Optional.ofNullable(depositFund);
+            depositFunds.map(existing -> {
+                existing.setConfirmedAt(LocalDateTime.now());
+                existing.setStatus("SUCCESS");
+                return depositFundRepository.save(existing);
+            });
+            double currentAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+            double totalAmount=currentAmount+depositFund.getAmount();
+            walletRepository.updateCapitalWalletOfUser(totalAmount,depositFund.getUserNodeCode());
+        } else {
+            Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
+            return finalResponse;
+        }
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse confirmWalletTransaction(Integer walletTxnPkId) {
+        FinalResponse finalResponse = new FinalResponse();
+        WalletTransaction walletTransaction = walletTransactionRepository.findByWalletTxnPkIdAndActiveStateCodeFkId(walletTxnPkId, "ACTIVE");
+        if (Util.isDefined(walletTransaction)) {
+            Optional<WalletTransaction> depositFunds = Optional.ofNullable(walletTransaction);
+            depositFunds.map(existing -> {
+                existing.setConfirmedAt(LocalDateTime.now());
+                existing.setStatus("SUCCESS");
+                return walletTransactionRepository.save(existing);
+            });
+
+            if (walletTransaction.getFromWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+                //deducting amount fromUser
+                double currentFromWalletAmount = walletRepository.fetchUserCapitalWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+                double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+                walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+
+                // adding money to the transfer wallet to user
+                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalNodeAmount = currentNodeAmount = walletTransaction.getAmount();
+                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
+                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
+                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+                }
+            } else if (walletTransaction.getFromWallet().equalsIgnoreCase("NODE_WALLET")) {
+                double currentFromWalletAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+                double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+                walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+
+                // adding money to the transfer wallet
+                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
+                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
+                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
+                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+                }
+
+            } else if (walletTransaction.getFromWallet().equalsIgnoreCase("MINE_WALLET")) {
+                double currentFromWalletAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+                double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+                walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+
+                // adding money to the transfer wallet
+                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
+                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
+                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
+                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+                }
+
+            } else {
+                Util.setMessage(finalResponse, "100", "Error:Unable to get From wallet name , Please contact Admin.");
+                return finalResponse;
+            }
+
+        } else {
+            Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
+            return finalResponse;
+        }
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
