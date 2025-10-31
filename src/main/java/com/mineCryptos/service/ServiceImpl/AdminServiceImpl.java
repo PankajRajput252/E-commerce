@@ -255,10 +255,10 @@ public class AdminServiceImpl implements AdminService {
             } else if (walletTransaction.getFromWallet().equalsIgnoreCase("NODE_WALLET")) {
                 double currentFromWalletAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
                 double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
-                walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+                walletRepository.updateNodeWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
 
                 // adding money to the transfer wallet
-                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+                if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
                     double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
                     double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
                     walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
@@ -271,14 +271,14 @@ public class AdminServiceImpl implements AdminService {
             } else if (walletTransaction.getFromWallet().equalsIgnoreCase("MINE_WALLET")) {
                 double currentFromWalletAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
                 double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
-                walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+                walletRepository.updateMineWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
 
                 // adding money to the transfer wallet
                 if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
                     double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
                     double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
                     walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
-                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
+                } else if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
                     double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
                     double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
                     walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
@@ -290,7 +290,7 @@ public class AdminServiceImpl implements AdminService {
             }
 
         } else {
-            Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
+            Util.setMessage(finalResponse, "100", "Error:Transfer not found.");
             return finalResponse;
         }
         finalResponse = Util.setSuccessMessage(finalResponse);
