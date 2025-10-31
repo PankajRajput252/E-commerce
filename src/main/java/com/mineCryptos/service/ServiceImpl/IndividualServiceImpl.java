@@ -4,6 +4,7 @@ import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.*;
+import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class IndividualServiceImpl implements IndividualService {
@@ -26,6 +28,8 @@ public class IndividualServiceImpl implements IndividualService {
     private DepositFundRepository depositFundRepository;
     @Autowired
     private WalletTransactionRepository walletTransactionRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -304,6 +308,11 @@ public class IndividualServiceImpl implements IndividualService {
         } else {
             depositFundList = depositFundRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
+        depositFundList.stream().map((depositFund)->{
+           String userName= userRepository.fetchUserNameBasedOnNodeId(depositFund.getUserNodeCode(),"ACTIVE");
+            depositFund.setUserName(userName);
+            return depositFund;
+        }).collect(Collectors.toList());
         return depositFundList;
     }
 
@@ -381,6 +390,11 @@ public class IndividualServiceImpl implements IndividualService {
         } else {
             walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
+        walletTransactionList.stream().map((walletTransaction)->{
+            String userName= userRepository.fetchUserNameBasedOnNodeId(walletTransaction.getFromUserId(),"ACTIVE");
+            walletTransaction.setUserName(userName);
+            return walletTransaction;
+        }).collect(Collectors.toList());
         return walletTransactionList;
     }
     @Override

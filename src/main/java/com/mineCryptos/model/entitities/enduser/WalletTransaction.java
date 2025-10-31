@@ -42,6 +42,9 @@ public class WalletTransaction extends StandardFieldClass {
     @Column(name = "CONFIRMED_AT")
     private LocalDateTime confirmedAt;
 
+    @Transient
+    private String userName;
+
     public Integer getWalletTxnPkId() {
         return walletTxnPkId;
     }
@@ -120,5 +123,13 @@ public class WalletTransaction extends StandardFieldClass {
 
     public void setConfirmedAt(LocalDateTime confirmedAt) {
         this.confirmedAt = confirmedAt;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

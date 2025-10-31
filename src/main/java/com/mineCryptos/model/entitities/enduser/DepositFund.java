@@ -34,6 +34,9 @@ public class DepositFund extends StandardFieldClass {
     @Column(name = "CONFIRMED_AT")
     private LocalDateTime confirmedAt;
 
+    @Transient
+    private String userName;
+
     public Integer getDepositPkId() {
         return depositPkId;
     }
@@ -89,5 +92,13 @@ public class DepositFund extends StandardFieldClass {
 
     public void setConfirmedAt(LocalDateTime confirmedAt) {
         this.confirmedAt = confirmedAt;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
