@@ -24,4 +24,6 @@ public interface AdminService {
     FinalResponse confirmDeposit(Integer depositId);
 
     FinalResponse confirmWalletTransaction(Integer depositId);
+
+    FinalResponse confirmUser(String nodeId);
 }

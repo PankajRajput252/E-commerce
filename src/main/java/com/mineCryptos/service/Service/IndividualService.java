@@ -43,4 +43,8 @@ public interface IndividualService {
     FinalResponse updateWalletTransaction(Integer id, WalletTransaction walletTransaction);
 
     FinalResponse deleteWalletTransaction(Integer id);
+
+    FinalResponse getAllDirectMember(String inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse getTeamHierarchy(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
 }

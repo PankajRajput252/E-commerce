@@ -36,8 +36,14 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByNodeId(String nodeId);
 
     User findByNodeIdAndActiveStateCodeFkId(String username, String active);
+    List<User> findByParentNodeIdAndActiveStateCodeFkId(String username, String active, Pageable pageable);
 
     @Query("SELECT t.name FROM User t where t.nodeId = ?1 And t.activeStateCodeFkId =?2")
     String fetchUserNameBasedOnNodeId(String userNodeCode, String active);
 
+    List<User> findByActiveStateCodeFkIdAndParentNodeIdContaining(String active, String searchValue, Pageable pageable);
+
+    int countByParentNodeIdAndActiveStateCodeFkId(String inputPkId, String active);
+
+    int countByActiveStateCodeFkIdAndParentNodeIdContaining(String active, String searchValue);
 }

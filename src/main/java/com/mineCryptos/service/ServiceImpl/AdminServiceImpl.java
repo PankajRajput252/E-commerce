@@ -8,6 +8,7 @@ import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.DepositFund;
 import com.mineCryptos.model.entitities.enduser.WalletTransaction;
+import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.admin.IncomeTypeRepository;
 import com.mineCryptos.repo.admin.RankRewardRepository;
 import com.mineCryptos.repo.enduser.DepositFundRepository;
@@ -38,6 +39,8 @@ public class AdminServiceImpl implements AdminService {
     private WalletRepository walletRepository;
     @Autowired
     private WalletTransactionRepository walletTransactionRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -291,6 +294,30 @@ public class AdminServiceImpl implements AdminService {
 
         } else {
             Util.setMessage(finalResponse, "100", "Error:Transfer not found.");
+            return finalResponse;
+        }
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse confirmUser(String nodeId) {
+        FinalResponse finalResponse = new FinalResponse();
+        User user = userRepository.findByNodeIdAndActiveStateCodeFkId(nodeId, "ACTIVE");
+        if (Util.isDefined(user)) {
+            Optional<User> users = Optional.ofNullable(user);
+            users.map(existing -> {
+                existing.setDateOfActivation(LocalDateTime.now());
+                existing.setUserStatus("ACTIVE");
+                if(Util.isDefined(existing.getReferralCode())) {
+                    existing.setParentNodeId(existing.getReferralCode());
+                }
+                return userRepository.save(existing);
+            });
+
+        } else {
+            Util.setMessage(finalResponse, "100", "Error: User not found.");
             return finalResponse;
         }
         finalResponse = Util.setSuccessMessage(finalResponse);

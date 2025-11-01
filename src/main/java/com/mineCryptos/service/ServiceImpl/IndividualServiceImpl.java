@@ -1,6 +1,7 @@
 package com.mineCryptos.service.ServiceImpl;
 
 import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.*;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -442,6 +444,89 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
+
+    @Override
+    public FinalResponse getAllDirectMember(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue){
+        FinalResponse<MemberDetail> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<MemberDetail> memberDetailList = populateMemberDetailView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateMemberDetailCount(inputPkId, inputFkId, filterBy,searchValue);
+        finalResponse.setData(memberDetailList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private int populateMemberDetailCount(String inputPkId, String inputFkId, String filterBy,String searchValue) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = userRepository.countByParentNodeIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }
+        else if(Util.isDefined(searchValue)){
+            count=userRepository.countByActiveStateCodeFkIdAndParentNodeIdContaining("ACTIVE",searchValue);
+        }
+        else {
+            count = userRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+        return count;
+    }
+
+    private List<MemberDetail> populateMemberDetailView(String inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<MemberDetail> memberDetailList = new ArrayList<>();
+        List<User> userList=new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+             userList = userRepository.findByParentNodeIdAndActiveStateCodeFkId(inputPkId, "ACTIVE",pageable);
+        }
+        else if(Util.isDefined(searchValue)){
+            userList=userRepository.findByActiveStateCodeFkIdAndParentNodeIdContaining("ACTIVE",searchValue,pageable);
+        }
+        else {
+            userList = userRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        if(Util.isDefined(userList)){
+            AtomicInteger levelCount = new AtomicInteger(0);
+            userList.stream().map((user)->{
+                MemberDetail memberDetail = new MemberDetail();
+                memberDetail.setMemberId(user.getNodeId());
+                memberDetail.setMemberLevel(levelCount.getAndIncrement()); // increments each time
+                memberDetail.setMemberName(user.getName());
+                memberDetail.setMemberEmail(user.getEmail());
+                memberDetailList.add(memberDetail);
+                return user;
+            }).collect(Collectors.toList());
+        }
+        return memberDetailList;
+    }
+
+    @Override
+    public  FinalResponse getTeamHierarchy(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue){
+        FinalResponse<MemberDetail> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<MemberDetail> team=new ArrayList<>();
+        fetchTeamRecursive(inputPkId, 0, team);
+        finalResponse.setData(team);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+
+    }
+
+
+    private void fetchTeamRecursive(String parentId, int level, List<MemberDetail> team) {
+//        if (level >= 10) return; // stop after level 10 (for safety)
+
+        List<User> userList = userRepository.findByParentNodeIdAndActiveStateCodeFkId(parentId, "ACTIVE",null);
+        if (userList.isEmpty()) return; // no more downline → stop
+
+        for (User child : userList) {
+            MemberDetail detail = new MemberDetail();
+            detail.setMemberId(child.getNodeId());
+            detail.setMemberLevel(level + 1);
+            detail.setMemberName(child.getName());
+            team.add(detail);
+            fetchTeamRecursive(child.getNodeId(), level + 1, team);
+        }
+    }
+
 
 
 }

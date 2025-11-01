@@ -103,4 +103,10 @@ public class AdminController {
         return adminService.confirmWalletTransaction(walletTxnPkId);
 
     }
+
+
+    @PutMapping("/confirmUser/{nodeId}")
+    public FinalResponse confirmUser(@PathVariable String nodeId) {
+        return adminService.confirmUser(nodeId);
+    }
 }

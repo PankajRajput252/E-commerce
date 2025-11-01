@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,16 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     @Column(name = "POSITION")
     private String position;
+
+    @Column(name = "USER_STATUS")
+    private String userStatus;
+
+    @Column(name = "PARENT_NODE_ID")
+    private String parentNodeId;
+
+    @Column(name = "DATE_OF_ACTIVATION")
+    private LocalDateTime dateOfActivation;
+
 
     @Transient
     private boolean isUserIsAdmin;
@@ -210,5 +221,27 @@ public class User  extends StandardFieldClass implements UserDetails {
         this.nodeId = nodeId;
     }
 
+    public String getUserStatus() {
+        return userStatus;
+    }
 
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
+    }
+
+    public LocalDateTime getDateOfActivation() {
+        return dateOfActivation;
+    }
+
+    public String getParentNodeId() {
+        return parentNodeId;
+    }
+
+    public void setParentNodeId(String parentNodeId) {
+        this.parentNodeId = parentNodeId;
+    }
+
+    public void setDateOfActivation(LocalDateTime dateOfActivation) {
+        this.dateOfActivation = dateOfActivation;
+    }
 }
