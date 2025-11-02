@@ -11,9 +11,11 @@ import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -527,6 +529,25 @@ public class IndividualServiceImpl implements IndividualService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse updateProfile(Profile profile){
+        FinalResponse finalResponse = new FinalResponse();
+        User user=  userRepository.findByNodeIdAndActiveStateCodeFkId(profile.getUserNodeId(),"ACTIVE");
+        if (Util.isDefined(user)) {
+            Optional<User> users = Optional.ofNullable(user);
+            users.map(existing -> {
+                existing.setName(existing.getUsername());
+                existing.setEmail(existing.getEmail());
+                existing.setCountry(existing.getCountry());
+                existing.setMobile(existing.getMobile());
+                existing.setTransactionPassword(existing.getTransactionPassword());
+                return userRepository.save(existing);
+            }).orElseThrow(() -> new RuntimeException(" User  not found"));
+        }
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 
 
 }

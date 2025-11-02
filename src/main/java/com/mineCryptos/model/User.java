@@ -55,6 +55,10 @@ public class User  extends StandardFieldClass implements UserDetails {
     @Column(name = "PARENT_NODE_ID")
     private String parentNodeId;
 
+    @Column(name = "TRANSACTION_PASSWORD")
+    private String transactionPassword;
+
+
     @Column(name = "DATE_OF_ACTIVATION")
     private LocalDateTime dateOfActivation;
 
@@ -243,5 +247,13 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     public void setDateOfActivation(LocalDateTime dateOfActivation) {
         this.dateOfActivation = dateOfActivation;
+    }
+
+    public String getTransactionPassword() {
+        return transactionPassword;
+    }
+
+    public void setTransactionPassword(String transactionPassword) {
+        this.transactionPassword = transactionPassword;
     }
 }

@@ -220,4 +220,9 @@ public class IndividualController {
     ) throws FinalException {
         return individualService.getTeamHierarchy(inputPkId, inputFkId, page, size, filterBy, searchValue);
     }
+
+    @PutMapping("/updateProfile")
+    public FinalResponse updateProfile(@RequestBody Profile profile) {
+        return individualService.updateProfile(profile);
+    }
 }

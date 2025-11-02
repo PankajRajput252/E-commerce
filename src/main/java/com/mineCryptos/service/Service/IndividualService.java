@@ -47,4 +47,6 @@ public interface IndividualService {
     FinalResponse getAllDirectMember(String inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse getTeamHierarchy(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse updateProfile(Profile profile);
 }
