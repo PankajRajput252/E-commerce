@@ -49,4 +49,12 @@ public interface IndividualService {
     FinalResponse getTeamHierarchy(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
 
     FinalResponse updateProfile(Profile profile);
+
+    FinalResponse getSupportTicket(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addSupportTicket(SupportTicket supportTicket);
+
+    FinalResponse updateSupportTicket(Integer id, SupportTicket supportTicket);
+
+    FinalResponse deleteSupportTicket(Integer id);
 }

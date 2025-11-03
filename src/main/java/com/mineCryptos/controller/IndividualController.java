@@ -225,4 +225,39 @@ public class IndividualController {
     public FinalResponse updateProfile(@RequestBody Profile profile) {
         return individualService.updateProfile(profile);
     }
+
+    @GetMapping("/getSupportTicket")
+    public FinalResponse getSupportTicket(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        Integer inputFkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        if (Util.isDefined(inputFkId)) {
+            inputFkIdInt = Util.convertStringToInteger(inputFkId);
+        }
+        return individualService.getSupportTicket(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addSupportTicket")
+    public FinalResponse addSupportTicket(@RequestBody SupportTicket supportTicket) throws FinalException {
+        return this.individualService.addSupportTicket(supportTicket);
+    }
+
+    @PutMapping("/updateSupportTicket/{id}")
+    public FinalResponse updateSupportTicket(@PathVariable Integer id, @RequestBody SupportTicket supportTicket) {
+        return individualService.updateSupportTicket(id, supportTicket);
+    }
+
+    @DeleteMapping("/deleteSupportTicket/{id}")
+    public FinalResponse deleteSupportTicket(@PathVariable Integer id) {
+        return individualService.deleteSupportTicket(id);
+    }
 }

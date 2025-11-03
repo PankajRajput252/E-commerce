@@ -34,6 +34,8 @@ public class IndividualServiceImpl implements IndividualService {
     private WalletTransactionRepository walletTransactionRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private SupportTicketRepository supportTicketRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -549,5 +551,88 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+
+    @Override
+    public FinalResponse getSupportTicket(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<SupportTicket> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<SupportTicket> supportTicketList = populateSupportTicketView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateSupportTicketCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(supportTicketList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+    private int populateSupportTicketCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = walletTransactionRepository.countByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }  else {
+            count = walletTransactionRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<SupportTicket> populateSupportTicketView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<SupportTicket> supportTicketList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            SupportTicket supportTicket = supportTicketRepository.findBySupportTicketPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            supportTicketList.add(supportTicket);
+        } else {
+            supportTicketList = supportTicketRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        supportTicketList.stream().map((supportTicket)->{
+            String userName= userRepository.fetchUserNameBasedOnNodeId(supportTicket.getUserNodeId(),"ACTIVE");
+            supportTicket.setUserName(userName);
+            return supportTicket;
+        }).collect(Collectors.toList());
+       return supportTicketList;
+    }
+
+    @Override
+    public FinalResponse addSupportTicket(SupportTicket supportTicket) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        supportTicket.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(supportTicket.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(supportTicket);
+
+        supportTicketRepository.save(supportTicket);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateSupportTicket(Integer id, SupportTicket supportTicket) {
+        FinalResponse finalResponse = new FinalResponse();
+        supportTicketRepository.findById(id)
+                .map(existing -> {
+                    existing.setCategory(supportTicket.getCategory());
+                    existing.setPriority(supportTicket.getPriority());
+                    existing.setUserNodeId(supportTicket.getUserNodeId());
+                    existing.setMessage(supportTicket.getMessage());
+                    existing.setStatus(supportTicket.getStatus());
+                    return supportTicketRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Support ticket  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteSupportTicket(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        supportTicketRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 
 }

@@ -7,6 +7,7 @@ import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.DepositFund;
+import com.mineCryptos.model.entitities.enduser.Wallet;
 import com.mineCryptos.model.entitities.enduser.WalletTransaction;
 import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.admin.IncomeTypeRepository;
@@ -15,6 +16,7 @@ import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.WalletRepository;
 import com.mineCryptos.repo.enduser.WalletTransactionRepository;
 import com.mineCryptos.service.Service.AdminService;
+import com.mineCryptos.service.Service.IndividualService;
 import net.bytebuddy.dynamic.DynamicType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,8 @@ public class AdminServiceImpl implements AdminService {
     private WalletTransactionRepository walletTransactionRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private IndividualService individualService;
 
     @Override
     @Transactional(readOnly = true)
@@ -315,6 +319,12 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return userRepository.save(existing);
             });
+            Wallet wallet = new Wallet();
+            wallet.setUserNodeCode(nodeId);
+            finalResponse = individualService.addWalletData(wallet);
+            if (!finalResponse.getStatusCode().equals("200")) {
+                return finalResponse;
+            }
 
         } else {
             Util.setMessage(finalResponse, "100", "Error: User not found.");
