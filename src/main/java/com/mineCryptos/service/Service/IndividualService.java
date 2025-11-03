@@ -57,4 +57,6 @@ public interface IndividualService {
     FinalResponse updateSupportTicket(Integer id, SupportTicket supportTicket);
 
     FinalResponse deleteSupportTicket(Integer id);
+
+    FinalResponse getWithdrawalRequest(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
 }

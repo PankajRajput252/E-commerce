@@ -260,4 +260,39 @@ public class IndividualController {
     public FinalResponse deleteSupportTicket(@PathVariable Integer id) {
         return individualService.deleteSupportTicket(id);
     }
+
+    @GetMapping("/getWithdrawalRequest")
+    public FinalResponse getWithdrawalRequest(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        Integer inputFkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        if (Util.isDefined(inputFkId)) {
+            inputFkIdInt = Util.convertStringToInteger(inputFkId);
+        }
+        return individualService.getWithdrawalRequest(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addWithDrawalRequest")
+    public FinalResponse addWithDrawalRequest(@RequestBody SupportTicket supportTicket) throws FinalException {
+        return this.individualService.addSupportTicket(supportTicket);
+    }
+
+    @PutMapping("/updateWithDrawalRequest/{id}")
+    public FinalResponse updateWithDrawalRequest(@PathVariable Integer id, @RequestBody SupportTicket supportTicket) {
+        return individualService.updateSupportTicket(id, supportTicket);
+    }
+
+    @DeleteMapping("/deleteWithDrawalRequest/{id}")
+    public FinalResponse deleteWithDrawalRequest(@PathVariable Integer id) {
+        return individualService.deleteSupportTicket(id);
+    }
 }

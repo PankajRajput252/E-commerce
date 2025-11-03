@@ -635,4 +635,9 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+    @Override
+    public FinalResponse getWithdrawalRequest(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue) {
+        return null;
+    }
+
 }
