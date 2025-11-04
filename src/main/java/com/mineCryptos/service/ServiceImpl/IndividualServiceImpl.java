@@ -36,6 +36,8 @@ public class IndividualServiceImpl implements IndividualService {
     private UserRepository userRepository;
     @Autowired
     private SupportTicketRepository supportTicketRepository;
+    @Autowired
+    private WithdrawalRequestRepository withdrawalRequestRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -636,8 +638,83 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getWithdrawalRequest(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue) {
-        return null;
+    public FinalResponse getWithdrawalRequest(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<WithdrawalRequest> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<WithdrawalRequest> withdrawalRequestList = populateWithdrawalRequestView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateWithdrawalRequestCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(withdrawalRequestList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+    private int populateWithdrawalRequestCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = withdrawalRequestRepository.countByWithdrawalRequestPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }  else {
+            count = withdrawalRequestRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<WithdrawalRequest> populateWithdrawalRequestView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<WithdrawalRequest> withdrawalRequestList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            WithdrawalRequest withdrawalRequest = withdrawalRequestRepository.findByWithdrawalRequestPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            withdrawalRequestList.add(withdrawalRequest);
+        } else {
+            withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return withdrawalRequestList;
+    }
+
+
+    @Override
+    public FinalResponse addWithDrawalRequest(WithdrawalRequest withdrawalRequest) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        withdrawalRequest.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(withdrawalRequest.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(withdrawalRequest);
+
+        withdrawalRequestRepository.save(withdrawalRequest);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateWithDrawalRequest(Integer id, WithdrawalRequest withdrawalRequest) {
+        FinalResponse finalResponse = new FinalResponse();
+        withdrawalRequestRepository.findById(id)
+                .map(existing -> {
+                    existing.setUsername(withdrawalRequest.getUsername());
+                    existing.setUserNodeId(withdrawalRequest.getUserNodeId());
+                    existing.setWalletType(withdrawalRequest.getWalletType());
+                    existing.setWalletAddress(withdrawalRequest.getWalletAddress());
+                    existing.setAmount(withdrawalRequest.getAmount());
+                    existing.setStatus(withdrawalRequest.getStatus());
+                    return withdrawalRequestRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Withdrawal Request  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteWithDrawalRequest(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        withdrawalRequestRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
     }
 
 }

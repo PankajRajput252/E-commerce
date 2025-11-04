@@ -282,17 +282,17 @@ public class IndividualController {
     }
 
     @PostMapping("/addWithDrawalRequest")
-    public FinalResponse addWithDrawalRequest(@RequestBody SupportTicket supportTicket) throws FinalException {
-        return this.individualService.addSupportTicket(supportTicket);
+    public FinalResponse addWithDrawalRequest(@RequestBody WithdrawalRequest withdrawalRequest) throws FinalException {
+        return this.individualService.addWithDrawalRequest(withdrawalRequest);
     }
 
     @PutMapping("/updateWithDrawalRequest/{id}")
-    public FinalResponse updateWithDrawalRequest(@PathVariable Integer id, @RequestBody SupportTicket supportTicket) {
-        return individualService.updateSupportTicket(id, supportTicket);
+    public FinalResponse updateWithDrawalRequest(@PathVariable Integer id, @RequestBody WithdrawalRequest withdrawalRequest) {
+        return individualService.updateWithDrawalRequest(id, withdrawalRequest);
     }
 
     @DeleteMapping("/deleteWithDrawalRequest/{id}")
     public FinalResponse deleteWithDrawalRequest(@PathVariable Integer id) {
-        return individualService.deleteSupportTicket(id);
+        return individualService.deleteWithDrawalRequest(id);
     }
 }

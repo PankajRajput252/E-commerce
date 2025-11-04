@@ -59,4 +59,10 @@ public interface IndividualService {
     FinalResponse deleteSupportTicket(Integer id);
 
     FinalResponse getWithdrawalRequest(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addWithDrawalRequest(WithdrawalRequest withdrawalRequest);
+
+    FinalResponse updateWithDrawalRequest(Integer id, WithdrawalRequest withdrawalRequest);
+
+    FinalResponse deleteWithDrawalRequest(Integer id);
 }
