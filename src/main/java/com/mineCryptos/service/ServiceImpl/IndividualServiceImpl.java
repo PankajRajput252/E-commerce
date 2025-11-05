@@ -566,23 +566,25 @@ public class IndividualServiceImpl implements IndividualService {
         }
     }
 
-    @Override
     @Transactional(rollbackFor = Exception.class)
-    public FinalResponse updateProfile(Profile profile){
+    public FinalResponse updateProfile(Profile profile) {
         FinalResponse finalResponse = new FinalResponse();
-        User user=  userRepository.findByNodeIdAndActiveStateCodeFkId(profile.getUserNodeId(),"ACTIVE");
+
+        User user = userRepository.findByNodeIdAndActiveStateCodeFkId(profile.getUserNodeId(), "ACTIVE");
+
         if (Util.isDefined(user)) {
-            Optional<User> users = Optional.ofNullable(user);
-            users.map(existing -> {
-                existing.setName(existing.getUsername());
-                existing.setEmail(existing.getEmail());
-                existing.setCountry(existing.getCountry());
-                existing.setMobile(existing.getMobile());
-                existing.setTransactionPassword(existing.getTransactionPassword());
-                return userRepository.save(existing);
-            }).orElseThrow(() -> new RuntimeException(" User  not found"));
+            user.setName(profile.getUserName());
+            user.setEmail(profile.getEmail());
+            user.setCountry(profile.getCountry());
+            user.setMobile(profile.getMobile());
+            user.setTransactionPassword(profile.getTransactionPassword());
+
+            userRepository.save(user);
+            finalResponse = Util.setSuccessMessage(finalResponse);
+        } else {
+            throw new RuntimeException("User not found");
         }
-        finalResponse = Util.setSuccessMessage(finalResponse);
+
         return finalResponse;
     }
 
