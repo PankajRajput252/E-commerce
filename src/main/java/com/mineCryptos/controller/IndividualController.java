@@ -32,10 +32,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getWalletData(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getWalletData(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addWalletData")
@@ -104,10 +101,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getIndividualMiningPackage(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getIndividualMiningPackage(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addMiningPackage")
@@ -140,10 +134,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getIndividualDepositFund(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getIndividualDepositFund(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addDepositFund")
@@ -176,10 +167,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getWalletTransaction(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getWalletTransaction(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addWalletTransaction")
@@ -240,10 +228,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getSupportTicket(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getSupportTicket(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addSupportTicket")
@@ -275,10 +260,8 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return individualService.getWithdrawalRequest(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+
+        return individualService.getWithdrawalRequest(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addWithDrawalRequest")

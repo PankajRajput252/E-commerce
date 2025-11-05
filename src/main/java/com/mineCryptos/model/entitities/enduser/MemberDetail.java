@@ -5,6 +5,7 @@ public class MemberDetail {
  private String memberName;
  private String memberEmail;
  private int memberLevel;
+ private String position;
 
     public MemberDetail() {
         this.memberLevel = 0;
@@ -40,5 +41,13 @@ public class MemberDetail {
 
     public void setMemberLevel(int memberLevel) {
         this.memberLevel = memberLevel;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

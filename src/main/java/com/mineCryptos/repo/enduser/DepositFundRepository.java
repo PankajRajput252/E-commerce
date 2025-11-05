@@ -14,4 +14,8 @@ public interface DepositFundRepository extends JpaRepository<DepositFund,Integer
     int countByDepositPkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
 
     int countByActiveStateCodeFkId(String active);
+
+    List<DepositFund> findByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId);
 }

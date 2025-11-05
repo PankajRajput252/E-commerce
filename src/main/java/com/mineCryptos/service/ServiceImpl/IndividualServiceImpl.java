@@ -40,7 +40,7 @@ public class IndividualServiceImpl implements IndividualService {
     private WithdrawalRequestRepository withdrawalRequestRepository;
 
     @Override
-    public FinalResponse getWalletData(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<Wallet> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<Wallet> walletList = populateWalletView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -51,23 +51,31 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateWalletViewCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateWalletViewCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = walletRepository.countByWalletPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = walletRepository.countByActiveStateCodeFkIdAndUserNodeCode("ACTIVE", inputFkId);
+        }
+        else {
             count = walletRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<Wallet> populateWalletView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<Wallet> populateWalletView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<Wallet> walletList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             Wallet wallet = walletRepository.findByWalletPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             walletList.add(wallet);
-        } else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            walletList = walletRepository.findByActiveStateCodeFkIdAndUserNodeCode("ACTIVE", inputFkId,pageable);
+        }
+        else {
             walletList = walletRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         return walletList;
@@ -195,7 +203,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getIndividualMiningPackage(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue){
+    public FinalResponse getIndividualMiningPackage(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue){
         FinalResponse<MiningPackage> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<MiningPackage> miningPackageList = populateMiningPackageView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -206,23 +214,31 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateMiningPackageCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateMiningPackageCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = miningPackageRepository.countByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            count = miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",inputFkId);
+        }
+        else {
             count = miningPackageRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<MiningPackage> populateMiningPackageView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<MiningPackage> populateMiningPackageView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<MiningPackage> miningPackageList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             MiningPackage miningPackage = miningPackageRepository.findByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             miningPackageList.add(miningPackage);
-        } else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            miningPackageList = miningPackageRepository.findByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",inputFkId, pageable);
+        }
+        else {
             miningPackageList = miningPackageRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         return miningPackageList;
@@ -286,7 +302,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getIndividualDepositFund(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getIndividualDepositFund(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<DepositFund> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<DepositFund> depositFundList = populateDepositFundView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -297,23 +313,31 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateDepositFundCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateDepositFundCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = depositFundRepository.countByDepositPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = depositFundRepository.countByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",inputFkId);
+        }
+        else {
             count = depositFundRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<DepositFund> populateDepositFundView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<DepositFund> populateDepositFundView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<DepositFund> depositFundList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             DepositFund depositFund = depositFundRepository.findByDepositPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             depositFundList.add(depositFund);
-        } else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            depositFundList = depositFundRepository.findByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",inputFkId, pageable);
+        }
+        else {
             depositFundList = depositFundRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         depositFundList.stream().map((depositFund)->{
@@ -368,7 +392,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getWalletTransaction(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getWalletTransaction(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<WalletTransaction> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<WalletTransaction> walletTransactionList = populateWalletTransactionView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -379,23 +403,31 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateWalletTransactionCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateWalletTransactionCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = walletTransactionRepository.countByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = walletTransactionRepository.countByActiveStateCodeFkIdAndFromUserId("ACTIVE",inputFkId);
+        }
+        else {
             count = walletTransactionRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<WalletTransaction> populateWalletTransactionView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<WalletTransaction> populateWalletTransactionView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<WalletTransaction> walletTransactionList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             WalletTransaction walletTransaction = walletTransactionRepository.findByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             walletTransactionList.add(walletTransaction);
-        } else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkIdAndFromUserId("ACTIVE",inputFkId, pageable);
+        }
+        else {
             walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         walletTransactionList.stream().map((walletTransaction)->{
@@ -528,6 +560,7 @@ public class IndividualServiceImpl implements IndividualService {
             detail.setMemberId(child.getNodeId());
             detail.setMemberLevel(level + 1);
             detail.setMemberName(child.getName());
+            detail.setPosition(child.getPosition());
             team.add(detail);
             fetchTeamRecursive(child.getNodeId(), level + 1, team);
         }
@@ -555,7 +588,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
-    public FinalResponse getSupportTicket(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getSupportTicket(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<SupportTicket> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<SupportTicket> supportTicketList = populateSupportTicketView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -568,23 +601,31 @@ public class IndividualServiceImpl implements IndividualService {
 
 
 
-    private int populateSupportTicketCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateSupportTicketCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = walletTransactionRepository.countByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            count = supportTicketRepository.countByActiveStateCodeFkIdAndUserNodeId("ACTIVE", inputFkId);
+        }
+        else {
             count = walletTransactionRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<SupportTicket> populateSupportTicketView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<SupportTicket> populateSupportTicketView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<SupportTicket> supportTicketList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             SupportTicket supportTicket = supportTicketRepository.findBySupportTicketPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             supportTicketList.add(supportTicket);
-        } else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            supportTicketList = supportTicketRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE", inputFkId,pageable);
+        }
+        else {
             supportTicketList = supportTicketRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         supportTicketList.stream().map((supportTicket)->{
@@ -638,7 +679,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getWithdrawalRequest(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getWithdrawalRequest(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<WithdrawalRequest> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<WithdrawalRequest> withdrawalRequestList = populateWithdrawalRequestView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -651,23 +692,31 @@ public class IndividualServiceImpl implements IndividualService {
 
 
 
-    private int populateWithdrawalRequestCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateWithdrawalRequestCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if (Util.isDefined(inputPkId)) {
             count = withdrawalRequestRepository.countByWithdrawalRequestPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
-        }  else {
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = withdrawalRequestRepository.countByActiveStateCodeFkIdAndUserNodeId("ACTIVE",inputFkId);
+        }
+        else {
             count = withdrawalRequestRepository.countByActiveStateCodeFkId("ACTIVE");
         }
 
         return count;
     }
 
-    private List<WithdrawalRequest> populateWithdrawalRequestView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<WithdrawalRequest> populateWithdrawalRequestView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<WithdrawalRequest> withdrawalRequestList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             WithdrawalRequest withdrawalRequest = withdrawalRequestRepository.findByWithdrawalRequestPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             withdrawalRequestList.add(withdrawalRequest);
-        } else {
+        }
+        else if(Util.isDefined(inputFkId)){
+            withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE",inputFkId, pageable);
+        }
+        else {
             withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         return withdrawalRequestList;

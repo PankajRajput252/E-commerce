@@ -54,4 +54,7 @@ public interface WalletRepository extends JpaRepository<Wallet,Integer> {
     public void updateMineWalletOfUser(double capitalAmount, String userFkId);
 
 
+    List<Wallet> findByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId);
 }

@@ -4,7 +4,7 @@ import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.entitities.enduser.*;
 
 public interface IndividualService {
-    FinalResponse getWalletData(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getWalletData(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addWalletData(Wallet wallet);
 
@@ -20,7 +20,7 @@ public interface IndividualService {
 
     FinalResponse deleteIndividualIncomeSummary(Integer id);
 
-    FinalResponse getIndividualMiningPackage(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getIndividualMiningPackage(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addMiningPackage(MiningPackage miningPackage);
 
@@ -28,7 +28,7 @@ public interface IndividualService {
 
     FinalResponse deleteMiningPackage(Integer id);
 
-    FinalResponse getIndividualDepositFund(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getIndividualDepositFund(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addDepositFund(DepositFund depositFund);
 
@@ -36,7 +36,7 @@ public interface IndividualService {
 
     FinalResponse deleteDepositFund(Integer id);
 
-    FinalResponse getWalletTransaction(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getWalletTransaction(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addWalletTransaction(WalletTransaction walletTransaction);
 
@@ -50,7 +50,7 @@ public interface IndividualService {
 
     FinalResponse updateProfile(Profile profile);
 
-    FinalResponse getSupportTicket(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getSupportTicket(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addSupportTicket(SupportTicket supportTicket);
 
@@ -58,7 +58,7 @@ public interface IndividualService {
 
     FinalResponse deleteSupportTicket(Integer id);
 
-    FinalResponse getWithdrawalRequest(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getWithdrawalRequest(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addWithDrawalRequest(WithdrawalRequest withdrawalRequest);
 
