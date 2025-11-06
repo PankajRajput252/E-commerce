@@ -125,7 +125,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getIndividualIncomeSummary(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getIndividualIncomeSummary(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<IndividualIncomeSummary> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<IndividualIncomeSummary> individualIncomeSummaryList = populateIndividualIncomeSummaryView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -147,12 +147,14 @@ public class IndividualServiceImpl implements IndividualService {
         return count;
     }
 
-    private List<IndividualIncomeSummary> populateIndividualIncomeSummaryView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<IndividualIncomeSummary> populateIndividualIncomeSummaryView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<IndividualIncomeSummary> individualIncomeSummaryList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             IndividualIncomeSummary individualIncomeSummary = individualIncomeSummaryRepository.findByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
             individualIncomeSummaryList.add(individualIncomeSummary);
-        } else {
+        }
+
+        else {
             individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
         return individualIncomeSummaryList;

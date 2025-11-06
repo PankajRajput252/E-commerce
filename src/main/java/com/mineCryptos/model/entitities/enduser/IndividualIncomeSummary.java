@@ -39,8 +39,8 @@ public class IndividualIncomeSummary extends StandardFieldClass {
     @Column(name = "NODE_BUSINESS_SHARING_AMOUNT")
     private double nodeBusinessSharingAmount;
 
-    @Column(name = "USER_FK_ID")
-    private  Integer userFkId;
+    @Column(name = "USER_NODE_ID")
+    private  String userNodeId;
 
     public IndividualIncomeSummary() {
         this.serviceGenerationAmount = 0.0;
@@ -137,11 +137,11 @@ public class IndividualIncomeSummary extends StandardFieldClass {
         this.nodeBusinessSharingAmount = nodeBusinessSharingAmount;
     }
 
-    public Integer getUserFkId() {
-        return userFkId;
+    public String getUserNodeId() {
+        return userNodeId;
     }
 
-    public void setUserFkId(Integer userFkId) {
-        this.userFkId = userFkId;
+    public void setUserNodeId(String userNodeId) {
+        this.userNodeId = userNodeId;
     }
 }

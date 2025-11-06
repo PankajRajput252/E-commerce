@@ -65,9 +65,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
+
         return individualService.getIndividualIncomeSummary(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
     }
 
