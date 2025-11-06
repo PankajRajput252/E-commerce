@@ -52,6 +52,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Transactional
     @Modifying
-    @Query("update User u set u.profileImageUrl = ?1 where u.nodeId = ?2")
-    void updateProfileImageUrlBasedOnNodeId(String profileImageUrl, String nodeId);
+    @Query("update User u set u.imageId = ?1 where u.nodeId = ?2")
+    void updateProfileImageUrlBasedOnNodeId(String imageId, String nodeId);
 }

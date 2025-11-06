@@ -4,6 +4,7 @@ import com.mineCryptos.FinalException;
 import com.mineCryptos.model.*;
 import com.mineCryptos.repo.RoleRepository;
 import com.mineCryptos.repo.UserRepository;
+import com.mineCryptos.service.Service.ImageUploadService;
 import com.mineCryptos.service.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -22,6 +24,8 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     //creating user
     @Override
@@ -87,6 +91,14 @@ public class UserServiceImpl implements UserService {
         } else {
             userList = userRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
         }
+        userList.stream().map((user -> {
+            if(Util.isDefined(user.getImageId())) {
+                String presignedUrl = imageUploadService.generatePresignedUrl(user.getImageId());
+                user.setProfileImageUrl(presignedUrl);
+            }
+
+            return user;
+        })).collect(Collectors.toList());
         return userList;
     }
 

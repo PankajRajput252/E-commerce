@@ -62,7 +62,10 @@ public class User  extends StandardFieldClass implements UserDetails {
     @Column(name = "DATE_OF_ACTIVATION")
     private LocalDateTime dateOfActivation;
 
-    @Column(name = "PROFILE_IMAGE_URL")
+    @Column(name = "IMAGE_ID")
+    private String imageId;
+
+    @Column(name = "PROFILE_IMAGE_URL",length = 1000)
     private String profileImageUrl; // <-- store S3 URL here
 
 
@@ -267,5 +270,13 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 }

@@ -26,11 +26,11 @@ public class ImageController {
         FinalResponse finalResponse = new FinalResponse();
         try {
 
-            String imageUrl = imageUploadService.uploadFile(file);
+            String imageId = imageUploadService.uploadFile(file);
             // You can save imageUrl to your user/entity table here
-            userRepository.updateProfileImageUrlBasedOnNodeId(imageUrl, userNodeId);
+            userRepository.updateProfileImageUrlBasedOnNodeId(imageId, userNodeId);
             Util.setSuccessMessage(finalResponse);
-            finalResponse.setMessage("Image uploaded successfully: " + imageUrl);
+            finalResponse.setMessage("Image uploaded successfully: " + imageId);
         } catch (Exception e) {
             finalResponse.setMessage("Upload failed: " + e.getMessage());
         }
