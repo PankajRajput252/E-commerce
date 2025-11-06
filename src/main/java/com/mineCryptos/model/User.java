@@ -62,6 +62,10 @@ public class User  extends StandardFieldClass implements UserDetails {
     @Column(name = "DATE_OF_ACTIVATION")
     private LocalDateTime dateOfActivation;
 
+    @Column(name = "PROFILE_IMAGE_URL")
+    private String profileImageUrl; // <-- store S3 URL here
+
+
 
     @Transient
     private boolean isUserIsAdmin;
@@ -255,5 +259,13 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     public void setTransactionPassword(String transactionPassword) {
         this.transactionPassword = transactionPassword;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

@@ -3,8 +3,10 @@ package com.mineCryptos.repo;
 import com.mineCryptos.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,4 +48,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     int countByParentNodeIdAndActiveStateCodeFkId(String inputPkId, String active);
 
     int countByActiveStateCodeFkIdAndParentNodeIdContaining(String active, String searchValue);
+
+
+    @Transactional
+    @Modifying
+    @Query("update User u set u.profileImageUrl = ?1 where u.nodeId = ?2")
+    void updateProfileImageUrlBasedOnNodeId(String profileImageUrl, String nodeId);
 }
