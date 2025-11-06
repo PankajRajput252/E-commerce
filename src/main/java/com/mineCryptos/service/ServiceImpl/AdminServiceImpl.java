@@ -192,7 +192,9 @@ public class AdminServiceImpl implements AdminService {
         incomeTypeRepository.findById(rankId)
                 .map(existing -> {
                     existing.setIncomeName(incomeType.getIncomeName());
+                    existing.setIncomeTypeCode(incomeType.getIncomeTypeCode());
                     existing.setPercentage(incomeType.getPercentage());
+                    existing.setLevel(incomeType.getLevel());
                     return incomeTypeRepository.save(existing);
                 }).orElseThrow(() -> new RuntimeException("IncomeType not found"));
         finalResponse = Util.setSuccessMessage(finalResponse);

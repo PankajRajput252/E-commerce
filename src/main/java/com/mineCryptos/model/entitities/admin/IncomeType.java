@@ -17,6 +17,12 @@ public class IncomeType extends StandardFieldClass {
     @Column(name = "INCOME_NAME")
     private String incomeName;
 
+    @Column(name = "INCOME_TYPE_CODE")
+    private String incomeTypeCode;
+
+    @Column(name = "LEVEL")
+    private Integer level;
+
     // Optional configuration fields
     @Column(name = "PERCENTAGE")
     private double percentage;   // e.g., commission %
@@ -43,5 +49,21 @@ public class IncomeType extends StandardFieldClass {
 
     public void setPercentage(double percentage) {
         this.percentage = percentage;
+    }
+
+    public String getIncomeTypeCode() {
+        return incomeTypeCode;
+    }
+
+    public void setIncomeTypeCode(String incomeTypeCode) {
+        this.incomeTypeCode = incomeTypeCode;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }
