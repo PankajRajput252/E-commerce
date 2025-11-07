@@ -12,7 +12,7 @@ public interface IndividualService {
 
     FinalResponse deleteWalletData(Integer id);
 
-    FinalResponse getIndividualIncomeSummary(Integer inputPkIdInt, Integer inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getIndividualIncomeSummary(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addIndividualIncomeSummary(IndividualIncomeSummary individualIncomeSummary);
 

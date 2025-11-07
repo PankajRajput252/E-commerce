@@ -14,4 +14,8 @@ public interface IndividualIncomeSummaryRepository extends JpaRepository<Individ
     int countByActiveStateCodeFkId(String active);
 
     int countByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    List<IndividualIncomeSummary> findByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId);
 }

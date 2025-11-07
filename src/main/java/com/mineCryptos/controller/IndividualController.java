@@ -66,7 +66,7 @@ public class IndividualController {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
 
-        return individualService.getIndividualIncomeSummary(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+        return individualService.getIndividualIncomeSummary(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addIndividualIncomeSummary")
