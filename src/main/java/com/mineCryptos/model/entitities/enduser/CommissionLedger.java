@@ -4,6 +4,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -23,7 +24,10 @@ public class CommissionLedger extends StandardFieldClass {
     private String incomeType;
 
     @Column(name = "AMOUNT")
-    private double amount;
+    private BigDecimal amount;
+
+    @Column(name = "NOTE")
+    private String note;
 
 
     @Column(name = "IS_SETTLED")
@@ -53,11 +57,11 @@ public class CommissionLedger extends StandardFieldClass {
         this.incomeType = incomeType;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -67,5 +71,13 @@ public class CommissionLedger extends StandardFieldClass {
 
     public void setIsSettled(boolean settled) {
         isSettled = settled;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

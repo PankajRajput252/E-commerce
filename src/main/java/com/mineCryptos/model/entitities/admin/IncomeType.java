@@ -4,6 +4,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "income_type")
@@ -23,9 +24,12 @@ public class IncomeType extends StandardFieldClass {
     @Column(name = "LEVEL")
     private Integer level;
 
+    @Column(name = "RULE_MODE",  columnDefinition ="VARCHAR(200) default 'PERCENT'")
+    private  String ruleMode;   // FIXED
+
     // Optional configuration fields
     @Column(name = "PERCENTAGE")
-    private double percentage;   // e.g., commission %
+    private BigDecimal percentage;   // e.g., commission %
 
     public Integer getIncomeTypePkId() {
         return incomeTypePkId;
@@ -43,11 +47,11 @@ public class IncomeType extends StandardFieldClass {
         this.incomeName = incomeName;
     }
 
-    public double getPercentage() {
+    public BigDecimal getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(double percentage) {
+    public void setPercentage(BigDecimal percentage) {
         this.percentage = percentage;
     }
 
@@ -65,5 +69,13 @@ public class IncomeType extends StandardFieldClass {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public String getRuleMode() {
+        return ruleMode;
+    }
+
+    public void setRuleMode(String ruleMode) {
+        this.ruleMode = ruleMode;
     }
 }

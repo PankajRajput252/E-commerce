@@ -39,6 +39,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     User findByNodeIdAndActiveStateCodeFkId(String username, String active);
     List<User> findByParentNodeIdAndActiveStateCodeFkId(String username, String active, Pageable pageable);
+    User findByParentNodeIdAndActiveStateCodeFkId(String username, String active);
 
     @Query("SELECT t.name FROM User t where t.nodeId = ?1 And t.activeStateCodeFkId =?2")
     String fetchUserNameBasedOnNodeId(String userNodeCode, String active);
@@ -54,4 +55,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     @Query("update User u set u.imageId = ?1 where u.nodeId = ?2")
     void updateProfileImageUrlBasedOnNodeId(String imageId, String nodeId);
+
+    @Query("SELECT t.parentNodeId FROM User t where t.nodeId = ?1 And t.activeStateCodeFkId =?2")
+    String fetchParentNodeBasedOnUserNodeId(String userNodeCode, String active);
 }

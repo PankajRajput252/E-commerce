@@ -74,6 +74,7 @@ public class User  extends StandardFieldClass implements UserDetails {
     private boolean isUserIsAdmin;
 
 
+
     @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "users", referencedColumnName = "USER_PK_ID"),

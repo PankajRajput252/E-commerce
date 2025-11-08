@@ -1,5 +1,6 @@
 package com.mineCryptos.repo.admin;
 
+import com.mineCryptos.model.entitities.IncomeTypeEnum;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface IncomeTypeRepository extends JpaRepository<IncomeType,Integer> 
     int countByActiveStateCodeFkId(String active);
 
     int countByIncomeTypePkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    List<IncomeType> findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum incomeTypeEnum, String active);
 }

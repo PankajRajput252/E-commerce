@@ -3,10 +3,14 @@ package com.mineCryptos.service.ServiceImpl;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
+import com.mineCryptos.model.entitities.IncomeTypeEnum;
+import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.*;
 import com.mineCryptos.repo.CommissionLedgerRepository;
+import com.mineCryptos.repo.UserMapRepository;
 import com.mineCryptos.repo.UserRepository;
+import com.mineCryptos.repo.admin.IncomeTypeRepository;
 import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,10 @@ public class IndividualServiceImpl implements IndividualService {
     private WithdrawalRequestRepository withdrawalRequestRepository;
     @Autowired
     private CommissionLedgerRepository comissionLedgerRepository;
+    @Autowired
+    private IncomeTypeRepository incomeTypeRepository;
+    @Autowired
+    private UserMapRepository userMapRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -863,6 +871,208 @@ public class IndividualServiceImpl implements IndividualService {
         comissionLedgerRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
+    }
+
+
+    // General entry point: process an event (purchase/mining payout/fast-track etc.)
+    public void processServicePurchase(String buyerId, BigDecimal amount) {
+        User buyer = userRepository.findByNodeIdAndActiveStateCodeFkId(buyerId,"ACTIVE");
+
+       // 1. Direct service generation: pay sponsor(s) according to direct rule
+        payDirectReferral(buyer, amount);
+
+        // 2. Trigger matching income calculation up the upline
+        payMatchingIncome(buyer);
+
+       // 3. Update binary volume if applicable (example)
+        updateBinaryVolume(buyer, amount);
+
+
+    }
+
+
+    private void payDirectReferral(User buyer, BigDecimal amount) {
+        User sponsoredParent = userRepository.findByParentNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(),"ACTIVE");
+        if (sponsoredParent == null) return;
+
+
+        List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.SERVICE_GENERATION,"ACTIVE");
+        // assume one rule only for direct service
+        IncomeType rule = rules.stream().findFirst().orElse(null);
+        if (rule == null) return;
+
+
+        BigDecimal payout = calculateByRule(rule, amount);
+        // now updating commision to parentId
+        saveLedger(sponsoredParent.getNodeId(), String.valueOf(IncomeTypeEnum.SERVICE_GENERATION), payout, "Direct referral from " + buyer.getNodeId());
+    }
+
+
+    private void updateBinaryVolume(User buyer, BigDecimal amount) {
+// This is a simple example: propagate volume to sponsors as left/right randomly
+        UserMap sponsoredParent = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(), "ACTIVE");
+        if (sponsoredParent == null) return;
+// for demo: add to leftVolume
+        sponsoredParent.setLeftVolume(sponsoredParent.getLeftVolume().add(amount));
+        userMapRepository.save(sponsoredParent);
+    }
+
+
+    private void payMatchingIncome(User buyer) {
+       // traverse upline and check left/right match
+        UserMap upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(), "ACTIVE");
+        while (upline != null) {
+            BigDecimal left = upline.getLeftVolume();
+            BigDecimal right = upline.getRightVolume();
+            BigDecimal matched = left.min(right);
+            if (matched.compareTo(BigDecimal.ZERO) > 0) {
+       // fetch matching rules
+                List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.MATCHING_INCOME,"ACTIVE");
+                IncomeType rule = rules.stream().findFirst().orElse(null);
+                if (rule != null) {
+                    BigDecimal payout = calculateByRule(rule, matched);
+                    saveLedger(upline.getUserNodeId(), String.valueOf(IncomeTypeEnum.MATCHING_INCOME), payout, "Pair matched: " + matched);
+
+
+                  // subtract matched volume
+                    upline.setLeftVolume(left.subtract(matched));
+                    upline.setRightVolume(right.subtract(matched));
+                    userMapRepository.save(upline);
+                }
+            }
+//            upline = upline.getSponsor();
+            String parentId = userRepository.fetchParentNodeBasedOnUserNodeId(upline.getUserNodeId(),"ACTIVE");
+            upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(parentId, "ACTIVE");
+        }
+    }
+
+
+    // Club income distribution (e.g., monthly pool)  This is based on user
+    public void distributeClubPool(BigDecimal totalPool) {
+        // find qualified members
+        List<User> allUsers = userRepository.findAll();
+        List<User> qualified = allUsers.stream()
+                .filter(u -> qualifiesForClub(u))
+                .collect(Collectors.toList());
+        if (qualified.isEmpty()) return;
+        BigDecimal share = totalPool.divide(BigDecimal.valueOf(qualified.size()), 2, BigDecimal.ROUND_HALF_UP);
+        for (User u : qualified) {
+            saveLedger(u.getNodeId(), String.valueOf(IncomeTypeEnum.CLUB_INCOME), share, "Monthly club pool share");
+        }
+    }
+
+
+    private boolean qualifiesForClub(User user) {
+       // sample qualification: rank GOLD or above
+        UserMap userMap = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(user.getNodeId(), "ACTIVE");
+        if (userMap.getRank() == null) return false;
+        return Arrays.asList("GOLD", "DIAMOND", "PLATINUM").contains(userMap.getRank().toUpperCase());
+    }
+
+
+    // Reward income: milestone-based  this is based on user
+    public void evaluateRewards(User u) {
+       // sample: team sales threshold
+        BigDecimal teamSales = calculateTeamSales(u);
+        BigDecimal threshold = BigDecimal.valueOf(100000);
+        if (teamSales.compareTo(threshold) >= 0) {
+           // get reward rule
+            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.REWARD_INCOME,"ACTIVE");
+            IncomeType rule = rules.stream().findFirst().orElse(null);
+            if (rule != null) {
+                BigDecimal reward = calculateByRule(rule, teamSales);
+                saveLedger(u.getNodeId(), String.valueOf(IncomeTypeEnum.REWARD_INCOME), reward, "Team sales reward");
+            }
+        }
+    }
+
+
+    private BigDecimal calculateTeamSales(User u) {
+        // naive calculation: sum of direct sponsor purchases - placeholder
+        return BigDecimal.valueOf(120000); // pretend we computed this
+    }
+
+
+    // Fast track: one-time bonus for quick achievement   this is user-based
+    public void evaluateFastTrack(User newUser, LocalDateTime joinDate, int directReferrals) {
+        LocalDateTime cutoff = joinDate.plusDays(30);
+        if (LocalDateTime.now().isBefore(cutoff) && directReferrals >= 5) {
+            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.FAST_TRACK_BONUS,"ACTIVE");
+            IncomeType rule = rules.stream().findFirst().orElse(null);
+            if (rule != null) {
+                BigDecimal bonus = rule.getPercentage(); // often fixed
+                saveLedger(newUser.getNodeId(), String.valueOf(IncomeTypeEnum.FAST_TRACK_BONUS), bonus, "Fast track bonus");
+            }
+        }
+    }
+
+
+    // Mining profit sharing: proportional to investment  this is user-based
+    public void distributeMiningProfit(BigDecimal totalProfit) {
+        List<UserMap> userMaps = userMapRepository.findAll();
+        BigDecimal totalInvestment = userMaps.stream()
+                .map(UserMap::getMiningInvestment)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (totalInvestment.compareTo(BigDecimal.ZERO) == 0) return;
+        for (UserMap u : userMaps) {
+            BigDecimal share = u.getMiningInvestment().divide(totalInvestment, 8, BigDecimal.ROUND_HALF_UP)
+                    .multiply(totalProfit).setScale(2, BigDecimal.ROUND_HALF_UP);
+            saveLedger(u.getUserNodeId(), String.valueOf(IncomeTypeEnum.MINING_PROFIT_SHARING), share, "Mining profit share");
+        }
+    }
+
+    // Mining generation: pay upline a percentage of downline mining profit
+    public void distributeMiningGeneration(String minerId, BigDecimal minerProfit) {
+        User miner = userRepository.findByNodeIdAndActiveStateCodeFkId(minerId,"ACTIVE");
+       // assume we have rules per level
+        List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.MINING_GENERATION,"ACTIVE");
+       // map level -> rule
+        Map<Integer, IncomeType> levelRules = rules.stream().collect(Collectors.toMap(IncomeType::getLevel, r -> r));
+        int level = 1;
+        UserMap upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(miner.getParentNodeId(), "ACTIVE");
+        while (upline != null && level <= 10) {
+            IncomeType r = levelRules.get(level);
+            if (r != null) {
+                BigDecimal payout = calculateByRule(r, minerProfit);
+                saveLedger(upline.getUserNodeId(), String.valueOf(IncomeTypeEnum.MINING_GENERATION), payout, "Mining gen from " + miner.getNodeId() + " level " + level);
+            }
+            String parentId = userRepository.fetchParentNodeBasedOnUserNodeId(upline.getUserNodeId(),"ACTIVE");
+            upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(parentId, "ACTIVE");
+            level++;
+        }
+    }
+
+
+    // Node business sharing: based on nodeSharePercent  based on user
+    public void distributeNodePool(BigDecimal totalNodePool) {
+        List<UserMap> userMaps = userMapRepository.findAll();
+        for (UserMap u : userMaps) {
+            if (u.getNodeSharePercent().compareTo(BigDecimal.ZERO) <= 0) continue;
+            BigDecimal share = totalNodePool.multiply(u.getNodeSharePercent()).divide(BigDecimal.valueOf(100));
+            saveLedger(u.getUserNodeId(), String.valueOf(IncomeTypeEnum.NODE_BUSINESS_SHARING), share, "Node pool share");
+        }
+    }
+
+
+    private BigDecimal calculateByRule(IncomeType rule, BigDecimal baseAmount) {
+        if (rule == null || baseAmount == null) return BigDecimal.ZERO;
+        if ("PERCENT".equalsIgnoreCase(rule.getRuleMode())) {
+            return baseAmount.multiply(rule.getPercentage()).divide(BigDecimal.valueOf(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+        } else {
+            // FIXED
+            return rule.getPercentage().setScale(2, BigDecimal.ROUND_HALF_UP);
+        }
+    }
+
+
+    private void saveLedger(String userId, String incomeType , BigDecimal amount, String notes) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return;
+        CommissionLedger ledger = new CommissionLedger();
+        ledger.setUserNodeId(userId);
+        ledger.setIncomeType(incomeType);
+        ledger.setAmount(amount);
+        ledger.setNote(notes);
+        comissionLedgerRepository.save(ledger);
     }
 
 }
