@@ -276,4 +276,37 @@ public class IndividualController {
     public FinalResponse deleteWithDrawalRequest(@PathVariable Integer id) {
         return individualService.deleteWithDrawalRequest(id);
     }
+
+
+    @GetMapping("/getCommissionLedger")
+    public FinalResponse getCommissionLedger(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+
+        return individualService.getCommissionLedger(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addCommissionLedger")
+    public FinalResponse addCommissionLedger(@RequestBody CommissionLedger commissionLedger) throws FinalException {
+        return this.individualService.addCommissionLedger(commissionLedger);
+    }
+
+    @PutMapping("/updateCommissionLedger/{id}")
+    public FinalResponse updateCommissionLedger(@PathVariable Integer id, @RequestBody  CommissionLedger commissionLedger) {
+        return individualService.updateCommissionLedger(id, commissionLedger);
+    }
+
+    @DeleteMapping("/deleteCommissionLedger/{id}")
+    public FinalResponse deleteCommissionLedger(@PathVariable Integer id) {
+        return individualService.deleteCommissionLedger(id);
+    }
 }

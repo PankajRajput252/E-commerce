@@ -65,4 +65,12 @@ public interface IndividualService {
     FinalResponse updateWithDrawalRequest(Integer id, WithdrawalRequest withdrawalRequest);
 
     FinalResponse deleteWithDrawalRequest(Integer id);
+
+    FinalResponse getCommissionLedger(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addCommissionLedger(CommissionLedger commissionLedger);
+
+    FinalResponse updateCommissionLedger(Integer id, CommissionLedger commissionLedger);
+
+    FinalResponse deleteCommissionLedger(Integer id);
 }

@@ -5,6 +5,7 @@ import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.*;
+import com.mineCryptos.repo.CommissionLedgerRepository;
 import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
@@ -38,6 +39,8 @@ public class IndividualServiceImpl implements IndividualService {
     private SupportTicketRepository supportTicketRepository;
     @Autowired
     private WithdrawalRequestRepository withdrawalRequestRepository;
+    @Autowired
+    private CommissionLedgerRepository comissionLedgerRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -773,6 +776,91 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteWithDrawalRequest(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         withdrawalRequestRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getCommissionLedger(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<CommissionLedger> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<CommissionLedger> commissionLedgerList = populateCommissionLedgerView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateCommissionLedgerCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(commissionLedgerList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+    private int populateCommissionLedgerCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = comissionLedgerRepository.countByCommissionLedgerPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = comissionLedgerRepository.countByActiveStateCodeFkIdAndUserNodeId("ACTIVE",inputFkId);
+        }
+        else {
+            count = comissionLedgerRepository.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<CommissionLedger> populateCommissionLedgerView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<CommissionLedger> commissionLedgerList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            CommissionLedger commissionLedger = comissionLedgerRepository.findByCommissionLedgerPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            commissionLedgerList.add(commissionLedger);
+        }
+        else if(Util.isDefined(inputFkId)){
+            commissionLedgerList = comissionLedgerRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE",inputFkId, pageable);
+        }
+        else {
+            commissionLedgerList = comissionLedgerRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return commissionLedgerList;
+    }
+
+    @Override
+    public FinalResponse addCommissionLedger(CommissionLedger commissionLedger) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        commissionLedger.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(commissionLedger.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(commissionLedger);
+
+        comissionLedgerRepository.save(commissionLedger);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateCommissionLedger(Integer id, CommissionLedger commissionLedger) {
+        FinalResponse finalResponse = new FinalResponse();
+        comissionLedgerRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(commissionLedger.getUserNodeId());
+                    existing.setIncomeType(commissionLedger.getIncomeType());
+                    existing.setIsSettled(commissionLedger.getIsSettled());
+                    existing.setAmount(commissionLedger.getAmount());
+                    return comissionLedgerRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Commission Ledger  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteCommissionLedger(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        comissionLedgerRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
