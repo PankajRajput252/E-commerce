@@ -580,6 +580,7 @@ public class IndividualServiceImpl implements IndividualService {
             detail.setMemberId(child.getNodeId());
             detail.setMemberLevel(level + 1);
             detail.setMemberName(child.getName());
+            detail.setMemberEmail(child.getEmail());
             detail.setPosition(child.getPosition());
             team.add(detail);
             fetchTeamRecursive(child.getNodeId(), level + 1, team);

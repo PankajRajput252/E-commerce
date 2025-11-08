@@ -19,4 +19,6 @@ public interface UserService {
     FinalResponse getRole();
 
      FinalResponse createRegistration(User user) throws FinalException;
+
+    FinalResponse deleteUser(Integer id);
 }

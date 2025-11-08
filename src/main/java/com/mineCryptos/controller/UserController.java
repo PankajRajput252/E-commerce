@@ -63,10 +63,10 @@ public class UserController {
 //    }
 //
 //
-//    @DeleteMapping("/deleteUser")
-//    FinalResponse deleteUser(@RequestBody User user) throws FinalException {
-//        return this.userService.deleteUser(user);
-//    }
+    @DeleteMapping("/deleteUser/{id}")
+    FinalResponse deleteUser(@PathVariable Integer id) throws FinalException {
+        return this.userService.deleteUser(id);
+    }
 
 
 

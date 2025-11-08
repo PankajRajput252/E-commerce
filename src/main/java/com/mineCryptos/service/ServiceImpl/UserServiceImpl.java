@@ -235,4 +235,11 @@ public class UserServiceImpl implements UserService {
         return finalResponse;
     }
 
+    @Override
+    public FinalResponse deleteUser(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        userRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 }
