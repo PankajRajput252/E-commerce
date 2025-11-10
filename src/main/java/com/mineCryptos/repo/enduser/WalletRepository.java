@@ -57,4 +57,13 @@ public interface WalletRepository extends JpaRepository<Wallet,Integer> {
     List<Wallet> findByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId, Pageable pageable);
 
     int countByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId);
+
+    @Query("SELECT SUM(w.mineWallet) FROM Wallet w")
+    Double getTotalMineWallet();
+
+    @Query("SELECT SUM(w.nodeWallet) FROM Wallet w")
+    Double getTotalNodeWallet();
+
+    @Query("SELECT SUM(w.capitalWallet) FROM Wallet w")
+    Double getTotalCapitalWallet();
 }

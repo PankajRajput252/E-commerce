@@ -351,6 +351,15 @@ public class AdminServiceImpl implements AdminService {
         adminDashboardInfo.setTotalNormalUser(normalCount);
         long totalUserCount= userRepository.count();
         adminDashboardInfo.setTotalUser(totalUserCount);
+        Double nodeWallet= walletRepository.getTotalNodeWallet();
+        Double mineWallet= walletRepository.getTotalMineWallet();
+        Double capitalWallet=  walletRepository.getTotalCapitalWallet();
+        adminDashboardInfo.setNodewallet(nodeWallet);
+        adminDashboardInfo.setTotalMineWallet(mineWallet);
+        adminDashboardInfo.setCapitalWallet(capitalWallet);
+        Double totalWallet=nodeWallet+mineWallet+capitalWallet;
+        adminDashboardInfo.setTotalWallet(totalWallet);
+
         finalResponse.setResponse(adminDashboardInfo);
 
 

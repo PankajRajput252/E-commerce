@@ -6,19 +6,19 @@ public class AdminDashboardInfo {
     private int totalInactiveUser;
     private int totalNormalUser;
     private int totalAdminUser;
-    private int totalWallet;
-    private int totalMineWallet;
-    private int totalMineInvestment;
-    private int nodewallet;
-    private int capitalWallet;
-    private int totalROIIncome;
-    private int totalWithdrawal;
-    private int totalDirectIncome;
-    private int totalDeposit;
-    private int totalCredit;
-    private int totalDebit;
-    private int totalRevenue;
-    private int totalNetProfit;
+    private Double totalWallet;
+    private Double totalMineWallet;
+    private Double totalMineInvestment;
+    private Double nodewallet;
+    private Double capitalWallet;
+    private Double totalROIIncome;
+    private Double totalWithdrawal;
+    private Double totalDirectIncome;
+    private Double totalDeposit;
+    private Double totalCredit;
+    private Double totalDebit;
+    private Double totalRevenue;
+    private Double totalNetProfit;
 
     public long getTotalUser() {
         return totalUser;
@@ -60,107 +60,107 @@ public class AdminDashboardInfo {
         this.totalAdminUser = totalAdminUser;
     }
 
-    public int getTotalWallet() {
+    public Double getTotalWallet() {
         return totalWallet;
     }
 
-    public void setTotalWallet(int totalWallet) {
+    public void setTotalWallet(Double totalWallet) {
         this.totalWallet = totalWallet;
     }
 
-    public int getTotalMineWallet() {
+    public Double getTotalMineWallet() {
         return totalMineWallet;
     }
 
-    public void setTotalMineWallet(int totalMineWallet) {
+    public void setTotalMineWallet(Double totalMineWallet) {
         this.totalMineWallet = totalMineWallet;
     }
 
-    public int getTotalMineInvestment() {
+    public Double getTotalMineInvestment() {
         return totalMineInvestment;
     }
 
-    public void setTotalMineInvestment(int totalMineInvestment) {
+    public void setTotalMineInvestment(Double totalMineInvestment) {
         this.totalMineInvestment = totalMineInvestment;
     }
 
-    public int getNodewallet() {
+    public Double getNodewallet() {
         return nodewallet;
     }
 
-    public void setNodewallet(int nodewallet) {
+    public void setNodewallet(Double nodewallet) {
         this.nodewallet = nodewallet;
     }
 
-    public int getCapitalWallet() {
+    public Double getCapitalWallet() {
         return capitalWallet;
     }
 
-    public void setCapitalWallet(int capitalWallet) {
+    public void setCapitalWallet(Double capitalWallet) {
         this.capitalWallet = capitalWallet;
     }
 
-    public int getTotalROIIncome() {
+    public Double getTotalROIIncome() {
         return totalROIIncome;
     }
 
-    public void setTotalROIIncome(int totalROIIncome) {
+    public void setTotalROIIncome(Double totalROIIncome) {
         this.totalROIIncome = totalROIIncome;
     }
 
-    public int getTotalWithdrawal() {
+    public Double getTotalWithdrawal() {
         return totalWithdrawal;
     }
 
-    public void setTotalWithdrawal(int totalWithdrawal) {
+    public void setTotalWithdrawal(Double totalWithdrawal) {
         this.totalWithdrawal = totalWithdrawal;
     }
 
-    public int getTotalDirectIncome() {
+    public Double getTotalDirectIncome() {
         return totalDirectIncome;
     }
 
-    public void setTotalDirectIncome(int totalDirectIncome) {
+    public void setTotalDirectIncome(Double totalDirectIncome) {
         this.totalDirectIncome = totalDirectIncome;
     }
 
-    public int getTotalDeposit() {
+    public Double getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(int totalDeposit) {
+    public void setTotalDeposit(Double totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 
-    public int getTotalCredit() {
+    public Double getTotalCredit() {
         return totalCredit;
     }
 
-    public void setTotalCredit(int totalCredit) {
+    public void setTotalCredit(Double totalCredit) {
         this.totalCredit = totalCredit;
     }
 
-    public int getTotalDebit() {
+    public Double getTotalDebit() {
         return totalDebit;
     }
 
-    public void setTotalDebit(int totalDebit) {
+    public void setTotalDebit(Double totalDebit) {
         this.totalDebit = totalDebit;
     }
 
-    public int getTotalRevenue() {
+    public Double getTotalRevenue() {
         return totalRevenue;
     }
 
-    public void setTotalRevenue(int totalRevenue) {
+    public void setTotalRevenue(Double totalRevenue) {
         this.totalRevenue = totalRevenue;
     }
 
-    public int getTotalNetProfit() {
+    public Double getTotalNetProfit() {
         return totalNetProfit;
     }
 
-    public void setTotalNetProfit(int totalNetProfit) {
+    public void setTotalNetProfit(Double totalNetProfit) {
         this.totalNetProfit = totalNetProfit;
     }
 }
