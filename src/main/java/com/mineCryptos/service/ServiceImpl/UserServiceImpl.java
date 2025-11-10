@@ -74,22 +74,28 @@ public class UserServiceImpl implements UserService {
 
     private int populateUserViewCount(Integer inputPkId, Integer inputFkId, String filterBy) {
         int count = 0;
+        if(!Util.isDefined(filterBy)) {
+            filterBy="ACTIVE";
+        }
         if (Util.isDefined(inputPkId)) {
-            count = userRepository.countByUserPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            count = userRepository.countByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
         }  else {
-            count = userRepository.countByActiveStateCodeFkId("ACTIVE");
+            count = userRepository.countByActiveStateCodeFkId(filterBy);
         }
 
         return count;
     }
 
     private List<User> populateUserView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        if(!Util.isDefined(filterBy)) {
+            filterBy="ACTIVE";
+        }
         List<User> userList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
-            User user = userRepository.findByUserPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            User user = userRepository.findByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
             userList.add(user);
         } else {
-            userList = userRepository.findByActiveStateCodeFkId("ACTIVE", pageable);
+            userList = userRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
         userList.stream().map((user -> {
             if(Util.isDefined(user.getImageId())) {
