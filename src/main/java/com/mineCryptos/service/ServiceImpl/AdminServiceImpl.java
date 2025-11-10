@@ -345,6 +345,15 @@ public class AdminServiceImpl implements AdminService {
         adminDashboardInfo.setTotalActiveUser(totalActiveUser);
         int totalInActiveUser=userRepository.countByActiveStateCodeFkId("INACTIVE");
         adminDashboardInfo.setTotalInactiveUser(totalInActiveUser);
+        int adminCount = userRepository.countByRoleName("ADMIN_USER");
+        int normalCount = userRepository.countByRoleName("NORMAL_USER");
+        adminDashboardInfo.setTotalAdminUser(adminCount);
+        adminDashboardInfo.setTotalNormalUser(normalCount);
+        long totalUserCount= userRepository.count();
+        adminDashboardInfo.setTotalUser(totalUserCount);
+        finalResponse.setResponse(adminDashboardInfo);
+
+
         return finalResponse;
     }
 

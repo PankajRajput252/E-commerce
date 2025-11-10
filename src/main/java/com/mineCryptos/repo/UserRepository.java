@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -58,4 +59,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT t.parentNodeId FROM User t where t.nodeId = ?1 And t.activeStateCodeFkId =?2")
     String fetchParentNodeBasedOnUserNodeId(String userNodeCode, String active);
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.name = :roleName")
+    int countByRoleName(@Param("roleName") String roleName);
 }

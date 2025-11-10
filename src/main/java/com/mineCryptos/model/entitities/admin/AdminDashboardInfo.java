@@ -1,7 +1,7 @@
 package com.mineCryptos.model.entitities.admin;
 
 public class AdminDashboardInfo {
-    private int totalUser;
+    private long totalUser;
     private int totalActiveUser;
     private int totalInactiveUser;
     private int totalNormalUser;
@@ -20,11 +20,11 @@ public class AdminDashboardInfo {
     private int totalRevenue;
     private int totalNetProfit;
 
-    public int getTotalUser() {
+    public long getTotalUser() {
         return totalUser;
     }
 
-    public void setTotalUser(int totalUser) {
+    public void setTotalUser(long totalUser) {
         this.totalUser = totalUser;
     }
 
