@@ -14,4 +14,8 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, In
     List<SupportTicket> findByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId, Pageable pageable);
 
     int countByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId);
+
+    int countByActiveStateCodeFkId(String filterBy);
+
+    int countBySupportTicketPkIdAndActiveStateCodeFkId(Integer inputPkId, String filterBy);
 }
