@@ -21,4 +21,6 @@ public interface UserService {
      FinalResponse createRegistration(User user) throws FinalException;
 
     FinalResponse deleteUser(Integer id);
+
+    FinalResponse updateUserStatus(Integer id, String activeStatusCode);
 }

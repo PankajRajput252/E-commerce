@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-@Where(clause = "SAVE_STATE_CODE_FK_ID='SAVED' AND ACTIVE_STATE_CODE_FK_ID='ACTIVE' AND RECORD_STATE_CODE_FK_ID='CURRENT' AND IS_DELETED=0")
+@Where(clause = "SAVE_STATE_CODE_FK_ID='SAVED' AND RECORD_STATE_CODE_FK_ID='CURRENT' AND IS_DELETED=0")
 public class User  extends StandardFieldClass implements UserDetails {
 
 

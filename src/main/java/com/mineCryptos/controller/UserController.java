@@ -5,6 +5,7 @@ import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.Role;
 import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
+import com.mineCryptos.model.entitities.enduser.Wallet;
 import com.mineCryptos.service.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +69,11 @@ public class UserController {
         return this.userService.deleteUser(id);
     }
 
+    @PutMapping("/updateUserStatus/{id}/{activeStatusCode}")
+    public FinalResponse updateUserStatus(@PathVariable Integer id,
+                                          @PathVariable String activeStatusCode) throws FinalException {
+        return userService.updateUserStatus(id, activeStatusCode);
+    }
 
 
 }

@@ -248,4 +248,16 @@ public class UserServiceImpl implements UserService {
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
+
+    @Override
+    public FinalResponse updateUserStatus(Integer id, String activeStatusCode) {
+        FinalResponse finalResponse = new FinalResponse();
+        userRepository.findById(id)
+                .map(existing -> {
+                    existing.setActiveStateCodeFkId(activeStatusCode);
+                    return userRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" User  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 }
