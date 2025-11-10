@@ -4,6 +4,7 @@ import com.mineCryptos.FinalException;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
+import com.mineCryptos.model.entitities.admin.AdminDashboardInfo;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.DepositFund;
@@ -333,6 +334,17 @@ public class AdminServiceImpl implements AdminService {
             return finalResponse;
         }
         finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getAdminDashboardCount(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue){
+        FinalResponse finalResponse = new FinalResponse();
+        AdminDashboardInfo adminDashboardInfo=new AdminDashboardInfo();
+        int totalActiveUser=userRepository.countByActiveStateCodeFkId("ACTIVE");
+        adminDashboardInfo.setTotalActiveUser(totalActiveUser);
+        int totalInActiveUser=userRepository.countByActiveStateCodeFkId("INACTIVE");
+        adminDashboardInfo.setTotalInactiveUser(totalInActiveUser);
         return finalResponse;
     }
 

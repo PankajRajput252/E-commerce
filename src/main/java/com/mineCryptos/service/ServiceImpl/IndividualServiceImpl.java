@@ -599,6 +599,7 @@ public class IndividualServiceImpl implements IndividualService {
         List<MemberDetail> team=new ArrayList<>();
         fetchTeamRecursive(inputPkId, 0, team);
         finalResponse.setData(team);
+        finalResponse.setCount(team.size());
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
 

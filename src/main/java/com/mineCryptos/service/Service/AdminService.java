@@ -26,4 +26,6 @@ public interface AdminService {
     FinalResponse confirmWalletTransaction(Integer depositId);
 
     FinalResponse confirmUser(String nodeId);
+
+    FinalResponse getAdminDashboardCount(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
 }

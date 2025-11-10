@@ -109,4 +109,21 @@ public class AdminController {
     public FinalResponse confirmUser(@PathVariable String nodeId) {
         return adminService.confirmUser(nodeId);
     }
+
+    @GetMapping("/getAdminDashboardCount")
+    public FinalResponse getAdminDashboardCount(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        Integer inputFkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        return adminService.getAdminDashboardCount(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
 }
