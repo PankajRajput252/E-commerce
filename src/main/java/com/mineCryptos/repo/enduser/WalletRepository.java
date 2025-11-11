@@ -66,4 +66,10 @@ public interface WalletRepository extends JpaRepository<Wallet,Integer> {
 
     @Query("SELECT SUM(w.capitalWallet) FROM Wallet w")
     Double getTotalCapitalWallet();
+
+    @Query("SELECT SUM(w.totalDebit) FROM Wallet w")
+    Double getTotalDebit();
+
+    @Query("SELECT SUM(w.totalCredit) FROM Wallet w")
+    Double getTotalTotalCredit();
 }
