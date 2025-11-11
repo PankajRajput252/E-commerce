@@ -244,7 +244,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public FinalResponse deleteUser(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
-        userRepository.deleteById(id);
+//        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // To prevent orphan join table issues
+        user.getRoles().clear();
+        userRepository.delete(user);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
