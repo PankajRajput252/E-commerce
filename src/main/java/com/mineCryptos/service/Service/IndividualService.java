@@ -81,4 +81,12 @@ public interface IndividualService {
     FinalResponse updateIncomeSummary(Integer id, IncomeSummary incomeSummary);
 
     FinalResponse deleteIncomeSummary(Integer id);
+
+    FinalResponse getAccountStatement(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addAccountStatement(AccountStatement accountStatement);
+
+    FinalResponse updateAccountStatement(Integer id, AccountStatement accountStatement);
+
+    FinalResponse deleteAccountStatement(Integer id);
 }

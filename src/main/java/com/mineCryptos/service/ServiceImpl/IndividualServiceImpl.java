@@ -51,6 +51,8 @@ public class IndividualServiceImpl implements IndividualService {
     private UserMapRepository userMapRepository;
     @Autowired
     private IncomeSummaryRepository incomeSummaryRepository;
+    @Autowired
+    private AccountStatementRepository accountStatementRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1212,6 +1214,89 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteIncomeSummary(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         incomeSummaryRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getAccountStatement(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<AccountStatement> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<AccountStatement> accountStatementList = populateAccountStatementView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateAccountStatementCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(accountStatementList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateAccountStatementCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = accountStatementRepository.countByAccountStatementPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = accountStatementRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = accountStatementRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<AccountStatement> populateAccountStatementView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<AccountStatement> accountStatementList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            AccountStatement accountStatement = accountStatementRepository.findByAccountStatementPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            accountStatementList.add(accountStatement);
+        } else if (Util.isDefined(inputFkId)) {
+            accountStatementList = accountStatementRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            accountStatementList = accountStatementRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return accountStatementList;
+    }
+
+    @Override
+    public FinalResponse addAccountStatement(AccountStatement accountStatement) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        accountStatement.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(accountStatement.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(accountStatement);
+
+        accountStatementRepository.save(accountStatement);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateAccountStatement(Integer id, AccountStatement accountStatement) {
+        FinalResponse finalResponse = new FinalResponse();
+        accountStatementRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(accountStatement.getUserNodeId());
+                    existing.setCredit(accountStatement.getCredit());
+                    existing.setDebit(accountStatement.getDebit());
+                    existing.setParticular(accountStatement.getParticular());
+                    return accountStatementRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" AccountStatement not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteAccountStatement(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        accountStatementRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
