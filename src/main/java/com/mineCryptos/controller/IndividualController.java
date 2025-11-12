@@ -309,4 +309,36 @@ public class IndividualController {
     public FinalResponse deleteCommissionLedger(@PathVariable Integer id) {
         return individualService.deleteCommissionLedger(id);
     }
+
+    @GetMapping("/getIncomeSummary")
+    public FinalResponse getIncomeSummary(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+
+        return individualService.getIncomeSummary(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addIncomeSummary")
+    public FinalResponse addIncomeSummary(@RequestBody IncomeSummary incomeSummary) throws FinalException {
+        return this.individualService.addIncomeSummary(incomeSummary);
+    }
+
+    @PutMapping("/updateIncomeSummary/{id}")
+    public FinalResponse updateIncomeSummary(@PathVariable Integer id, @RequestBody  IncomeSummary incomeSummary) {
+        return individualService.updateIncomeSummary(id, incomeSummary);
+    }
+
+    @DeleteMapping("/deleteIncomeSummary/{id}")
+    public FinalResponse deleteIncomeSummary(@PathVariable Integer id) {
+        return individualService.deleteIncomeSummary(id);
+    }
 }

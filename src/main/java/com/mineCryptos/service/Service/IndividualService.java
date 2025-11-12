@@ -73,4 +73,12 @@ public interface IndividualService {
     FinalResponse updateCommissionLedger(Integer id, CommissionLedger commissionLedger);
 
     FinalResponse deleteCommissionLedger(Integer id);
+
+    FinalResponse getIncomeSummary(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addIncomeSummary(IncomeSummary incomeSummary);
+
+    FinalResponse updateIncomeSummary(Integer id, IncomeSummary incomeSummary);
+
+    FinalResponse deleteIncomeSummary(Integer id);
 }

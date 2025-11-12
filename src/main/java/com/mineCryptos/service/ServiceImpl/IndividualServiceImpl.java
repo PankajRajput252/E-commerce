@@ -49,6 +49,8 @@ public class IndividualServiceImpl implements IndividualService {
     private IncomeTypeRepository incomeTypeRepository;
     @Autowired
     private UserMapRepository userMapRepository;
+    @Autowired
+    private IncomeSummaryRepository incomeSummaryRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1124,5 +1126,95 @@ public class IndividualServiceImpl implements IndividualService {
         ledger.setNote(notes);
         comissionLedgerRepository.save(ledger);
     }
+
+
+    @Override
+    public FinalResponse getIncomeSummary(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<IncomeSummary> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<IncomeSummary> incomeSummaryList = populateIncomeSummaryView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateIncomeSummaryCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(incomeSummaryList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+    private int populateIncomeSummaryCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if(!Util.isDefined(filterBy)) {
+            filterBy="ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = incomeSummaryRepository.countByIncomeSummaryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        }
+        else if (Util.isDefined(inputFkId)) {
+            count = incomeSummaryRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId);
+        }
+        else {
+            count = incomeSummaryRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<IncomeSummary> populateIncomeSummaryView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<IncomeSummary> incomeSummaryList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            IncomeSummary incomeSummary = incomeSummaryRepository.findByIncomeSummaryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            incomeSummaryList.add(incomeSummary);
+        }
+        else if(Util.isDefined(inputFkId)){
+            incomeSummaryList = incomeSummaryRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId, pageable);
+        }
+        else {
+            incomeSummaryList = incomeSummaryRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return incomeSummaryList;
+    }
+
+    @Override
+    public FinalResponse addIncomeSummary(IncomeSummary incomeSummary) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        incomeSummary.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(incomeSummary.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(incomeSummary);
+
+        incomeSummaryRepository.save(incomeSummary);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateIncomeSummary(Integer id, IncomeSummary incomeSummary) {
+        FinalResponse finalResponse = new FinalResponse();
+        incomeSummaryRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(incomeSummary.getUserNodeId());
+                    existing.setTransactionDate(incomeSummary.getTransactionDate());
+                    existing.setTransactionType(incomeSummary.getTransactionType());
+                    existing.setBonusAmount(incomeSummary.getBonusAmount());
+                    return incomeSummaryRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" IncomeSummary not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteIncomeSummary(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        incomeSummaryRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
 
 }
