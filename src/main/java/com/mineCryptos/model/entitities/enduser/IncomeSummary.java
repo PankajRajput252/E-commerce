@@ -23,7 +23,7 @@ public class IncomeSummary extends StandardFieldClass {
     private LocalDateTime transactionDate;
 
     @Column(name = "TRANSACTION_TYPE")
-    private String transactionType;
+    private String transactionType;   // direct_income ,  level_income,  total_income
 
     @Column(name = "BONUS_AMOUNT")
     private Double bonusAmount;
