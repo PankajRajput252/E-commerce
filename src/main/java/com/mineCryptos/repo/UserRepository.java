@@ -62,4 +62,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.name = :roleName")
     int countByRoleName(@Param("roleName") String roleName);
+
+    List<User> findByActiveStateCodeFkIdAndNodeId(String filterBy, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndNodeId(String filterBy, String inputFkId);
 }

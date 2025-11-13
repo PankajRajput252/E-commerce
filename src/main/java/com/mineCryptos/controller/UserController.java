@@ -52,10 +52,10 @@ public class UserController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        if (Util.isDefined(inputFkId)) {
-            inputFkIdInt = Util.convertStringToInteger(inputFkId);
-        }
-        return userService.getUser(inputPkIdInt, inputFkIdInt, page, size, filterBy, searchValue);
+//        if (Util.isDefined(inputFkId)) {
+//            inputFkIdInt = Util.convertStringToInteger(inputFkId);
+//        }
+        return userService.getUser(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
 //    @PutMapping("/updateUser")
 //    public FinalResponse updateUser(

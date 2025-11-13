@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public FinalResponse getUser( Integer inputPkId, Integer inputFkId, int page, int size, String filterBy,String searchValue) throws FinalException {
+    public FinalResponse getUser( Integer inputPkId, String inputFkId, int page, int size, String filterBy,String searchValue) throws FinalException {
         FinalResponse<User> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<User> userList = populateUserView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -72,21 +72,25 @@ public class UserServiceImpl implements UserService {
         return finalResponse;
     }
 
-    private int populateUserViewCount(Integer inputPkId, Integer inputFkId, String filterBy) {
+    private int populateUserViewCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
         if (Util.isDefined(inputPkId)) {
             count = userRepository.countByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
-        }  else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            count = userRepository.countByActiveStateCodeFkIdAndNodeId(filterBy,inputFkId);
+        }
+        else {
             count = userRepository.countByActiveStateCodeFkId(filterBy);
         }
 
         return count;
     }
 
-    private List<User> populateUserView(Integer inputPkId, Integer inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<User> populateUserView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
@@ -94,7 +98,11 @@ public class UserServiceImpl implements UserService {
         if (Util.isDefined(inputPkId)) {
             User user = userRepository.findByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
             userList.add(user);
-        } else {
+        }
+        else if(Util.isDefined(inputFkId)) {
+            userList = userRepository.findByActiveStateCodeFkIdAndNodeId(filterBy,inputFkId, pageable);
+        }
+        else {
             userList = userRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
         userList.stream().map((user -> {

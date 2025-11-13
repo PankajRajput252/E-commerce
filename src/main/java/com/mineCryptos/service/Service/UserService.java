@@ -8,7 +8,7 @@ import com.mineCryptos.model.User;
 public interface UserService {
     FinalResponse createUser(User user) throws FinalException;
 
-    FinalResponse getUser(Integer inputPkId, Integer inputFkId, int page, int size, String filterBy, String searchValue) throws FinalException;
+    FinalResponse getUser(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) throws FinalException;
 //
 //    FinalResponse deleteUser(User user) throws FinalException;
 //
