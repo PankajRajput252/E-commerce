@@ -53,6 +53,8 @@ public class IndividualServiceImpl implements IndividualService {
     private IncomeSummaryRepository incomeSummaryRepository;
     @Autowired
     private AccountStatementRepository accountStatementRepository;
+    @Autowired
+    private BusinessHistoryRepository businessHistoryRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1297,6 +1299,92 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteAccountStatement(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         accountStatementRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getBussinessHistory(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<BusinessHistory> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<BusinessHistory> businessHistoryList = populateBusinessHistoryView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateBusinessHistoryCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(businessHistoryList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateBusinessHistoryCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = businessHistoryRepository.countByBusinessHistoryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = businessHistoryRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = businessHistoryRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<BusinessHistory> populateBusinessHistoryView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<BusinessHistory> businessHistoryList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            BusinessHistory businessHistory = businessHistoryRepository.findByBusinessHistoryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            businessHistoryList.add(businessHistory);
+        } else if (Util.isDefined(inputFkId)) {
+            businessHistoryList = businessHistoryRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            businessHistoryList = businessHistoryRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return businessHistoryList;
+    }
+
+
+    @Override
+    public FinalResponse addBusinessHistory(BusinessHistory businessHistory) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        businessHistory.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(businessHistory.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(businessHistory);
+
+        businessHistoryRepository.save(businessHistory);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateBusinessHistory(Integer id, BusinessHistory businessHistory) {
+        FinalResponse finalResponse = new FinalResponse();
+        businessHistoryRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(businessHistory.getUserNodeId());
+                    existing.setUserName(businessHistory.getUserName());
+                    existing.setParentNodeId(businessHistory.getParentNodeId());
+                    existing.setAmount(businessHistory.getAmount());
+                    existing.setType(businessHistory.getType());
+                    existing.setMode(businessHistory.getMode());
+                    return businessHistoryRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" businessHistory not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteBusinessHistory(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        businessHistoryRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

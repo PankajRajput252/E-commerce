@@ -89,4 +89,12 @@ public interface IndividualService {
     FinalResponse updateAccountStatement(Integer id, AccountStatement accountStatement);
 
     FinalResponse deleteAccountStatement(Integer id);
+
+    FinalResponse getBussinessHistory(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addBusinessHistory(BusinessHistory businessHistory);
+
+    FinalResponse updateBusinessHistory(Integer id, BusinessHistory businessHistory);
+
+    FinalResponse deleteBusinessHistory(Integer id);
 }

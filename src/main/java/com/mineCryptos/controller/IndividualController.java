@@ -373,4 +373,36 @@ public class IndividualController {
     public FinalResponse deleteAccountStatement(@PathVariable Integer id) {
         return individualService.deleteAccountStatement(id);
     }
+
+    @GetMapping("/getBussinessHistory")
+    public FinalResponse getBussinessHistory(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+
+        return individualService.getBussinessHistory(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addBusinessHistory")
+    public FinalResponse addBusinessHistory(@RequestBody BusinessHistory businessHistory) throws FinalException {
+        return this.individualService.addBusinessHistory(businessHistory);
+    }
+
+    @PutMapping("/updateBusinessHistory/{id}")
+    public FinalResponse updateBusinessHistory(@PathVariable Integer id, @RequestBody  BusinessHistory businessHistory) {
+        return individualService.updateBusinessHistory(id, businessHistory);
+    }
+
+    @DeleteMapping("/deleteBusinessHistory/{id}")
+    public FinalResponse deleteBusinessHistory(@PathVariable Integer id) {
+        return individualService.deleteBusinessHistory(id);
+    }
 }
