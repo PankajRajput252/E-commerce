@@ -97,4 +97,12 @@ public interface IndividualService {
     FinalResponse updateBusinessHistory(Integer id, BusinessHistory businessHistory);
 
     FinalResponse deleteBusinessHistory(Integer id);
+
+    FinalResponse getIndividualRankReward(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addIndividualRankReward(IndividualRankReward individualRankReward);
+
+    FinalResponse updateIndividualRankReward(Integer id, IndividualRankReward businessHistory);
+
+    FinalResponse deleteIndividualRankReward(Integer id);
 }

@@ -55,6 +55,8 @@ public class IndividualServiceImpl implements IndividualService {
     private AccountStatementRepository accountStatementRepository;
     @Autowired
     private BusinessHistoryRepository businessHistoryRepository;
+    @Autowired
+    private IndividualRankRewardRepository individualRankRewardRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1385,6 +1387,91 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteBusinessHistory(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         businessHistoryRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getIndividualRankReward(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<IndividualRankReward> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<IndividualRankReward> individualRankRewardList = populateIndividualRankRewardView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateIndividualRankRewardCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(individualRankRewardList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateIndividualRankRewardCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = individualRankRewardRepository.countByIndividualRankPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = individualRankRewardRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = individualRankRewardRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<IndividualRankReward> populateIndividualRankRewardView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<IndividualRankReward> individualRankRewardList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            IndividualRankReward individualRankReward = individualRankRewardRepository.findByIndividualRankPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            individualRankRewardList.add(individualRankReward);
+        } else if (Util.isDefined(inputFkId)) {
+            individualRankRewardList = individualRankRewardRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            individualRankRewardList = individualRankRewardRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return individualRankRewardList;
+    }
+
+    @Override
+    public FinalResponse addIndividualRankReward(IndividualRankReward individualRankReward) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        individualRankReward.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(individualRankReward.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(individualRankReward);
+
+        individualRankRewardRepository.save(individualRankReward);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateIndividualRankReward(Integer id, IndividualRankReward individualRankReward) {
+        FinalResponse finalResponse = new FinalResponse();
+        individualRankRewardRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(individualRankReward.getUserNodeId());
+                    existing.setRankName(individualRankReward.getRankName());
+                    existing.setRankCodeFkId(individualRankReward.getRankCodeFkId());
+                    existing.setMatching(individualRankReward.getMatching());
+                    existing.setReward(individualRankReward.getReward());
+                    existing.setAchieved(individualRankReward.getAchieved());
+                    return individualRankRewardRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" individualRankReward not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteIndividualRankReward(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        individualRankRewardRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
