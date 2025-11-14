@@ -74,9 +74,6 @@ public class UserServiceImpl implements UserService {
 
     private int populateUserViewCount(Integer inputPkId, String inputFkId, String filterBy) {
         int count = 0;
-        if(!Util.isDefined(filterBy)) {
-            filterBy="ACTIVE";
-        }
         if (Util.isDefined(inputPkId)) {
             count = userRepository.countByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
         }
@@ -84,16 +81,15 @@ public class UserServiceImpl implements UserService {
             count = userRepository.countByActiveStateCodeFkIdAndNodeId(filterBy,inputFkId);
         }
         else {
-            count = userRepository.countByActiveStateCodeFkId(filterBy);
+          long  count1 = userRepository.count();
+          count= Math.toIntExact(count1);
         }
 
         return count;
     }
 
     private List<User> populateUserView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
-        if(!Util.isDefined(filterBy)) {
-            filterBy="ACTIVE";
-        }
+
         List<User> userList = new ArrayList<>();
         if (Util.isDefined(inputPkId)) {
             User user = userRepository.findByUserPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
@@ -103,7 +99,7 @@ public class UserServiceImpl implements UserService {
             userList = userRepository.findByActiveStateCodeFkIdAndNodeId(filterBy,inputFkId, pageable);
         }
         else {
-            userList = userRepository.findByActiveStateCodeFkId(filterBy, pageable);
+            userList = userRepository.findAll( );
         }
         userList.stream().map((user -> {
             if(Util.isDefined(user.getImageId())) {
