@@ -7,7 +7,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "rank_rewards")
+@Table(name = "individual_rank_rewards")
 @Where(clause = "SAVE_STATE_CODE_FK_ID='SAVED' AND ACTIVE_STATE_CODE_FK_ID='ACTIVE' AND RECORD_STATE_CODE_FK_ID='CURRENT' AND IS_DELETED=0")
 public class IndividualRankReward  extends StandardFieldClass {
 
