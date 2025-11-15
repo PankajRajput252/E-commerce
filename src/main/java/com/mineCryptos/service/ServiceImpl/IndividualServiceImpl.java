@@ -593,6 +593,11 @@ public class IndividualServiceImpl implements IndividualService {
                 memberDetail.setMemberLevel(levelCount.getAndIncrement()); // increments each time
                 memberDetail.setMemberName(user.getName());
                 memberDetail.setMemberEmail(user.getEmail());
+                memberDetail.setId(user.getUserPkId());
+                memberDetail.setActivationDate(user.getDateOfActivation());
+                memberDetail.setJoiningDate(user.getDateOfActivation());
+                memberDetail.setParentId(user.getParentNodeId());
+                memberDetail.setStatus(user.getUserStatus());
                 memberDetailList.add(memberDetail);
                 return user;
             }).collect(Collectors.toList());
