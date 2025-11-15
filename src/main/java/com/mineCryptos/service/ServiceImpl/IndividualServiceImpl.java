@@ -590,7 +590,7 @@ public class IndividualServiceImpl implements IndividualService {
             userList.stream().map((user)->{
                 MemberDetail memberDetail = new MemberDetail();
                 memberDetail.setMemberId(user.getNodeId());
-                memberDetail.setMemberLevel(levelCount.getAndIncrement()); // increments each time
+                memberDetail.setMemberLevel(1); // increments each time
                 memberDetail.setMemberName(user.getName());
                 memberDetail.setMemberEmail(user.getEmail());
                 memberDetail.setId(user.getUserPkId());
@@ -598,10 +598,27 @@ public class IndividualServiceImpl implements IndividualService {
                 memberDetail.setJoiningDate(user.getDateOfActivation());
                 memberDetail.setParentId(user.getParentNodeId());
                 memberDetail.setStatus(user.getUserStatus());
+                memberDetail.setPosition(user.getPosition());
                 memberDetailList.add(memberDetail);
                 return user;
             }).collect(Collectors.toList());
         }
+        User userData=userRepository.findByNodeIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        if(Util.isDefined(userData)){
+            MemberDetail memberDetail = new MemberDetail();
+            memberDetail.setMemberId(userData.getNodeId());
+            memberDetail.setMemberLevel(0); // increments each time
+            memberDetail.setMemberName(userData.getName());
+            memberDetail.setMemberEmail(userData.getEmail());
+            memberDetail.setId(userData.getUserPkId());
+            memberDetail.setActivationDate(userData.getDateOfActivation());
+            memberDetail.setJoiningDate(userData.getDateOfActivation());
+            memberDetail.setParentId(userData.getParentNodeId());
+            memberDetail.setStatus(userData.getUserStatus());
+            memberDetail.setPosition(userData.getPosition());
+            memberDetailList.add(memberDetail);
+        }
+
         return memberDetailList;
     }
 
@@ -610,6 +627,21 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse<MemberDetail> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<MemberDetail> team=new ArrayList<>();
+        User userData=userRepository.findByNodeIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        if(Util.isDefined(userData)){
+            MemberDetail memberDetail = new MemberDetail();
+            memberDetail.setMemberId(userData.getNodeId());
+            memberDetail.setMemberLevel(0); // increments each time
+            memberDetail.setMemberName(userData.getName());
+            memberDetail.setMemberEmail(userData.getEmail());
+            memberDetail.setId(userData.getUserPkId());
+            memberDetail.setActivationDate(userData.getDateOfActivation());
+            memberDetail.setJoiningDate(userData.getDateOfActivation());
+            memberDetail.setParentId(userData.getParentNodeId());
+            memberDetail.setStatus(userData.getUserStatus());
+            memberDetail.setPosition(userData.getPosition());
+            team.add(memberDetail);
+        }
         fetchTeamRecursive(inputPkId, 0, team);
         finalResponse.setData(team);
         finalResponse.setCount(team.size());
