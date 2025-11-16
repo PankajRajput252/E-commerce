@@ -18,4 +18,10 @@ public interface MiningPackageRepository extends JpaRepository<MiningPackage,Int
     List<MiningPackage> findByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId, Pageable pageable);
 
     int countByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId);
+
+    MiningPackage findByModeAndActiveStateCodeFkId(String inputPkId, String filterBy);
+
+    List<MiningPackage> findByModeAndActiveStateCodeFkIdAndUserNodeCode(String inputPkId, String filterBy, String inputFkId, Pageable pageable);
+
+    int countByModeAndActiveStateCodeFkIdAndUserNodeCode(String inputPkId, String filterBy, String inputFkId);
 }

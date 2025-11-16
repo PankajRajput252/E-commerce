@@ -243,7 +243,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getIndividualMiningPackage(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue){
+    public FinalResponse getIndividualMiningPackage(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue){
         FinalResponse<MiningPackage> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<MiningPackage> miningPackageList = populateMiningPackageView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -254,13 +254,13 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateMiningPackageCount(Integer inputPkId, String inputFkId, String filterBy) {
+    private int populateMiningPackageCount(String inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
-        if (Util.isDefined(inputPkId)) {
-            count = miningPackageRepository.countByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        if (Util.isDefined(inputPkId) && Util.isDefined(inputFkId)) {
+            count = miningPackageRepository.countByModeAndActiveStateCodeFkIdAndUserNodeCode(inputPkId, filterBy,inputFkId);
         }
         else if(Util.isDefined(inputFkId)) {
             count = miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCode(filterBy,inputFkId);
@@ -272,14 +272,13 @@ public class IndividualServiceImpl implements IndividualService {
         return count;
     }
 
-    private List<MiningPackage> populateMiningPackageView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<MiningPackage> populateMiningPackageView(String inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<MiningPackage> miningPackageList = new ArrayList<>();
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
-        if (Util.isDefined(inputPkId)) {
-            MiningPackage miningPackage = miningPackageRepository.findByMiningPackagePkIdAndActiveStateCodeFkId(inputPkId, filterBy);
-            miningPackageList.add(miningPackage);
+        if (Util.isDefined(inputPkId) && Util.isDefined(inputFkId)) {
+            miningPackageList = miningPackageRepository.findByModeAndActiveStateCodeFkIdAndUserNodeCode(inputPkId, filterBy,inputFkId, pageable);
         }
         else if(Util.isDefined(inputFkId)) {
             miningPackageList = miningPackageRepository.findByActiveStateCodeFkIdAndUserNodeCode(filterBy,inputFkId, pageable);

@@ -95,11 +95,11 @@ public class IndividualController {
             @RequestParam(value = "searchValue", required = false) String searchValue
     ) throws FinalException {
         Integer inputPkIdInt = null;
-        Integer inputFkIdInt = null;
-        if (Util.isDefined(inputPkId)) {
-            inputPkIdInt = Util.convertStringToInteger(inputPkId);
-        }
-        return individualService.getIndividualMiningPackage(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+//        Integer inputFkIdInt = null;
+//        if (Util.isDefined(inputPkId)) {
+//            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+//        }
+        return individualService.getIndividualMiningPackage(inputPkId, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addMiningPackage")

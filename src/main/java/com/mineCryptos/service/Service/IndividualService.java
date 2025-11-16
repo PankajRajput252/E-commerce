@@ -20,7 +20,7 @@ public interface IndividualService {
 
     FinalResponse deleteIndividualIncomeSummary(Integer id);
 
-    FinalResponse getIndividualMiningPackage(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getIndividualMiningPackage(String inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addMiningPackage(MiningPackage miningPackage);
 
