@@ -7,12 +7,14 @@ import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.AdminDashboardInfo;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
+import com.mineCryptos.model.entitities.admin.SubscriptionDefinition;
 import com.mineCryptos.model.entitities.enduser.DepositFund;
 import com.mineCryptos.model.entitities.enduser.Wallet;
 import com.mineCryptos.model.entitities.enduser.WalletTransaction;
 import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.admin.IncomeTypeRepository;
 import com.mineCryptos.repo.admin.RankRewardRepository;
+import com.mineCryptos.repo.admin.SubscriptionDefinitionRepo;
 import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.WalletRepository;
 import com.mineCryptos.repo.enduser.WalletTransactionRepository;
@@ -46,6 +48,8 @@ public class AdminServiceImpl implements AdminService {
     private UserRepository userRepository;
     @Autowired
     private IndividualService individualService;
+    @Autowired
+    private SubscriptionDefinitionRepo subscriptionDefinitionRepo;
 
     @Override
     @Transactional(readOnly = true)
@@ -371,5 +375,91 @@ public class AdminServiceImpl implements AdminService {
 
         return finalResponse;
     }
+
+    @Override
+    public FinalResponse getSubscriptionDefinition(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<SubscriptionDefinition> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<SubscriptionDefinition> subscriptionDefinitionList = populateSubscriptionDefinitionView(inputPkId,inputFkId, filterBy,searchValue, pageable);
+        int count = populateSubscriptionDefinitionCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(subscriptionDefinitionList);
+        finalResponse.setCount( count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private int populateSubscriptionDefinitionCount(String inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (Util.isDefined(inputPkId)) {
+            count = subscriptionDefinitionRepo.countBySubscriptionDefinitionPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+        }
+        else if(Util.isDefined(inputFkId)) {
+            count = subscriptionDefinitionRepo.countByActiveStateCodeFkIdAndSubscriptionCode("ACTIVE", inputFkId);
+        }
+        else {
+            count = subscriptionDefinitionRepo.countByActiveStateCodeFkId("ACTIVE");
+        }
+
+        return count;
+    }
+
+    private List<SubscriptionDefinition> populateSubscriptionDefinitionView(String inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<SubscriptionDefinition> subscriptionDefinitionList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            SubscriptionDefinition subscriptionDefinition = subscriptionDefinitionRepo.findBySubscriptionDefinitionPkIdAndActiveStateCodeFkId(inputPkId, "ACTIVE");
+            subscriptionDefinitionList.add(subscriptionDefinition);
+        }
+        else if (Util.isDefined(inputFkId)) {
+            subscriptionDefinitionList = subscriptionDefinitionRepo.findByActiveStateCodeFkIdAndSubscriptionCode("ACTIVE", inputFkId,pageable);
+        }
+        else {
+            subscriptionDefinitionList = subscriptionDefinitionRepo.findByActiveStateCodeFkId("ACTIVE", pageable);
+        }
+        return subscriptionDefinitionList;
+    }
+
+    @Override
+    public FinalResponse addSubscriptionDefinition(SubscriptionDefinition subscriptionDefinition) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        subscriptionDefinition.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(subscriptionDefinition.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+        subscriptionDefinition.setSubscriptionCode(subscriptionDefinition.getSubscriptionName().toUpperCase());
+        subscriptionDefinition.setSubscriptionStartDateTime(LocalDateTime.now());
+        subscriptionDefinition.setSubscriptionEndDateTime(LocalDateTime.now().plusYears(1));
+        Util.setCommonDefaultAttributes(subscriptionDefinition);
+        subscriptionDefinitionRepo.save(subscriptionDefinition);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateSubscriptionDefinition(Integer id, SubscriptionDefinition subscriptionDefinition) {
+        FinalResponse finalResponse = new FinalResponse();
+        subscriptionDefinitionRepo.findById(id)
+                .map(existing -> {
+                    existing.setSubscriptionName(subscriptionDefinition.getSubscriptionName());
+                    existing.setSubscriptionCode(subscriptionDefinition.getSubscriptionCode());
+                    existing.setSubscriptionAmount(subscriptionDefinition.getSubscriptionAmount());
+                    existing.setSubscriptionStartDateTime(subscriptionDefinition.getSubscriptionStartDateTime());
+                    existing.setSubscriptionEndDateTime(subscriptionDefinition.getSubscriptionEndDateTime());
+                    return subscriptionDefinitionRepo.save(existing);
+                }).orElseThrow(() -> new RuntimeException("SubscriptionDefinition not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteSubscriptionDefinition(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        subscriptionDefinitionRepo.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
 
 }

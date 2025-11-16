@@ -6,6 +6,7 @@ import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
+import com.mineCryptos.model.entitities.admin.SubscriptionDefinition;
 import com.mineCryptos.service.Service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -126,4 +127,35 @@ public class AdminController {
         }
         return adminService.getAdminDashboardCount(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
     }
+
+
+    @GetMapping("/getSubscriptionDefinition")
+    public FinalResponse getSubscriptionDefinition(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        return adminService.getSubscriptionDefinition(inputPkId, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addSubscriptionDefinition")
+    public FinalResponse addSubscriptionDefinition(@RequestBody SubscriptionDefinition subscriptionDefinition) throws FinalException {
+        return this.adminService.addSubscriptionDefinition(subscriptionDefinition);
+    }
+
+    @PutMapping("/updateSubscriptionDefinition/{id}")
+    public FinalResponse updateSubscriptionDefinition(@PathVariable Integer id, @RequestBody SubscriptionDefinition subscriptionDefinition) {
+        return adminService.updateSubscriptionDefinition(id, subscriptionDefinition);
+    }
+
+    @DeleteMapping("/deleteSubscriptionDefinition/{id}")
+    public FinalResponse deleteSubscriptionDefinition(@PathVariable Integer id) {
+        return adminService.deleteSubscriptionDefinition(id);
+    }
+
+
+
 }
