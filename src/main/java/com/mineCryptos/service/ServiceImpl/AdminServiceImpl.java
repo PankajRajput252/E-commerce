@@ -226,9 +226,13 @@ public class AdminServiceImpl implements AdminService {
                 existing.setStatus("SUCCESS");
                 return depositFundRepository.save(existing);
             });
-            double currentAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
-            double totalAmount=currentAmount+depositFund.getAmount();
-            walletRepository.updateCapitalWalletOfUser(totalAmount,depositFund.getUserNodeCode());
+            double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+            double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+            double halfAmountToBeAdded=depositFund.getAmount()/2;
+            double totalCapitalAmount=currentCapitalAmount+halfAmountToBeAdded;
+            double totalNodeAmount=currentNodeAmount+halfAmountToBeAdded;
+            walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,depositFund.getUserNodeCode());
+            walletRepository.updateNodeWalletOfUser(totalNodeAmount,depositFund.getUserNodeCode());
         } else {
             Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
             return finalResponse;
