@@ -98,7 +98,7 @@ public class AdminServiceImpl implements AdminService {
             Util.setMessage(finalResponse, "100", "Error: This Rank and reward already exists.");
             return finalResponse;
         }
-
+        rankReward.setRankCode(rankReward.getRankName().toUpperCase());
         Util.setCommonDefaultAttributes(rankReward);
 
         rankRewardRepository.save(rankReward);
