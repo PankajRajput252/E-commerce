@@ -226,13 +226,37 @@ public class AdminServiceImpl implements AdminService {
                 existing.setStatus("SUCCESS");
                 return depositFundRepository.save(existing);
             });
-            double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
-            double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
-            double halfAmountToBeAdded=depositFund.getAmount()/2;
-            double totalCapitalAmount=currentCapitalAmount+halfAmountToBeAdded;
-            double totalNodeAmount=currentNodeAmount+halfAmountToBeAdded;
-            walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,depositFund.getUserNodeCode());
-            walletRepository.updateNodeWalletOfUser(totalNodeAmount,depositFund.getUserNodeCode());
+            Wallet wallet=walletRepository.findByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",depositFund.getUserNodeCode());
+            if (Util.isDefined(wallet)) {
+                double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+                double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+                double halfAmountToBeAdded=depositFund.getAmount()/2;
+                double totalCapitalAmount=currentCapitalAmount+halfAmountToBeAdded;
+                double totalNodeAmount=currentNodeAmount+halfAmountToBeAdded;
+                walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,depositFund.getUserNodeCode());
+                walletRepository.updateNodeWalletOfUser(totalNodeAmount,depositFund.getUserNodeCode());
+            }
+            else{
+                 wallet = new Wallet();
+                wallet.setUserNodeCode(depositFund.getUserNodeCode());
+                finalResponse = individualService.addWalletData(wallet);
+                if (!finalResponse.getStatusCode().equals("200")) {
+                    return finalResponse;
+                }
+                double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+                double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(depositFund.getUserNodeCode(),"ACTIVE");
+                double halfAmountToBeAdded=depositFund.getAmount()/2;
+                double totalCapitalAmount=currentCapitalAmount+halfAmountToBeAdded;
+                double totalNodeAmount=currentNodeAmount+halfAmountToBeAdded;
+                walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,depositFund.getUserNodeCode());
+                walletRepository.updateNodeWalletOfUser(totalNodeAmount,depositFund.getUserNodeCode());
+
+                finalResponse= confirmUser(depositFund.getUserNodeCode());
+                if (!finalResponse.getStatusCode().equals("200")) {
+                    return finalResponse;
+                }
+            }
+
         } else {
             Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
             return finalResponse;
@@ -330,12 +354,12 @@ public class AdminServiceImpl implements AdminService {
                 }
                 return userRepository.save(existing);
             });
-            Wallet wallet = new Wallet();
-            wallet.setUserNodeCode(nodeId);
-            finalResponse = individualService.addWalletData(wallet);
-            if (!finalResponse.getStatusCode().equals("200")) {
-                return finalResponse;
-            }
+//            Wallet wallet = new Wallet();
+//            wallet.setUserNodeCode(nodeId);
+//            finalResponse = individualService.addWalletData(wallet);
+//            if (!finalResponse.getStatusCode().equals("200")) {
+//                return finalResponse;
+//            }
 
         } else {
             Util.setMessage(finalResponse, "100", "Error: User not found.");
