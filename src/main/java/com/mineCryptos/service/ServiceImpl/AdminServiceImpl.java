@@ -359,8 +359,10 @@ public class AdminServiceImpl implements AdminService {
         adminDashboardInfo.setNodewallet(nodeWallet);
         adminDashboardInfo.setTotalMineWallet(mineWallet);
         adminDashboardInfo.setCapitalWallet(capitalWallet);
-        Double totalWallet=nodeWallet+mineWallet+capitalWallet;
-        adminDashboardInfo.setTotalWallet(totalWallet);
+        if(Util.isDefined(nodeWallet) && Util.isDefined(mineWallet) && Util.isDefined(capitalWallet)){
+            Double totalWallet=nodeWallet+mineWallet+capitalWallet;
+            adminDashboardInfo.setTotalWallet(totalWallet);
+        }
         adminDashboardInfo.setTotalDebit(totalDebit);
         adminDashboardInfo.setTotalCredit(totalCredit);
 
