@@ -66,30 +66,21 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
         ResponseEntity<Map> res = restTemplate.postForEntity(url, entity, Map.class);
 
+        Map<String, Object> response = res.getBody();
+        CryptoDeposit deposit = new CryptoDeposit();
+        deposit.setPaymentId(response.get("payment_id").toString());
+        deposit.setAmount(request.getAmount());
+        deposit.setUserNodeId(request.getUserNodeId());
+        deposit.setPaymentStatus("PENDING");
+        cryptoDepositRepository.save(deposit);
         return res.getBody();
     }
 
-//    public void processWebhook(Map<String, Object> body, String sig) {
-//
-//        String json = new Gson().toJson(body);
-//        String expected = hmacSha512(json, ipnSecret);
-//
-//        if (!expected.equals(sig)) {
-//            throw new RuntimeException("Invalid Signature");
-//        }
-//
-//        String paymentId = body.get("payment_id").toString();
-//        String status = body.get("payment_status").toString();
-//        String txHash = body.get("purchase_id").toString();
-//
-//        if ("finished".equalsIgnoreCase(status)) {
-//            confirmDeposit(paymentId, txHash);
-//        }
-//    }
+
 
     public void processWebhook(Map<String, Object> body, String sig) {
 
-        String json = new Gson().toJson(body);
+//        String json = new Gson().toJson(body);
         String expected = hmacSha512(json, ipnSecret);
 
         if (!expected.equalsIgnoreCase(sig)) {
