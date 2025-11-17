@@ -14,4 +14,6 @@ public interface CryptoDepositRepository extends JpaRepository<CryptoDeposit, In
     int countByActiveStateCodeFkIdAndUserNodeId(String filterBy, String inputFkId);
 
     int countByActiveStateCodeFkId(String filterBy);
+
+    CryptoDeposit findByPaymentId(String paymentId);
 }
