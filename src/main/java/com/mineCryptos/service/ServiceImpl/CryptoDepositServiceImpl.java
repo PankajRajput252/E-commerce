@@ -80,7 +80,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
     public void processWebhook(Map<String, Object> body, String sig) {
 
-//        String json = new Gson().toJson(body);
+        String json = new Gson().toJson(body);
         String expected = hmacSha512(json, ipnSecret);
 
         if (!expected.equalsIgnoreCase(sig)) {
