@@ -57,6 +57,8 @@ public class IndividualServiceImpl implements IndividualService {
     private BusinessHistoryRepository businessHistoryRepository;
     @Autowired
     private IndividualRankRewardRepository individualRankRewardRepository;
+    @Autowired
+    private CryptoDepositRepository cryptoDepositRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1513,6 +1515,93 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteIndividualRankReward(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         individualRankRewardRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getCryptoDepositSummary(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<CryptoDeposit> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<CryptoDeposit> cryptoDepositList = populateCryptoDepositView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateCryptoDepositCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(cryptoDepositList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateCryptoDepositCount(String inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+//            count = cryptoDepositRepository.countByIndividualRankPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = cryptoDepositRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = cryptoDepositRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<CryptoDeposit> populateCryptoDepositView(String inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<CryptoDeposit> cryptoDepositList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+//            CryptoDeposit cryptoDeposit = cryptoDepositRepository.findByIndividualRankPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+//            cryptoDepositList.add(cryptoDeposit);
+        } else if (Util.isDefined(inputFkId)) {
+            cryptoDepositList = cryptoDepositRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            cryptoDepositList = cryptoDepositRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return cryptoDepositList;
+    }
+
+    @Override
+    public FinalResponse addCryptoDeposit(CryptoDeposit cryptoDeposit) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        cryptoDeposit.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(cryptoDeposit.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(cryptoDeposit);
+
+        cryptoDepositRepository.save(cryptoDeposit);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateCryptoDeposit(Integer id, CryptoDeposit cryptoDeposit) {
+        FinalResponse finalResponse = new FinalResponse();
+        cryptoDepositRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(cryptoDeposit.getUserNodeId());
+                    existing.setAmount(cryptoDeposit.getAmount());
+                    existing.setCurrency(cryptoDeposit.getCurrency());
+                    existing.setPayAddress(cryptoDeposit.getPayAddress());
+                    existing.setPayInaddress(cryptoDeposit.getPayInaddress());
+                    existing.setPayoutAddress(cryptoDeposit.getPayoutAddress());
+                    existing.setPaymentId(cryptoDeposit.getPaymentId());
+                    existing.setPaymentStatus(cryptoDeposit.getPaymentStatus());
+                    return cryptoDepositRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" CryptoDeposit not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteCryptoDeposit(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        cryptoDepositRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

@@ -437,4 +437,34 @@ public class IndividualController {
     public FinalResponse deleteIndividualRankReward(@PathVariable Integer id) {
         return individualService.deleteIndividualRankReward(id);
     }
+
+
+    @GetMapping("/getCryptoDepositSummary")
+    public FinalResponse getCryptoDepositSummary(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+
+        return individualService.getCryptoDepositSummary(inputPkId, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addCryptoDeposit")
+    public FinalResponse addCryptoDeposit(@RequestBody CryptoDeposit cryptoDeposit) throws FinalException {
+        return this.individualService.addCryptoDeposit(cryptoDeposit);
+    }
+
+    @PutMapping("/updateCryptoDeposit/{id}")
+    public FinalResponse updateCryptoDeposit(@PathVariable Integer id, @RequestBody CryptoDeposit cryptoDeposit) {
+        return individualService.updateCryptoDeposit(id, cryptoDeposit);
+    }
+
+    @DeleteMapping("/deleteCryptoDeposit/{id}")
+    public FinalResponse deleteCryptoDeposit(@PathVariable Integer id) {
+        return individualService.deleteCryptoDeposit(id);
+    }
+
 }

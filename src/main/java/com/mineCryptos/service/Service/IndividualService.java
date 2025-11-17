@@ -105,4 +105,12 @@ public interface IndividualService {
     FinalResponse updateIndividualRankReward(Integer id, IndividualRankReward businessHistory);
 
     FinalResponse deleteIndividualRankReward(Integer id);
+
+    FinalResponse getCryptoDepositSummary(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addCryptoDeposit(CryptoDeposit cryptoDeposit);
+
+    FinalResponse updateCryptoDeposit(Integer id, CryptoDeposit cryptoDeposit);
+
+    FinalResponse deleteCryptoDeposit(Integer id);
 }
