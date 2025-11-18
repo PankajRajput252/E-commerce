@@ -415,6 +415,7 @@ public class IndividualServiceImpl implements IndividualService {
         Util.setCommonDefaultAttributes(depositFund);
 
         depositFundRepository.save(depositFund);
+        finalResponse.setResponse(depositFund);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
