@@ -51,6 +51,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     @Autowired
     private DepositFundRepository depositFundRepository;
 
+    @Transactional
     public Map<String, Object> createDeposit(DepositRequest request) {
 
         String url = baseUrl + "/payment";
@@ -76,8 +77,8 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         deposit.setUserNodeId(request.getUserNodeId());
         deposit.setPaymentStatus("PENDING");
         cryptoDepositRepository.save(deposit);
-        if(Util.isDefined(deposit.getDepositPkId())){
-         depositFundRepository.updatePaymentIdBasedOnPkId(deposit.getPaymentId(),request.getUserNodeId() ,  deposit.getDepositPkId());
+        if(Util.isDefined(request.getDepositPkId())){
+         depositFundRepository.updatePaymentIdBasedOnPkId(deposit.getPaymentId(),request.getUserNodeId() ,  request.getDepositPkId());
         }
 
         return res.getBody();

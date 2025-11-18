@@ -42,8 +42,7 @@ public class CryptoDeposit extends StandardFieldClass {
     @Column(name = "TX_HASH")
     private String txHash;
 
-    @Transient
-    private Integer depositPkId;
+
 
     public Integer getCryptotopDepositPkId() {
         return cryptotopDepositPkId;
@@ -125,11 +124,4 @@ public class CryptoDeposit extends StandardFieldClass {
         this.txHash = txHash;
     }
 
-    public Integer getDepositPkId() {
-        return depositPkId;
-    }
-
-    public void setDepositPkId(Integer depositPkId) {
-        this.depositPkId = depositPkId;
-    }
 }
