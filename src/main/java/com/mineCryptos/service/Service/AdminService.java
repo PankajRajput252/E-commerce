@@ -22,7 +22,7 @@ public interface AdminService {
 
     FinalResponse deleteIncomeType(Integer id);
 
-    FinalResponse confirmDeposit(Integer depositId);
+    FinalResponse confirmDeposit(String paymentId);
 
     FinalResponse confirmWalletTransaction(Integer depositId);
 

@@ -28,4 +28,5 @@ public interface DepositFundRepository extends JpaRepository<DepositFund,Integer
             "  AND ACTIVE_STATE_CODE_FK_ID = 'ACTIVE' AND SAVE_STATE_CODE_FK_ID = 'SAVED' AND RECORD_STATE_CODE_FK_ID = 'CURRENT' AND IS_DELETED = 0  ", nativeQuery = true)
     public void updatePaymentIdBasedOnPkId(String paymentId, String userNodeCode, Integer depositPkId);
 
+    DepositFund findByPaymentIdAndActiveStateCodeFkId(String paymentId, String active);
 }

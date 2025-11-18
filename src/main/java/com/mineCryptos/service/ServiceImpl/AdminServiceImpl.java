@@ -216,9 +216,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public FinalResponse confirmDeposit(Integer depositId) {
+    public FinalResponse confirmDeposit(String paymentId) {
         FinalResponse finalResponse = new FinalResponse();
-        DepositFund depositFund = depositFundRepository.findByDepositPkIdAndActiveStateCodeFkId(depositId, "ACTIVE");
+        DepositFund depositFund = depositFundRepository.findByPaymentIdAndActiveStateCodeFkId(paymentId, "ACTIVE");
         if (Util.isDefined(depositFund)) {
             Optional<DepositFund> depositFunds = Optional.ofNullable(depositFund);
             depositFunds.map(existing -> {

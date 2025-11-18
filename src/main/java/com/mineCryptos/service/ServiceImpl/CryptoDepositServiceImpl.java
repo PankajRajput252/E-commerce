@@ -8,6 +8,7 @@ import com.mineCryptos.model.entitities.enduser.UserWallet;
 import com.mineCryptos.repo.enduser.CryptoDepositRepository;
 import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.UserWalletRepository;
+import com.mineCryptos.service.Service.AdminService;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,8 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     private UserWalletRepository userWalletRepository;
     @Autowired
     private DepositFundRepository depositFundRepository;
+    @Autowired
+    private AdminService adminService;
 
     @Transactional
     public Map<String, Object> createDeposit(DepositRequest request) {
@@ -135,6 +138,10 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         if (Util.isDefined(wallet)) {
             wallet.setBalance(wallet.getBalance() + deposit.getAmount());
             userWalletRepository.save(wallet);
+        }
+      FinalResponse finalResponse=  adminService.confirmDeposit(paymentId);
+        if (!finalResponse.getStatusCode().equals("200")) {
+            return;
         }
     }
 

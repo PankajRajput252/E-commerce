@@ -92,9 +92,9 @@ public class AdminController {
 
 
     // For admin or webhook confirmation
-    @PostMapping("/confirmDeposit/{depositId}")
-    public FinalResponse confirmDeposit(@PathVariable Integer depositId) {
-         return adminService.confirmDeposit(depositId);
+    @PostMapping("/confirmDeposit/{paymentId}")
+    public FinalResponse confirmDeposit(@PathVariable String paymentId) {
+         return adminService.confirmDeposit(paymentId);
 
     }
 
