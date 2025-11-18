@@ -6,6 +6,7 @@ import com.mineCryptos.model.entitities.enduser.CryptoDeposit;
 import com.mineCryptos.model.entitities.enduser.DepositRequest;
 import com.mineCryptos.model.entitities.enduser.UserWallet;
 import com.mineCryptos.repo.enduser.CryptoDepositRepository;
+import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.UserWalletRepository;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,8 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     private CryptoDepositRepository cryptoDepositRepository;
     @Autowired
     private UserWalletRepository userWalletRepository;
+    @Autowired
+    private DepositFundRepository depositFundRepository;
 
     public Map<String, Object> createDeposit(DepositRequest request) {
 
@@ -73,6 +76,10 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         deposit.setUserNodeId(request.getUserNodeId());
         deposit.setPaymentStatus("PENDING");
         cryptoDepositRepository.save(deposit);
+        if(Util.isDefined(deposit.getDepositPkId())){
+         depositFundRepository.updatePaymentIdBasedOnPkId(deposit.getPaymentId(),request.getUserNodeId() ,  deposit.getDepositPkId());
+        }
+
         return res.getBody();
     }
 
