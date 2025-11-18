@@ -24,9 +24,6 @@ public class WalletTransaction extends StandardFieldClass {
     @Column(name = "TO_USER_ID")
     private String toUserId;
 
-    @Column(name = "FROM_WALLET")
-    private String fromWallet;
-
     @Column(name = "T0_WALLET")
     private String toWallet;
 
@@ -75,14 +72,6 @@ public class WalletTransaction extends StandardFieldClass {
 
     public void setToUserId(String toUserId) {
         this.toUserId = toUserId;
-    }
-
-    public String getFromWallet() {
-        return fromWallet;
-    }
-
-    public void setFromWallet(String fromWallet) {
-        this.fromWallet = fromWallet;
     }
 
     public String getToWallet() {

@@ -523,7 +523,6 @@ public class IndividualServiceImpl implements IndividualService {
                     existing.setTransactionId(walletTransaction.getTransactionId());
                     existing.setFromUserId(walletTransaction.getFromUserId());
                     existing.setToUserId(walletTransaction.getToUserId());
-                    existing.setFromWallet(walletTransaction.getFromWallet());
                     existing.setToWallet(walletTransaction.getToWallet());
                     existing.setAmount(walletTransaction.getAmount());
                     existing.setStatus(walletTransaction.getStatus());

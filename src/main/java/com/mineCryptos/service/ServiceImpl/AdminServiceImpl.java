@@ -278,55 +278,67 @@ public class AdminServiceImpl implements AdminService {
                 return walletTransactionRepository.save(existing);
             });
 
-            if (walletTransaction.getFromWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+            if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
                 //deducting amount fromUser
                 double currentFromWalletAmount = walletRepository.fetchUserCapitalWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
                 double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+                if (totalAmountLeftInFromWallet < 0) {
+                    Util.setMessage(finalResponse, "100", "Error: You do not have enough Capital Amount to transfer.");
+                    return finalResponse;
+                }
                 walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
 
                 // adding money to the transfer wallet to user
-                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
-                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
-                    double totalNodeAmount = currentNodeAmount = walletTransaction.getAmount();
-                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
-                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
-                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
-                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
-                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+                if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+                    double currentCapitalAmount = walletRepository.fetchUserCapitalWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                    double totalCapitalAmount = currentCapitalAmount + walletTransaction.getAmount();
+                    walletRepository.updateNodeWalletOfUser(totalCapitalAmount, walletTransaction.getToUserId());
                 }
-            } else if (walletTransaction.getFromWallet().equalsIgnoreCase("NODE_WALLET")) {
+
+            } else if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
                 double currentFromWalletAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
                 double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+                if (totalAmountLeftInFromWallet < 0) {
+                    Util.setMessage(finalResponse, "100", "Error: You do not have enough Node Amount to transfer.");
+                    return finalResponse;
+                }
                 walletRepository.updateNodeWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
 
                 // adding money to the transfer wallet
-                if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
-                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
-                    double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
-                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
-                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
-                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
-                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
-                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
-                }
-
-            } else if (walletTransaction.getFromWallet().equalsIgnoreCase("MINE_WALLET")) {
-                double currentFromWalletAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
-                double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
-                walletRepository.updateMineWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
-
-                // adding money to the transfer wallet
                 if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
                     double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
                     double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
                     walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
-                } else if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
-                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
-                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
-                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
                 }
+//                if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+//                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+//                    double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
+//                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+//                } else if (walletTransaction.getToWallet().equalsIgnoreCase("MINE_WALLET")) {
+//                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+//                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
+//                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+//                }
 
-            } else {
+            }
+//            else if (walletTransaction.getFromWallet().equalsIgnoreCase("MINE_WALLET")) {
+//                double currentFromWalletAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+//                double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+//                walletRepository.updateMineWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+//
+//                // adding money to the transfer wallet
+//                if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+//                    double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+//                    double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
+//                    walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+//                } else if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+//                    double currentMineAmount = walletRepository.fetchUserMineWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+//                    double totalmineAmount = currentMineAmount + walletTransaction.getAmount();
+//                    walletRepository.updateMineWalletOfUser(totalmineAmount, walletTransaction.getToUserId());
+//                }
+//
+//            }
+            else {
                 Util.setMessage(finalResponse, "100", "Error:Unable to get From wallet name , Please contact Admin.");
                 return finalResponse;
             }
