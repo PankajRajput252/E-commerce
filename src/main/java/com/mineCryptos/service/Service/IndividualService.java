@@ -36,7 +36,7 @@ public interface IndividualService {
 
     FinalResponse deleteDepositFund(Integer id);
 
-    FinalResponse getWalletTransaction(Integer inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
+    FinalResponse getWalletTransaction(String inputPkIdInt, String inputFkIdInt, int page, int size, String filterBy, String searchValue);
 
     FinalResponse addWalletTransaction(WalletTransaction walletTransaction);
 

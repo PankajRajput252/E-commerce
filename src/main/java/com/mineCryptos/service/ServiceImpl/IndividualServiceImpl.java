@@ -1,5 +1,6 @@
 package com.mineCryptos.service.ServiceImpl;
 
+import com.mineCryptos.FinalException;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
@@ -446,7 +447,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getWalletTransaction(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getWalletTransaction(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
         FinalResponse<WalletTransaction> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
         List<WalletTransaction> walletTransactionList = populateWalletTransactionView(inputPkId,inputFkId, filterBy,searchValue, pageable);
@@ -457,16 +458,16 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    private int populateWalletTransactionCount(Integer inputPkId, String inputFkId, String filterBy) {
+    private int populateWalletTransactionCount(String inputPkId, String inputFkId, String filterBy) {
         int count = 0;
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
         if (Util.isDefined(inputPkId)) {
-            count = walletTransactionRepository.countByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            count = walletTransactionRepository.countByActiveStateCodeFkIdAndFromUserId(inputPkId, filterBy);
         }
         else if (Util.isDefined(inputFkId)) {
-            count = walletTransactionRepository.countByActiveStateCodeFkIdAndFromUserId(filterBy,inputFkId);
+            count = walletTransactionRepository.countByActiveStateCodeFkIdAndToUserId(filterBy,inputFkId);
         }
         else {
             count = walletTransactionRepository.countByActiveStateCodeFkId(filterBy);
@@ -475,17 +476,16 @@ public class IndividualServiceImpl implements IndividualService {
         return count;
     }
 
-    private List<WalletTransaction> populateWalletTransactionView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<WalletTransaction> populateWalletTransactionView(String inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<WalletTransaction> walletTransactionList = new ArrayList<>();
         if(!Util.isDefined(filterBy)) {
             filterBy="ACTIVE";
         }
         if (Util.isDefined(inputPkId)) {
-            WalletTransaction walletTransaction = walletTransactionRepository.findByWalletTxnPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
-            walletTransactionList.add(walletTransaction);
+            walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkIdAndFromUserId(filterBy,inputPkId, pageable);
         }
         else if (Util.isDefined(inputFkId)) {
-            walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkIdAndFromUserId(filterBy,inputFkId, pageable);
+            walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkIdAndToUserId(filterBy,inputFkId, pageable);
         }
         else {
             walletTransactionList = walletTransactionRepository.findByActiveStateCodeFkId(filterBy, pageable);
@@ -497,7 +497,9 @@ public class IndividualServiceImpl implements IndividualService {
         }).collect(Collectors.toList());
         return walletTransactionList;
     }
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addWalletTransaction(WalletTransaction walletTransaction) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -510,7 +512,41 @@ public class IndividualServiceImpl implements IndividualService {
 
         Util.setCommonDefaultAttributes(walletTransaction);
 
-        walletTransactionRepository.save(walletTransaction);
+        walletTransaction= walletTransactionRepository.save(walletTransaction);
+        if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+            //deducting amount fromUser
+            double currentFromWalletAmount = walletRepository.fetchUserCapitalWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+            double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+            if (totalAmountLeftInFromWallet < 0) {
+                Util.setMessage(finalResponse, "100", "Error: You do not have enough Capital Amount to transfer.");
+                throw new FinalException(finalResponse.getStatus());
+            }
+            walletRepository.updateCapitalWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+
+            // adding money to the transfer wallet to user
+            if (walletTransaction.getToWallet().equalsIgnoreCase("CAPITAL_WALLET")) {
+                double currentCapitalAmount = walletRepository.fetchUserCapitalWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                double totalCapitalAmount = currentCapitalAmount + walletTransaction.getAmount();
+                walletRepository.updateNodeWalletOfUser(totalCapitalAmount, walletTransaction.getToUserId());
+            }
+
+        } else if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+            double currentFromWalletAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getFromUserId(), "ACTIVE");
+            double totalAmountLeftInFromWallet = currentFromWalletAmount - walletTransaction.getAmount();
+            if (totalAmountLeftInFromWallet < 0) {
+                Util.setMessage(finalResponse, "100", "Error: You do not have enough Node Amount to transfer.");
+                throw new FinalException(finalResponse.getStatus());
+            }
+            walletRepository.updateNodeWalletOfUser(totalAmountLeftInFromWallet, walletTransaction.getFromUserId());
+
+            // adding money to the transfer wallet
+            if (walletTransaction.getToWallet().equalsIgnoreCase("NODE_WALLET")) {
+                double currentNodeAmount = walletRepository.fetchUserNodeWalletAmount(walletTransaction.getToUserId(), "ACTIVE");
+                double totalNodeAmount = currentNodeAmount + walletTransaction.getAmount();
+                walletRepository.updateNodeWalletOfUser(totalNodeAmount, walletTransaction.getToUserId());
+            }
+
+        }
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

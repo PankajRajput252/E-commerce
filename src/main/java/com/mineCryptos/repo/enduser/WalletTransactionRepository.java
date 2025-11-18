@@ -17,7 +17,11 @@ public interface WalletTransactionRepository  extends JpaRepository<WalletTransa
 
     int countByActiveStateCodeFkId(String active);
 
-    List<WalletTransaction> findByActiveStateCodeFkIdAndFromUserId(String active, String inputFkId, Pageable pageable);
+    List<WalletTransaction> findByActiveStateCodeFkIdAndFromUserId(String active, String inputPkId, Pageable pageable);
 
     int countByActiveStateCodeFkIdAndFromUserId(String active, String inputFkId);
+
+    List<WalletTransaction> findByActiveStateCodeFkIdAndToUserId(String filterBy, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndToUserId(String filterBy, String inputFkId);
 }

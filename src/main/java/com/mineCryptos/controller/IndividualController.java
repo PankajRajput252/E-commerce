@@ -164,10 +164,10 @@ public class IndividualController {
     ) throws FinalException {
         Integer inputPkIdInt = null;
         Integer inputFkIdInt = null;
-        if (Util.isDefined(inputPkId)) {
-            inputPkIdInt = Util.convertStringToInteger(inputPkId);
-        }
-        return individualService.getWalletTransaction(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+//        if (Util.isDefined(inputPkId)) {
+//            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+//        }
+        return individualService.getWalletTransaction(inputPkId, inputFkId, page, size, filterBy, searchValue);
     }
 
     @PostMapping("/addWalletTransaction")
