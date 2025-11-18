@@ -113,4 +113,6 @@ public interface IndividualService {
     FinalResponse updateCryptoDeposit(Integer id, CryptoDeposit cryptoDeposit);
 
     FinalResponse deleteCryptoDeposit(Integer id);
+
+    public FinalResponse getHierarchy(String loggedInNodeId);
 }

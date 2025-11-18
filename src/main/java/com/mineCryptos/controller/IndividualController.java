@@ -469,4 +469,12 @@ public class IndividualController {
         return individualService.deleteCryptoDeposit(id);
     }
 
+    @GetMapping("/getHierarchy")
+    public FinalResponse getCryptoDepositSummary(
+            @RequestParam(value = "loggedInNodeId", required = false) String loggedInNodeId
+    ) throws FinalException {
+
+        return individualService.getHierarchy(loggedInNodeId);
+    }
+
 }

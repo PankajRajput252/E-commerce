@@ -1642,5 +1642,50 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+    @Override
+    public FinalResponse getHierarchy(String loggedInNodeId) {
+        FinalResponse finalResponse = new FinalResponse();
+        Set<String> result = new LinkedHashSet<>();
+        List<MemberDetail> memberDetailList=new ArrayList<>();
+
+        // Find logged-in user
+        User loggedInNode = userRepository.findByNodeIdAndActiveStateCodeFkId(loggedInNodeId,"ACTIVE");
+
+
+        // 1️ Find Uplines (Parents)
+        String parent = loggedInNode.getParentNodeId();
+        while (parent != null) {
+            result.add(parent);
+            parent = userRepository.fetchParentNodeBasedOnUserNodeId(parent,"ACTIVE");
+        }
+
+        // 2️⃣ Find Downlines (Children)
+        findChildren(loggedInNode.getNodeId(), result);
+
+        // remove logged-in node if exists
+        result.remove(loggedInNodeId);
+        MemberDetail memberDetail=null;
+        for(String nodeId:result){
+            memberDetail=new MemberDetail();
+            memberDetail.setMemberId(nodeId);
+           String userName= userRepository.fetchUserNameBasedOnNodeId(nodeId,"ACTIVE");
+            memberDetail.setMemberName(userName);
+            memberDetailList.add(memberDetail);
+        }
+        finalResponse.setData(memberDetailList);
+
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    private void findChildren(String nodeId, Set<String> result) {
+        List<User> children = userRepository.findByParentNodeIdAndActiveStateCodeFkId(nodeId,"ACTIVE",null);
+        for (User child : children) {
+            result.add(child.getNodeId());
+            findChildren(child.getNodeId(), result);
+        }
+    }
+
+
 
 }
