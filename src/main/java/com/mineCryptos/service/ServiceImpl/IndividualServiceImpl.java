@@ -902,7 +902,7 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse finalResponse = new FinalResponse();
         withdrawalRequestRepository.findById(id)
                 .map(existing -> {
-                    existing.setUsername(withdrawalRequest.getUsername());
+//                    existing.setUsername(withdrawalRequests.getUsername());
                     existing.setUserNodeId(withdrawalRequest.getUserNodeId());
                     existing.setWalletType(withdrawalRequest.getWalletType());
                     existing.setWalletAddress(withdrawalRequest.getWalletAddress());

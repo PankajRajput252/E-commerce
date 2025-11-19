@@ -1,7 +1,9 @@
 package com.mineCryptos.service.Service;
 
 import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
 import com.mineCryptos.model.entitities.enduser.DepositRequest;
+import com.mineCryptos.model.entitities.enduser.WithdrawalRequest;
 
 import java.util.Map;
 
@@ -11,4 +13,6 @@ public interface CryptoDepositService {
     void processWebhook(Map<String, Object> payload, String signature);
 
     FinalResponse getHistory(String userId);
+
+    FinalResponse createBtcWithdrawal(String userNodeId, BtcWithdrawRequest request);
 }

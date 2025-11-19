@@ -1,10 +1,11 @@
 package com.mineCryptos.model.entitities.enduser;
 
 import javax.persistence.Transient;
+import java.math.BigDecimal;
 
 public class DepositRequest {
     private String userNodeId;
-    private Double amount;
+    private BigDecimal amount;
     private Integer depositPkId;
 
     public String getUserNodeId() {
@@ -15,11 +16,11 @@ public class DepositRequest {
         this.userNodeId = userNodeId;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

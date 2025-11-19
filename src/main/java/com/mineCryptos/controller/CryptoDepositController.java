@@ -2,11 +2,14 @@ package com.mineCryptos.controller;
 
 
 import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
 import com.mineCryptos.model.entitities.enduser.CryptoDeposit;
 import com.mineCryptos.model.entitities.enduser.DepositRequest;
+import com.mineCryptos.model.entitities.enduser.WithdrawalRequest;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +40,14 @@ public class CryptoDepositController {
     public FinalResponse getHistory(@PathVariable String userId) {
 //        return depositRepo.findByUserId(userId);
         return  cryptoDepositService.getHistory(userId);
+    }
+
+    @PostMapping("/withdraw/withdrawBTC/{userNodeId}")
+    public FinalResponse withdrawBTC(
+            @RequestBody BtcWithdrawRequest request,
+            @PathVariable String userNodeId
+    ) {
+       return cryptoDepositService.createBtcWithdrawal(userNodeId, request);
     }
 
 }

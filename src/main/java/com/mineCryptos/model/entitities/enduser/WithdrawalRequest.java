@@ -5,6 +5,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,8 +17,8 @@ public class WithdrawalRequest extends StandardFieldClass {
     @Column(name = "WITHDRAWAL_REQUEST_PK_ID")
     private  Integer withdrawalRequestPkId;
 
-    @Column(name = "USER_NAME")
-    private String username;            // MLM user who initiates withdrawal
+    @Column(name = "CURRENCY_CODE")
+    private String currencyCode;            // MLM user who initiates withdrawal
 
     @Column(name = "USER_NODE_ID")
     private String userNodeId;
@@ -29,7 +30,13 @@ public class WithdrawalRequest extends StandardFieldClass {
     private String walletAddress;       // e.g., user's BEP20 address
 
     @Column(name = "AMOUNT")
-    private Double amount;
+    private BigDecimal amount;
+
+    @Column(name = "FEE_WORK")
+    private BigDecimal feeWork  ;
+
+    @Column(name = "FINAL_AMOUNT")
+    private BigDecimal finalAmount  ;
 
     @Column(name = "STATUS")
     private String status = "PENDING";  // PENDING, APPROVED, REJECTED
@@ -50,14 +57,6 @@ public class WithdrawalRequest extends StandardFieldClass {
 
     public void setWithdrawalRequestPkId(Integer withdrawalRequestPkId) {
         this.withdrawalRequestPkId = withdrawalRequestPkId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getUserNodeId() {
@@ -84,13 +83,6 @@ public class WithdrawalRequest extends StandardFieldClass {
         this.walletAddress = walletAddress;
     }
 
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
 
     public String getStatus() {
         return status;
@@ -122,5 +114,38 @@ public class WithdrawalRequest extends StandardFieldClass {
 
     public void setOtp(String otp) {
         this.otp = otp;
+    }
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
+    }
+
+    public BigDecimal getFeeWork() {
+        return feeWork;
+    }
+
+    public void setFeeWork(BigDecimal feeWork) {
+        this.feeWork = feeWork;
+    }
+
+
+    public BigDecimal getFinalAmount() {
+        return finalAmount;
+    }
+
+    public void setFinalAmount(BigDecimal finalAmount) {
+        this.finalAmount = finalAmount;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 }

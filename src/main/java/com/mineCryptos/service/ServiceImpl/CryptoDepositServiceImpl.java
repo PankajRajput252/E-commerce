@@ -1,13 +1,15 @@
 package com.mineCryptos.service.ServiceImpl;
 
+import com.mineCryptos.FinalException;
 import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
-import com.mineCryptos.model.entitities.enduser.CryptoDeposit;
-import com.mineCryptos.model.entitities.enduser.DepositRequest;
-import com.mineCryptos.model.entitities.enduser.UserWallet;
+import com.mineCryptos.model.entitities.enduser.*;
+import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.enduser.CryptoDepositRepository;
 import com.mineCryptos.repo.enduser.DepositFundRepository;
 import com.mineCryptos.repo.enduser.UserWalletRepository;
+import com.mineCryptos.repo.enduser.WithdrawalRequestRepository;
 import com.mineCryptos.service.Service.AdminService;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigDecimal;
 import java.util.*;
 
 import com.google.gson.Gson;
@@ -53,6 +56,10 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     private DepositFundRepository depositFundRepository;
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private WithdrawalRequestRepository withdrawalRequestRepository;
 
     @Transactional
     public Map<String, Object> createDeposit(DepositRequest request) {
@@ -136,7 +143,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         // Update user wallet
         UserWallet wallet = userWalletRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE", deposit.getUserNodeId());
         if (Util.isDefined(wallet)) {
-            wallet.setBalance(wallet.getBalance() + deposit.getAmount());
+            wallet.setBalance(wallet.getBalance().add(deposit.getAmount()));
             userWalletRepository.save(wallet);
         }
       FinalResponse finalResponse=  adminService.confirmDeposit(paymentId);
@@ -153,5 +160,78 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         finalResponse.setData(cryptoDepositList);
         return   finalResponse;
     }
+
+
+    @Override
+    public FinalResponse createBtcWithdrawal(String userNodeId, BtcWithdrawRequest req) {
+        FinalResponse finalResponse=new FinalResponse();
+        // 1. Validate User
+        User user = userRepository.findByNodeIdAndActiveStateCodeFkId(userNodeId,"ACTIVE");
+        if (Util.isDefined(user)) {
+            // 2. Validate KYC status
+//            if (!user.isKycVerified()) {
+//                throw new RuntimeException("KYC not completed");
+//            }
+
+            // 3. Validate wallet balance
+            UserWallet wallet = userWalletRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE",userNodeId);
+            if (wallet.getBalance().compareTo(req.getAmount()) < 0) {
+                throw new RuntimeException("Insufficient balance");
+            }
+
+            // 4. Calculate fee (example: 0.0003 BTC)
+            BigDecimal networkFee = new BigDecimal("0.0003");
+            BigDecimal finalAmount = req.getAmount().subtract(networkFee);
+
+            if (finalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RuntimeException("Amount too low after fee deduction");
+            }
+
+            // 5. Freeze funds
+            wallet.setBalance(wallet.getBalance().subtract(req.getAmount()));
+            wallet.setFrozenBalance(wallet.getFrozenBalance().add(req.getAmount()));
+            userWalletRepository.save(wallet);
+
+            // 6. Create Withdrawal Request
+            WithdrawalRequest withdrawal = new WithdrawalRequest();
+            withdrawal.setUserNodeId(userNodeId);
+            withdrawal.setCurrencyCode("BTC");
+            withdrawal.setAmount(req.getAmount());
+            withdrawal.setFeeWork(networkFee);
+            withdrawal.setFinalAmount(finalAmount);
+            withdrawal.setWalletAddress(req.getBtcAddress());
+            withdrawal.setStatus("PENDING");
+
+
+            withdrawalRequestRepository.save(withdrawal);
+            finalResponse.setResponse(withdrawal);
+        }
+        else{
+            throw new FinalException("Invalid user ");
+
+        }
+        Util.setSuccessMessage(finalResponse);
+       return finalResponse;
+    }
+
+//    public void processWithdrawal(WithdrawalRequest req) {
+//
+//        // call blockchain wallet API to transfer BTC
+//        BlockchainResponse res = blockchainApi.sendBTC(
+//                req.getBtcAddress(), req.getFinalAmount()
+//        );
+//
+//        if (res.isSuccess()) {
+//            req.setStatus("SUCCESS");
+//        } else {
+//            req.setStatus("FAILED");
+//
+//            // return money to user's wallet
+//            refund(req);
+//        }
+//
+//        withdrawalRepository.save(req);
+//    }
+
 
 }

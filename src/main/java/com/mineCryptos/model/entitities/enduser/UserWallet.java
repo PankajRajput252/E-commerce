@@ -4,6 +4,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 
 @Entity
@@ -22,7 +23,10 @@ public class UserWallet extends StandardFieldClass {
     private String walletAddress;
 
     @Column(name = "BALANCE")
-    private Double balance;
+    private BigDecimal balance;
+
+    @Column(name = "FRONZEN_BALANCE")
+    private BigDecimal frozenBalance; // hold amount during withdrawal
 
     public Integer getUserWalletPkId() {
         return userWalletPkId;
@@ -48,11 +52,19 @@ public class UserWallet extends StandardFieldClass {
         this.walletAddress = walletAddress;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public BigDecimal getFrozenBalance() {
+        return frozenBalance;
+    }
+
+    public void setFrozenBalance(BigDecimal frozenBalance) {
+        this.frozenBalance = frozenBalance;
     }
 }

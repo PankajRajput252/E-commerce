@@ -4,6 +4,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 
 @Entity
@@ -19,7 +20,7 @@ public class CryptoDeposit extends StandardFieldClass {
     private String userNodeId;
 
     @Column(name = "AMOUNT")
-    private double amount;
+    private BigDecimal amount;
 
     @Column(name = "CURRENCY")
     private String currency;
@@ -60,11 +61,11 @@ public class CryptoDeposit extends StandardFieldClass {
         this.userNodeId = userNodeId;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
