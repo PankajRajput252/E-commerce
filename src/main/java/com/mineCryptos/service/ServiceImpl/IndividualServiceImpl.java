@@ -198,6 +198,13 @@ public class IndividualServiceImpl implements IndividualService {
         else {
             individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
+        if(Util.isDefined(individualIncomeSummaryList)){
+            individualIncomeSummaryList.stream().map((individualIncomeSummary)->{
+                String userName= userRepository.fetchUserNameBasedOnNodeId(individualIncomeSummary.getUserNodeId(),"ACTIVE");
+                individualIncomeSummary.setUserName(userName);
+                return individualIncomeSummary;
+            }).collect(Collectors.toList());
+        }
         return individualIncomeSummaryList;
     }
     @Override

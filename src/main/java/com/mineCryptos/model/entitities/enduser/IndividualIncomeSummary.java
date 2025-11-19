@@ -42,6 +42,9 @@ public class IndividualIncomeSummary extends StandardFieldClass {
     @Column(name = "USER_NODE_ID")
     private  String userNodeId;
 
+    @Transient
+    private String userName;
+
     public IndividualIncomeSummary() {
         this.serviceGenerationAmount = 0.0;
         this.matchingIncomeAmount = 0.0;
@@ -143,5 +146,13 @@ public class IndividualIncomeSummary extends StandardFieldClass {
 
     public void setUserNodeId(String userNodeId) {
         this.userNodeId = userNodeId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
