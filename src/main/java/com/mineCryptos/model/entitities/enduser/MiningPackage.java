@@ -5,6 +5,7 @@ import com.mineCryptos.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +22,7 @@ public class MiningPackage extends StandardFieldClass {
     private String userNodeCode;
 
     @Column(name = "PACKAGE_AMOUNT")
-    private double packageAmount;
+    private BigDecimal packageAmount;
 
     @Column(name = "REMARKS")
     private String remarks;
@@ -54,11 +55,11 @@ public class MiningPackage extends StandardFieldClass {
         this.userNodeCode = userNodeCode;
     }
 
-    public double getPackageAmount() {
+    public BigDecimal getPackageAmount() {
         return packageAmount;
     }
 
-    public void setPackageAmount(double packageAmount) {
+    public void setPackageAmount(BigDecimal packageAmount) {
         this.packageAmount = packageAmount;
     }
 

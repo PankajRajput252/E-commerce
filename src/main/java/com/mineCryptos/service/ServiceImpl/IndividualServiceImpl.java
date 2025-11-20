@@ -303,7 +303,9 @@ public class IndividualServiceImpl implements IndividualService {
     @Override
     public FinalResponse addMiningPackage(MiningPackage miningPackage) {
         FinalResponse finalResponse=new FinalResponse();
-        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
+//        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
+            if (miningPackage.getPackageAmount().compareTo(new BigDecimal("100")) < 0 ||
+                    miningPackage.getPackageAmount().remainder(new BigDecimal("10")).compareTo(BigDecimal.ZERO) != 0) {
             throw new IllegalArgumentException("Amount must be >= 100 and in multiples of 10");
         }
 
@@ -318,6 +320,7 @@ public class IndividualServiceImpl implements IndividualService {
 //        }
 
          miningPackageRepository.save(miningPackage);
+        processServicePurchase( miningPackage.getUserNodeCode(),  miningPackage.getPackageAmount());
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
@@ -507,7 +510,7 @@ public class IndividualServiceImpl implements IndividualService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public FinalResponse addWalletTransaction(WalletTransaction walletTransaction) {
+    public FinalResponse addWalletTransaction(WalletTransaction walletTransaction) throws FinalException {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
         walletTransaction.setEffectiveDateTime(vLastModifiedDateTime);
@@ -1026,10 +1029,10 @@ public class IndividualServiceImpl implements IndividualService {
         payDirectReferral(buyer, amount);
 
         // 2. Trigger matching income calculation up the upline
-        payMatchingIncome(buyer);
+//        payMatchingIncome(buyer);
 
        // 3. Update binary volume if applicable (example)
-        updateBinaryVolume(buyer, amount);
+//        updateBinaryVolume(buyer, amount);
 
 
     }

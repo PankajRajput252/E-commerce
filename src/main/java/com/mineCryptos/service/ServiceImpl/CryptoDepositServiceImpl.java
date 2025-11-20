@@ -69,7 +69,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         Map<String, Object> payload = new HashMap<>();
         payload.put("price_amount", request.getAmount());
         payload.put("price_currency", "usd");
-        payload.put("pay_currency", "usdtbsc");
+        payload.put("pay_currency", "bnbbsc");
         payload.put("ipn_callback_url", "http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/deposit/webhook");
 
         HttpHeaders headers = new HttpHeaders();
