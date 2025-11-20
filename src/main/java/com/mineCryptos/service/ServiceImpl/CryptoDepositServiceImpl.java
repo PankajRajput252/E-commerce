@@ -74,7 +74,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
         payload.put("is_fixed_rate", true);        // locks exact amount in BNB
         payload.put("is_fee_paid_by_user", true);  // user pays transaction fee
-        payload.put("strict_amount", true);
+//        payload.put("strict_amount", true);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-api-key", apiKey);
