@@ -319,8 +319,11 @@ public class IndividualServiceImpl implements IndividualService {
 //            throw new IllegalArgumentException("Invalid OTP");
 //        }
 
-         miningPackageRepository.save(miningPackage);
-        processServicePurchase( miningPackage.getUserNodeCode(),  miningPackage.getPackageAmount());
+        miningPackageRepository.save(miningPackage);
+
+        if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
+            processServicePurchase(miningPackage.getUserNodeCode(), miningPackage.getPackageAmount());
+        }
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
@@ -1029,7 +1032,7 @@ public class IndividualServiceImpl implements IndividualService {
         payDirectReferral(buyer, amount);
 
         // 2. Trigger matching income calculation up the upline
-//        payMatchingIncome(buyer);
+        payMatchingIncome(buyer);
 
        // 3. Update binary volume if applicable (example)
 //        updateBinaryVolume(buyer, amount);
@@ -1066,8 +1069,8 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     private void payMatchingIncome(User buyer) {
-       // traverse upline and check left/right match
-        UserMap upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(), "ACTIVE");
+       // traverse upline and check left/right match (this is finding parentData)
+        User upline = userRepository.findByNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(), "ACTIVE");
         while (upline != null) {
             BigDecimal left = upline.getLeftVolume();
             BigDecimal right = upline.getRightVolume();
@@ -1078,18 +1081,18 @@ public class IndividualServiceImpl implements IndividualService {
                 IncomeType rule = rules.stream().findFirst().orElse(null);
                 if (rule != null) {
                     BigDecimal payout = calculateByRule(rule, matched);
-                    saveLedger(upline.getUserNodeId(), String.valueOf(IncomeTypeEnum.MATCHING_INCOME), payout, "Pair matched: " + matched);
+                    saveLedger(upline.getNodeId(), String.valueOf(IncomeTypeEnum.MATCHING_INCOME), payout, "Pair matched: " + matched);
 
 
                   // subtract matched volume
                     upline.setLeftVolume(left.subtract(matched));
                     upline.setRightVolume(right.subtract(matched));
-                    userMapRepository.save(upline);
+                    userRepository.save(upline);
                 }
             }
 //            upline = upline.getSponsor();
-            String parentId = userRepository.fetchParentNodeBasedOnUserNodeId(upline.getUserNodeId(),"ACTIVE");
-            upline = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(parentId, "ACTIVE");
+//            String parentId = userRepository.fetchParentNodeBasedOnUserNodeId(upline.getUserNodeId(),"ACTIVE");
+            upline = userRepository.findByNodeIdAndActiveStateCodeFkId(upline.getParentNodeId(), "ACTIVE");
         }
     }
 
@@ -1536,6 +1539,7 @@ public class IndividualServiceImpl implements IndividualService {
         Util.setCommonDefaultAttributes(individualRankReward);
 
         individualRankRewardRepository.save(individualRankReward);
+        UserMap userMap = new UserMap();
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

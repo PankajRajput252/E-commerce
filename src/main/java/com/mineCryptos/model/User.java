@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,6 +68,21 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     @Column(name = "PROFILE_IMAGE_URL",length = 1000)
     private String profileImageUrl; // <-- store S3 URL here
+
+    // For binary system
+    @Column(name = "LEFT_VOLUME")
+    private BigDecimal leftVolume = BigDecimal.ZERO;
+
+    @Column(name = "RIGHT_VOLUME")
+    private BigDecimal rightVolume = BigDecimal.ZERO;
+
+    // investment for mining
+    @Column(name = "MINING_INVESTMENT")
+    private BigDecimal miningInvestment = BigDecimal.ZERO;
+
+    // node share percentage (0-100)
+    @Column(name = "NODE_SHARE_PERCENT")
+    private BigDecimal nodeSharePercent = BigDecimal.ZERO;
 
 
 
@@ -279,5 +295,45 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     public void setImageId(String imageId) {
         this.imageId = imageId;
+    }
+
+    public BigDecimal getLeftVolume() {
+        return leftVolume;
+    }
+
+    public void setLeftVolume(BigDecimal leftVolume) {
+        this.leftVolume = leftVolume;
+    }
+
+    public BigDecimal getRightVolume() {
+        return rightVolume;
+    }
+
+    public void setRightVolume(BigDecimal rightVolume) {
+        this.rightVolume = rightVolume;
+    }
+
+    public BigDecimal getMiningInvestment() {
+        return miningInvestment;
+    }
+
+    public void setMiningInvestment(BigDecimal miningInvestment) {
+        this.miningInvestment = miningInvestment;
+    }
+
+    public BigDecimal getNodeSharePercent() {
+        return nodeSharePercent;
+    }
+
+    public void setNodeSharePercent(BigDecimal nodeSharePercent) {
+        this.nodeSharePercent = nodeSharePercent;
+    }
+
+    public boolean isUserIsAdmin() {
+        return isUserIsAdmin;
+    }
+
+    public void setUserIsAdmin(boolean userIsAdmin) {
+        isUserIsAdmin = userIsAdmin;
     }
 }
