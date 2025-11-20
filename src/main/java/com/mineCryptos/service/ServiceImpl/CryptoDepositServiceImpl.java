@@ -72,8 +72,8 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         payload.put("pay_currency", "bnbbsc");
         payload.put("ipn_callback_url", "http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/deposit/webhook");
 
-        payload.put("is_fixed_rate", true);        // locks exact amount in BNB
-        payload.put("is_fee_paid_by_user", true);  // user pays transaction fee
+//        payload.put("is_fixed_rate", true);        // locks exact amount in BNB
+//        payload.put("is_fee_paid_by_user", true);  // user pays transaction fee
 //        payload.put("strict_amount", true);
 
         HttpHeaders headers = new HttpHeaders();
