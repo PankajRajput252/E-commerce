@@ -1114,9 +1114,10 @@ public class IndividualServiceImpl implements IndividualService {
 
     private boolean qualifiesForClub(User user) {
        // sample qualification: rank GOLD or above
-        UserMap userMap = userMapRepository.findByUserNodeIdAndActiveStateCodeFkId(user.getNodeId(), "ACTIVE");
-        if (userMap.getRank() == null) return false;
-        return Arrays.asList("GOLD", "DIAMOND", "PLATINUM").contains(userMap.getRank().toUpperCase());
+//        User user = userRepository.findByNodeIdAndActiveStateCodeFkId(user.getNodeId(), "ACTIVE");
+        IndividualRankReward individualRankReward=individualRankRewardRepository.findByUserNodeIdAndActiveStateCodeFkId(user.getNodeId(), "ACTIVE");
+        if (individualRankReward.getRankCodeFkId() == null) return false;
+        return Arrays.asList("GOLD", "DIAMOND", "PLATINUM").contains(individualRankReward.getRankCodeFkId().toUpperCase());
     }
 
 
@@ -1159,15 +1160,15 @@ public class IndividualServiceImpl implements IndividualService {
 
     // Mining profit sharing: proportional to investment  this is user-based
     public void distributeMiningProfit(BigDecimal totalProfit) {
-        List<UserMap> userMaps = userMapRepository.findAll();
-        BigDecimal totalInvestment = userMaps.stream()
-                .map(UserMap::getMiningInvestment)
+        List<User> users = userRepository.findAll();
+        BigDecimal totalInvestment = users.stream()
+                .map(User::getMiningInvestment)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (totalInvestment.compareTo(BigDecimal.ZERO) == 0) return;
-        for (UserMap u : userMaps) {
+        for (User u : users) {
             BigDecimal share = u.getMiningInvestment().divide(totalInvestment, 8, BigDecimal.ROUND_HALF_UP)
                     .multiply(totalProfit).setScale(2, BigDecimal.ROUND_HALF_UP);
-            saveLedger(u.getUserNodeId(), String.valueOf(IncomeTypeEnum.MINING_PROFIT_SHARING), share, "Mining profit share");
+            saveLedger(u.getNodeId(), String.valueOf(IncomeTypeEnum.MINING_PROFIT_SHARING), share, "Mining profit share");
         }
     }
 
@@ -1195,11 +1196,11 @@ public class IndividualServiceImpl implements IndividualService {
 
     // Node business sharing: based on nodeSharePercent  based on user
     public void distributeNodePool(BigDecimal totalNodePool) {
-        List<UserMap> userMaps = userMapRepository.findAll();
-        for (UserMap u : userMaps) {
+        List<User> users = userRepository.findAll();
+        for (User u : users) {
             if (u.getNodeSharePercent().compareTo(BigDecimal.ZERO) <= 0) continue;
             BigDecimal share = totalNodePool.multiply(u.getNodeSharePercent()).divide(BigDecimal.valueOf(100));
-            saveLedger(u.getUserNodeId(), String.valueOf(IncomeTypeEnum.NODE_BUSINESS_SHARING), share, "Node pool share");
+            saveLedger(u.getNodeId(), String.valueOf(IncomeTypeEnum.NODE_BUSINESS_SHARING), share, "Node pool share");
         }
     }
 

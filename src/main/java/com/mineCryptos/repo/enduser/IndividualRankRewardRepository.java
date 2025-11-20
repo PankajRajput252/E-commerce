@@ -18,4 +18,6 @@ public interface IndividualRankRewardRepository extends JpaRepository<Individual
     int countByActiveStateCodeFkIdAndUserNodeId(String filterBy, String inputFkId);
 
     int countByActiveStateCodeFkId(String filterBy);
+
+    IndividualRankReward findByUserNodeIdAndActiveStateCodeFkId(String nodeId, String active);
 }
