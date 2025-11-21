@@ -100,31 +100,68 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
 
 
-    public void processWebhook(Map<String, Object> body, String sig) {
+//    public void processWebhook(Map<String, Object> body, String sig) {
+//
+//        String json = new Gson().toJson(body);
+//        System.out.println("###################json: " + json);
+//        String expected = hmacSha512(json, ipnSecret);
+//        System.out.println("###################expected: " + expected);
+//        if (!expected.equalsIgnoreCase(sig)) {
+//            throw new RuntimeException("Invalid NOWPayments Signature");
+//        }
+//
+//        String paymentId = body.get("payment_id").toString();
+//        String status = body.get("payment_status").toString();
+//        System.out.println("###################body: " + body);
+//
+//        // Correct TX HASH
+//        String txHash = body.get("payin_hash") != null ? body.get("payin_hash").toString() : null;
+//
+//        if ("finished".equalsIgnoreCase(status)
+//                || "confirmed".equalsIgnoreCase(status)
+//                || "completed".equalsIgnoreCase(status)) {
+//            confirmDeposit(paymentId, txHash);
+//        }
+//    }
 
-        String json = new Gson().toJson(body);
-        System.out.println("###################json: " + json);
-        String expected = hmacSha512(json, ipnSecret);
-        System.out.println("###################expected: " + expected);
-        if (!expected.equalsIgnoreCase(sig)) {
+
+    public void processWebhook(String rawBody, String sig) {
+
+        System.out.println("RAW BODY: " + rawBody);
+
+        String expected = hmacSha512(rawBody, ipnSecret);
+
+        System.out.println("EXPECTED: " + expected);
+        System.out.println("RECEIVED: " + sig);
+
+        if (!expected.equals(sig)) {
             throw new RuntimeException("Invalid NOWPayments Signature");
         }
 
-        String paymentId = body.get("payment_id").toString();
-        String status = body.get("payment_status").toString();
-        System.out.println("###################body: " + body);
+        Map<String, Object> body = new Gson().fromJson(rawBody, Map.class);
 
-        // Correct TX HASH
-        String txHash = body.get("payin_hash") != null ? body.get("payin_hash").toString() : null;
+        String paymentId = body.get("payment_id").toString();
+
+        // Support both cases
+        String status = body.containsKey("payment_status")
+                ? body.get("payment_status").toString()
+                : body.get("status").toString();
+
+        String txHash = body.get("payin_hash") != null
+                ? body.get("payin_hash").toString()
+                : null;
+
+        System.out.println("Payment ID: " + paymentId);
+        System.out.println("Status: " + status);
+        System.out.println("TxHash: " + txHash);
 
         if ("finished".equalsIgnoreCase(status)
                 || "confirmed".equalsIgnoreCase(status)
                 || "completed".equalsIgnoreCase(status)) {
+
             confirmDeposit(paymentId, txHash);
         }
     }
-
-
 
 
     private String hmacSha512(String data, String secret) {

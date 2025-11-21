@@ -10,11 +10,13 @@ import java.util.Map;
 public interface CryptoDepositService {
     Map<String, Object> createDeposit(DepositRequest request);
 
-    void processWebhook(Map<String, Object> payload, String signature);
+//    void processWebhook(Map<String, Object> payload, String signature);
 
     FinalResponse getHistory(String userId);
 
     FinalResponse createBtcWithdrawal(String userNodeId, BtcWithdrawRequest request);
 
     void processWebhookRaw(String rawBody, String signature);
+
+    void processWebhook(String rawBody, String signature);
 }

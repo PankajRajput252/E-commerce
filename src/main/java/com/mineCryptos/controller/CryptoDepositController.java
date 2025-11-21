@@ -8,6 +8,7 @@ import com.mineCryptos.model.entitities.enduser.DepositRequest;
 import com.mineCryptos.model.entitities.enduser.WithdrawalRequest;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +29,13 @@ public class CryptoDepositController {
     public ResponseEntity<?> createDeposit(@RequestBody DepositRequest request) {
         return ResponseEntity.ok(cryptoDepositService.createDeposit(request));
     }
-
-    @PostMapping("/deposit/webhook")
-    public ResponseEntity<?> webhook(@RequestBody Map<String, Object> payload,
-                                     @RequestHeader("x-nowpayments-sig") String signature) {
-        cryptoDepositService.processWebhook(payload, signature);
-        return ResponseEntity.ok("OK");
-    }
+//
+//    @PostMapping("/deposit/webhook")
+//    public ResponseEntity<?> webhook(@RequestBody Map<String, Object> payload,
+//                                     @RequestHeader("x-nowpayments-sig") String signature) {
+//        cryptoDepositService.processWebhook(payload, signature);
+//        return ResponseEntity.ok("OK");
+//    }
 
     @GetMapping("/deposit/history/{userId}")
     public FinalResponse getHistory(@PathVariable String userId) {
@@ -62,6 +63,22 @@ public class CryptoDepositController {
 //        cryptoDepositService.processWebhookRaw(rawBody, signature);
 //        return ResponseEntity.ok("OK");
 //    }
+
+
+    @PostMapping("/deposit/webhook")
+    public ResponseEntity<String> webhook(
+            @RequestBody String rawBody,
+            @RequestHeader("x-nowpayments-sig") String signature) {
+
+        try {
+            cryptoDepositService.processWebhook(rawBody, signature);
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ERROR");
+        }
+    }
+
 
 
 
