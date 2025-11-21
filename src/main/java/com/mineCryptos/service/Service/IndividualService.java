@@ -115,4 +115,12 @@ public interface IndividualService {
     FinalResponse deleteCryptoDeposit(Integer id);
 
     public FinalResponse getHierarchy(String loggedInNodeId);
+
+    FinalResponse deleteUserWalletAddress(Integer id);
+
+    FinalResponse updateUserWalletAddress(Integer id, UserWalletAddress userWalletAddress);
+
+    FinalResponse addUserWalletAddress(UserWalletAddress userWalletAddress);
+
+    FinalResponse getUserWalletAddress(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
 }

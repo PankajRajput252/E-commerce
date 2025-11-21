@@ -115,7 +115,9 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         // Correct TX HASH
         String txHash = body.get("payin_hash") != null ? body.get("payin_hash").toString() : null;
 
-        if ("finished".equalsIgnoreCase(status)) {
+        if ("finished".equalsIgnoreCase(status)
+                || "confirmed".equalsIgnoreCase(status)
+                || "completed".equalsIgnoreCase(status)) {
             confirmDeposit(paymentId, txHash);
         }
     }
@@ -236,6 +238,37 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 //
 //        withdrawalRepository.save(req);
 //    }
+
+    public void processWebhookRaw(String rawBody, String sig) {
+
+        String expected = hmacSha512(rawBody, ipnSecret);
+
+        System.out.println("SIG FROM NOWPAY: " + sig);
+        System.out.println("SIG GENERATED  : " + expected);
+
+        if (sig == null || sig.equals("test")) {
+            System.out.println("⚠ Skipping signature check for local testing");
+        } else if (!expected.equals(sig)) {
+            System.out.println("❌ Signature mismatch");
+            return;
+        }
+
+
+        Map<String, Object> body = new Gson().fromJson(rawBody, Map.class);
+
+        String paymentId = body.get("payment_id").toString();
+        String status = body.get("payment_status").toString();
+
+        String txHash = body.get("payin_hash") != null ? body.get("payin_hash").toString() : null;
+
+        if ("finished".equalsIgnoreCase(status)
+                || "confirmed".equalsIgnoreCase(status)
+                || "completed".equalsIgnoreCase(status)) {
+
+            confirmDeposit(paymentId, txHash);
+        }
+    }
+
 
 
 }

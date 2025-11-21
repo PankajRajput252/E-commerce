@@ -15,4 +15,6 @@ public interface CryptoDepositService {
     FinalResponse getHistory(String userId);
 
     FinalResponse createBtcWithdrawal(String userNodeId, BtcWithdrawRequest request);
+
+    void processWebhookRaw(String rawBody, String signature);
 }

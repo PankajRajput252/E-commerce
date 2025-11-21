@@ -50,4 +50,19 @@ public class CryptoDepositController {
        return cryptoDepositService.createBtcWithdrawal(userNodeId, request);
     }
 
+
+//    @PostMapping("/deposit/webhook")
+//    public ResponseEntity<?> webhook(
+//            @RequestBody String rawBody,
+//            @RequestHeader(value = "x-nowpayments-sig", required = false) String signature) {
+//
+//        System.out.println("RAW BODY: " + rawBody);
+//        System.out.println("SIG: " + signature);
+//
+//        cryptoDepositService.processWebhookRaw(rawBody, signature);
+//        return ResponseEntity.ok("OK");
+//    }
+
+
+
 }

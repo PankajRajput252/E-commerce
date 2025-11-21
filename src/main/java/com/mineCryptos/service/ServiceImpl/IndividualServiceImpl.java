@@ -60,6 +60,8 @@ public class IndividualServiceImpl implements IndividualService {
     private IndividualRankRewardRepository individualRankRewardRepository;
     @Autowired
     private CryptoDepositRepository cryptoDepositRepository;
+    @Autowired
+    private UserWalletAddressRepository userWalletAddressRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1702,5 +1704,91 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
 
+    @Override
+    public FinalResponse deleteUserWalletAddress(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        userWalletAddressRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateUserWalletAddress(Integer id, UserWalletAddress userWalletAddress) {
+        FinalResponse finalResponse = new FinalResponse();
+        userWalletAddressRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(userWalletAddress.getUserNodeId());
+                    existing.setWalletType(userWalletAddress.getWalletType());
+                    existing.setAddress(userWalletAddress.getAddress());
+                    existing.setIsVerified(userWalletAddress.getIsVerified());
+                    existing.setIsDefault(userWalletAddress.getIsDefault());
+                    existing.setOtpHash(userWalletAddress.getOtpHash());
+                    existing.setOtpExpiresAt(userWalletAddress.getOtpExpiresAt());
+                    existing.setUpdatedAt(userWalletAddress.getUpdatedAt());
+                    return userWalletAddressRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" UserWalletAddress not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse addUserWalletAddress(UserWalletAddress userWalletAddress) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        userWalletAddress.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(userWalletAddress.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(userWalletAddress);
+
+        userWalletAddressRepository.save(userWalletAddress);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getUserWalletAddress(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<UserWalletAddress> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<UserWalletAddress> userWalletAddressList = populateUserWalletAddressView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateUserWalletAddressCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(userWalletAddressList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateUserWalletAddressCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = userWalletAddressRepository.countByUserWalletAddressPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = userWalletAddressRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = userWalletAddressRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<UserWalletAddress> populateUserWalletAddressView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<UserWalletAddress> userWalletAddressList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            UserWalletAddress userWalletAddress = userWalletAddressRepository.findByUserWalletAddressPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            userWalletAddressList.add(userWalletAddress);
+        } else if (Util.isDefined(inputFkId)) {
+            userWalletAddressList = userWalletAddressRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            userWalletAddressList = userWalletAddressRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return userWalletAddressList;
+    }
 
 }
