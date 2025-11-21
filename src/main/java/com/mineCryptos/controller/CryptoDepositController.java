@@ -70,14 +70,19 @@ public class CryptoDepositController {
             @RequestBody String rawBody,
             @RequestHeader("x-nowpayments-sig") String signature) {
 
+        System.out.println("======== NOWPAYMENTS WEBHOOK ========");
+        System.out.println("Signature header: " + signature);
+        System.out.println("Raw body: " + rawBody);
+
         try {
             cryptoDepositService.processWebhook(rawBody, signature);
             return ResponseEntity.ok("OK");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ERROR");
+            return ResponseEntity.status(400).body("ERROR");
         }
     }
+
 
 
 

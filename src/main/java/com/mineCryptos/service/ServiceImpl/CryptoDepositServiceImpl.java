@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import com.google.gson.Gson;
@@ -167,12 +168,12 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     private String hmacSha512(String data, String secret) {
         try {
             Mac mac = Mac.getInstance("HmacSHA512");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes("UTF-8"), "HmacSHA512");
-            mac.init(secretKeySpec);
-            byte[] hmacData = mac.doFinal(data.getBytes("UTF-8"));
-            return Base64.getEncoder().encodeToString(hmacData);
+            SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+            mac.init(key);
+            byte[] rawHmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(rawHmac);
         } catch (Exception e) {
-            throw new RuntimeException("Error generating HMAC-SHA512 signature", e);
+            throw new RuntimeException("HMAC error", e);
         }
     }
 
