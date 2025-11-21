@@ -103,8 +103,9 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
     public void processWebhook(Map<String, Object> body, String sig) {
 
         String json = new Gson().toJson(body);
+        System.out.println("###################json: " + json);
         String expected = hmacSha512(json, ipnSecret);
-
+        System.out.println("###################expected: " + expected);
         if (!expected.equalsIgnoreCase(sig)) {
             throw new RuntimeException("Invalid NOWPayments Signature");
         }
