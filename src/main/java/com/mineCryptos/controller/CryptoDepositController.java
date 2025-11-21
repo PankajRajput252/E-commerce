@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class CryptoDepositController {
+    private static final Logger logger = LoggerFactory.getLogger(CryptoDepositController.class);
+
 
     @Autowired
     private CryptoDepositService cryptoDepositService;
@@ -70,9 +74,9 @@ public class CryptoDepositController {
             @RequestBody String rawBody,
             @RequestHeader("x-nowpayments-sig") String signature) {
 
-        System.out.println("======== NOWPAYMENTS WEBHOOK ========");
-        System.out.println("Signature header: " + signature);
-        System.out.println("Raw body: " + rawBody);
+        logger.info("======== NOWPAYMENTS WEBHOOK RECEIVED ========");
+        logger.info("Signature header: {}", signature);
+        logger.info("Raw body: {}", rawBody);
 
         try {
             cryptoDepositService.processWebhook(rawBody, signature);

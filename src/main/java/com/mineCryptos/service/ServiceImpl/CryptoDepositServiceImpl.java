@@ -28,7 +28,8 @@ import java.util.*;
 
 import com.google.gson.Gson;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -37,6 +38,8 @@ import javax.transaction.Transactional;
 
 @Service
 public class CryptoDepositServiceImpl implements CryptoDepositService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CryptoDepositServiceImpl.class);
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -128,12 +131,13 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
     public void processWebhook(String rawBody, String sig) {
 
-        System.out.println("RAW BODY: " + rawBody);
+
+        logger.info("======== RAW BODY: ========");
 
         String expected = hmacSha512(rawBody, ipnSecret);
 
-        System.out.println("EXPECTED: " + expected);
-        System.out.println("RECEIVED: " + sig);
+        logger.info("======== RAW BODY: ========"+ expected);
+        logger.info("======== RAW BODY: ========"+ sig);
 
         if (!expected.equals(sig)) {
             throw new RuntimeException("Invalid NOWPayments Signature");
@@ -152,9 +156,9 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
                 ? body.get("payin_hash").toString()
                 : null;
 
-        System.out.println("Payment ID: " + paymentId);
-        System.out.println("Status: " + status);
-        System.out.println("TxHash: " + txHash);
+        logger.info("Payment ID: " + paymentId);
+        logger.info("Status: " + status);
+        logger.info("TxHash: " + txHash);
 
         if ("finished".equalsIgnoreCase(status)
                 || "confirmed".equalsIgnoreCase(status)
