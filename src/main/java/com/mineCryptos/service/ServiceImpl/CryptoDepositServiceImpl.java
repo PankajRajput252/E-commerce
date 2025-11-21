@@ -111,6 +111,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
         String paymentId = body.get("payment_id").toString();
         String status = body.get("payment_status").toString();
+        System.out.println("###################body: " + body);
 
         // Correct TX HASH
         String txHash = body.get("payin_hash") != null ? body.get("payin_hash").toString() : null;
