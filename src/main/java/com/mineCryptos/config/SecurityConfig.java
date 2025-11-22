@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception{
 
         http.csrf()  .ignoringAntMatchers("/api/deposit/webhook") // Explicitly ignore webhook
-                .and()
+                .disable()
                 .authorizeHttpRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/deposit/webhook").permitAll()
