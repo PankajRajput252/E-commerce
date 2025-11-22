@@ -38,10 +38,18 @@ public class UserServiceImpl implements UserService {
             return finalResponse;
         }
 
-        int count = userRepository.countByUserPkIdAndActiveStateCodeFkId(user.getUserPkId(),  "ACTIVE");
+        int count = userRepository.countByEmailAndActiveStateCodeFkId(user.getEmail(),  "ACTIVE");
         if (count>0) {
-            Util.setMessage(finalResponse, "100", "Error: This User already exists.");
+            Util.setMessage(finalResponse, "100", "Error: This User Email already exists.");
             return finalResponse;
+        }
+         count = userRepository.countByMobileAndActiveStateCodeFkId(user.getEmail(),  "ACTIVE");
+        if (count>0) {
+            Util.setMessage(finalResponse, "100", "Error: This User Phone already exists.");
+            return finalResponse;
+        }
+        if(user.getReferralCode() == null || user.getReferralCode().trim().isEmpty()){
+            user.setReferralCode("NODE24770625");
         }
 
         Util.setCommonDefaultAttributes(user);
