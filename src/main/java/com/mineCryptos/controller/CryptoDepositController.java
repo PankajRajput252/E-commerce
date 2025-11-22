@@ -79,6 +79,12 @@ public class CryptoDepositController {
         logger.info("Signature header: {}", signature);
         logger.info("Raw body: {}", rawBody);
 
+        // Check if rawBody is null
+        if (rawBody == null) {
+            logger.error("Raw body is null");
+            return ResponseEntity.badRequest().body("Raw body is required");
+        }
+
         try {
             Map<String, Object> payload = new Gson().fromJson(rawBody, Map.class);
             cryptoDepositService.processWebhook(payload, signature, rawBody);

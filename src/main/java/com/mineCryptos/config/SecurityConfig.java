@@ -39,7 +39,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception{
 
-        http.csrf().disable()
+        http.csrf()  .ignoringAntMatchers("/api/deposit/webhook") // Explicitly ignore webhook
+                .and()
                 .authorizeHttpRequests()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/deposit/webhook").permitAll()
@@ -79,9 +80,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration corsConfiguration=new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedOriginPattern("*");
+        corsConfiguration.addAllowedHeader("*"); // Allow ALL headers
         corsConfiguration.addAllowedHeader("Authorization");
         corsConfiguration.addAllowedHeader("Content-Type");
         corsConfiguration.addAllowedHeader("Accept");
+        corsConfiguration.addAllowedHeader("x-nowpayments-sig"); // Add this
+        corsConfiguration.addAllowedHeader("user-agent"); // Add this
         corsConfiguration.addAllowedMethod("GET");
         corsConfiguration.addAllowedMethod("POST");
         corsConfiguration.addAllowedMethod("PUT");
