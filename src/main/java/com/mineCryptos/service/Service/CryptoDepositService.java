@@ -16,7 +16,9 @@ public interface CryptoDepositService {
 
     FinalResponse createBtcWithdrawal(String userNodeId, BtcWithdrawRequest request);
 
+    void processWebhook(Map<String, Object> payload);
+
 //    void processWebhookRaw(String rawBody, String signature);
 
-     void processWebhook(Map<String, Object> body, String sig, String rawBody);
+//     void processWebhook(Map<String, Object> body, String sig, String rawBody);
 }

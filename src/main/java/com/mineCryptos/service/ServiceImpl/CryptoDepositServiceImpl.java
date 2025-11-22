@@ -308,83 +308,117 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 //            confirmDeposit(paymentId, txHash);
 //        }
 //    }
-
-   @Override
-    public void processWebhook(Map<String, Object> body, String sig, String rawBody) {
-
-        // Use the sorted JSON approach instead of raw body
-        String expected = hmacSha512Sorted(body, ipnSecret);
-
-        logger.info("Expected signature: {}", expected);
-        logger.info("Received signature: {}", sig);
-
+//
+//   @Override
+//    public void processWebhook(Map<String, Object> body, String sig, String rawBody) {
+//
+//        // Use the sorted JSON approach instead of raw body
+//        String expected = hmacSha512Sorted(body, ipnSecret);
+//
+//        logger.info("Expected signature: {}", expected);
+//        logger.info("Received signature: {}", sig);
+//
 //        if (sig == null || !expected.equalsIgnoreCase(sig)) {
 //            logger.error("Signature mismatch! Expected: {}, Received: {}", expected, sig);
 //            throw new RuntimeException("Invalid NOWPayments Signature");
 //        }
+//
+//        String paymentId = body.get("payment_id").toString();
+//
+//        // Support both cases
+//        String status = body.containsKey("payment_status")
+//                ? body.get("payment_status").toString()
+//                : body.get("status").toString();
+//
+//        String txHash = body.get("payin_hash") != null
+//                ? body.get("payin_hash").toString()
+//                : null;
+//
+//        logger.info("Payment ID: " + paymentId);
+//        logger.info("Status: " + status);
+//        logger.info("TxHash: " + txHash);
+//
+//        if ("finished".equalsIgnoreCase(status)
+//                || "confirmed".equalsIgnoreCase(status)
+//                || "completed".equalsIgnoreCase(status)) {
+//
+//            confirmDeposit(paymentId, txHash);
+//        }
+//    }
+//
+//    private String hmacSha512Sorted(Map<String, Object> data, String secret) {
+//        try {
+//            // Sort the map keys and create sorted JSON
+//            String sortedJson = createSortedJson(data);
+//            logger.info("Sorted JSON for HMAC: {}", sortedJson);
+//
+//            Mac mac = Mac.getInstance("HmacSHA512");
+//            SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+//            mac.init(key);
+//            byte[] rawHmac = mac.doFinal(sortedJson.getBytes(StandardCharsets.UTF_8));
+//
+//            // Convert to HEX (not Base64)
+//            return bytesToHex(rawHmac);
+//        } catch (Exception e) {
+//            throw new RuntimeException("HMAC error", e);
+//        }
+//    }
+//
+//    private String createSortedJson(Map<String, Object> data) {
+//        try {
+//            // Use Gson to create sorted JSON
+//            Gson gson = new GsonBuilder().create();
+//            Map<String, Object> sortedMap = new TreeMap<>(data);
+//            return gson.toJson(sortedMap);
+//        } catch (Exception e) {
+//            throw new RuntimeException("JSON sorting error", e);
+//        }
+//    }
+//
+//    private String bytesToHex(byte[] bytes) {
+//        StringBuilder hexString = new StringBuilder();
+//        for (byte b : bytes) {
+//            String hex = Integer.toHexString(0xff & b);
+//            if (hex.length() == 1) {
+//                hexString.append('0');
+//            }
+//            hexString.append(hex);
+//        }
+//        return hexString.toString();
+//    }
 
-        String paymentId = body.get("payment_id").toString();
+    @Override
+    public void processWebhook(Map<String, Object> body) {
 
-        // Support both cases
-        String status = body.containsKey("payment_status")
-                ? body.get("payment_status").toString()
-                : body.get("status").toString();
+        logger.info("===== PROCESSING NOWPAYMENTS WEBHOOK =====");
 
-        String txHash = body.get("payin_hash") != null
-                ? body.get("payin_hash").toString()
-                : null;
+        String paymentId     = getString(body, "payment_id");
+        String status        = getString(body, "payment_status", "status"); // support both
+        String txHash        = getString(body, "payin_hash");
 
-        logger.info("Payment ID: " + paymentId);
-        logger.info("Status: " + status);
-        logger.info("TxHash: " + txHash);
+        logger.info("Payment ID : {}", paymentId);
+        logger.info("Status     : {}", status);
+        logger.info("Tx Hash    : {}", txHash);
 
+        // 🔥 Only confirm when fully paid
         if ("finished".equalsIgnoreCase(status)
                 || "confirmed".equalsIgnoreCase(status)
                 || "completed".equalsIgnoreCase(status)) {
 
+            logger.info("Payment finished. Confirming deposit...");
             confirmDeposit(paymentId, txHash);
+        } else {
+            logger.info("Payment not confirmed yet. Current status: {}", status);
         }
     }
 
-    private String hmacSha512Sorted(Map<String, Object> data, String secret) {
-        try {
-            // Sort the map keys and create sorted JSON
-            String sortedJson = createSortedJson(data);
-            logger.info("Sorted JSON for HMAC: {}", sortedJson);
-
-            Mac mac = Mac.getInstance("HmacSHA512");
-            SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-            mac.init(key);
-            byte[] rawHmac = mac.doFinal(sortedJson.getBytes(StandardCharsets.UTF_8));
-
-            // Convert to HEX (not Base64)
-            return bytesToHex(rawHmac);
-        } catch (Exception e) {
-            throw new RuntimeException("HMAC error", e);
-        }
-    }
-
-    private String createSortedJson(Map<String, Object> data) {
-        try {
-            // Use Gson to create sorted JSON
-            Gson gson = new GsonBuilder().create();
-            Map<String, Object> sortedMap = new TreeMap<>(data);
-            return gson.toJson(sortedMap);
-        } catch (Exception e) {
-            throw new RuntimeException("JSON sorting error", e);
-        }
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : bytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
+    private String getString(Map<String, Object> body, String... keys) {
+        for (String key : keys) {
+            if (body.containsKey(key) && body.get(key) != null) {
+                return String.valueOf(body.get(key));
             }
-            hexString.append(hex);
         }
-        return hexString.toString();
+        return null;
     }
 
 }
