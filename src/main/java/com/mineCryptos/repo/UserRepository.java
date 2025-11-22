@@ -70,4 +70,52 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     int countByEmailAndActiveStateCodeFkId(String email, String active);
 
     int countByMobileAndActiveStateCodeFkId(String email, String active);
+
+    @Query(value = " WITH RECURSIVE downline AS (  "+
+       " SELECT node_id  "+
+      "  FROM users  "+
+      "  WHERE parent_node_id = :userId  "+
+     "   UNION ALL "+
+     "   SELECT u.node_id  "+
+      "  FROM users u  "+
+       " INNER JOIN downline d ON u.parent_node_id = d.node_id "+
+   " )  "+
+  "  SELECT COUNT(*) FROM downline " , nativeQuery = true)
+    int countTotalTeam(@Param("userId") String userId);
+
+    @Query(value = " WITH RECURSIVE left_team AS (\n" +
+            "        SELECT node_id\n" +
+            "        FROM users\n" +
+            "        WHERE parent_node_id =:userId \n" +
+            "          AND position = 'Left'\n" +
+            "\n" +
+            "        UNION ALL\n" +
+            "\n" +
+            "        SELECT u.node_id\n" +
+            "        FROM users u\n" +
+            "        INNER JOIN left_team lt ON u.parent_node_id = lt.node_id\n" +
+            "    )\n" +
+            "    SELECT COUNT(*)\n" +
+            "    FROM users u\n" +
+            "    WHERE u.node_id IN (SELECT node_id FROM left_team)\n" +
+            "      AND u.user_status = 'ACTIVE'; ",nativeQuery = true)
+    int totalLeftTeam(@Param("userId") String userId);
+
+    @Query(value = " WITH RECURSIVE right_team AS (\n" +
+            "        SELECT node_id\n" +
+            "        FROM users\n" +
+            "        WHERE parent_node_id =:userId \n" +
+            "          AND position = 'Right'\n" +
+            "\n" +
+            "        UNION ALL\n" +
+            "\n" +
+            "        SELECT u.node_id\n" +
+            "        FROM users u\n" +
+            "        INNER JOIN right_team lt ON u.parent_node_id = lt.node_id\n" +
+            "    )\n" +
+            "    SELECT COUNT(*)\n" +
+            "    FROM users u\n" +
+            "    WHERE u.node_id IN (SELECT node_id FROM right_team)\n" +
+            "      AND u.user_status = 'ACTIVE'; ",nativeQuery = true)
+    int totalRightTeam(@Param("userId") String userId);
 }

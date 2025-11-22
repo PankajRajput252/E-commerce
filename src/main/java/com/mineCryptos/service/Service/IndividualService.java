@@ -123,4 +123,6 @@ public interface IndividualService {
     FinalResponse addUserWalletAddress(UserWalletAddress userWalletAddress);
 
     FinalResponse getUserWalletAddress(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse getBusinessDetails(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
 }

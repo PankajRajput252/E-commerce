@@ -1791,4 +1791,36 @@ public class IndividualServiceImpl implements IndividualService {
         return userWalletAddressList;
     }
 
+    @Override
+    public FinalResponse getBusinessDetails(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse finalResponse = new FinalResponse();
+        BusinessDetailsDTO dto = new BusinessDetailsDTO();
+
+        // TODO: Replace with actual database logic
+        int directTeam=userRepository.countByParentNodeIdAndActiveStateCodeFkId(inputPkId,"ACTIVE");
+        dto.setDirectTeam(directTeam);
+        int totalTeam= userRepository.countTotalTeam(inputPkId);
+        dto.setTotalTeam(totalTeam);
+        dto.setTeamBusiness(0);
+        int totalActiveTeamLeft= userRepository. totalLeftTeam(inputPkId);
+        dto.setTotalActiveTeamLeft(totalActiveTeamLeft);
+        int totalActiveTeamRight= userRepository. totalRightTeam(inputPkId);
+        dto.setTotalActiveTeamRight(totalActiveTeamRight);
+
+        dto.setStrongLegTeam(0);
+        dto.setWeakerLegTeam(0);
+
+        dto.setCarryForwardLeft(0);
+        dto.setCarryForwardRight(0);
+
+        dto.setCurrentMiningBusinessLeft(0);
+        dto.setCurrentMiningBusinessRight(0);
+
+        dto.setTotalMiningBusinessLeft(0);
+        dto.setTotalMiningBusinessRight(0);
+        finalResponse.setResponse(dto);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
 }
