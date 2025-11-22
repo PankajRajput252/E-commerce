@@ -1,6 +1,7 @@
 package com.mineCryptos.controller;
 
 
+import com.google.gson.Gson;
 import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
 import com.mineCryptos.model.entitities.enduser.CryptoDeposit;
@@ -72,20 +73,22 @@ public class CryptoDepositController {
     @PostMapping("/deposit/webhook")
     public ResponseEntity<String> webhook(
             @RequestBody String rawBody,
-            @RequestHeader("x-nowpayments-sig") String signature) {
+            @RequestHeader(value = "x-nowpayments-sig", required = false) String signature) {
 
         logger.info("======== NOWPAYMENTS WEBHOOK RECEIVED ========");
         logger.info("Signature header: {}", signature);
         logger.info("Raw body: {}", rawBody);
 
         try {
-            cryptoDepositService.processWebhook(rawBody, signature);
+            Map<String, Object> payload = new Gson().fromJson(rawBody, Map.class);
+            cryptoDepositService.processWebhook(payload, signature, rawBody);
             return ResponseEntity.ok("OK");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body("ERROR");
+            logger.error("Webhook error: ", e);
+            return ResponseEntity.status(400).body("Webhook failed");
         }
     }
+
 
 
 

@@ -18,5 +18,5 @@ public interface CryptoDepositService {
 
     void processWebhookRaw(String rawBody, String signature);
 
-    void processWebhook(String rawBody, String signature);
+     void processWebhook(Map<String, Object> body, String sig, String rawBody);
 }

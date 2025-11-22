@@ -129,21 +129,16 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 //    }
 
 
-    public void processWebhook(String rawBody, String sig) {
-
-
-        logger.info("======== RAW BODY: ========");
+    public void processWebhook(Map<String, Object> body, String sig, String rawBody) {
 
         String expected = hmacSha512(rawBody, ipnSecret);
 
-        logger.info("======== RAW BODY: ========"+ expected);
-        logger.info("======== RAW BODY: ========"+ sig);
+        logger.info("Expected signature: {}", expected);
+        logger.info("Received signature: {}", sig);
 
-        if (!expected.equals(sig)) {
+        if (sig == null || !expected.equalsIgnoreCase(sig)) {
             throw new RuntimeException("Invalid NOWPayments Signature");
         }
-
-        Map<String, Object> body = new Gson().fromJson(rawBody, Map.class);
 
         String paymentId = body.get("payment_id").toString();
 
