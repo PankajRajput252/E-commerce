@@ -125,4 +125,10 @@ public interface IndividualService {
     FinalResponse getUserWalletAddress(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
 
     FinalResponse getBusinessDetails(String inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    String generateAndSave(String email,String userNodeId);
+
+    FinalResponse sendOtp(String email, String otp);
+
+    FinalResponse getOtpForVerification(String userNodeId);
 }

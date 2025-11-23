@@ -16,6 +16,8 @@ import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +66,11 @@ public class IndividualServiceImpl implements IndividualService {
     private UserWalletAddressRepository userWalletAddressRepository;
     @Autowired
     private UserWalletRepository userWalletRepository;
+    @Autowired
+    private EmailOtpRepository emailOtpRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1830,6 +1837,44 @@ public class IndividualServiceImpl implements IndividualService {
         dto.setTotalMiningBusinessLeft(0);
         dto.setTotalMiningBusinessRight(0);
         finalResponse.setResponse(dto);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public String generateAndSave(String email,String userNodeId) {
+        String otp = Util.generateOtp();
+        EmailOtp entity = new EmailOtp();
+        entity.setEmail(email);
+        entity.setOtp(otp);
+        entity.setUserNodeId(userNodeId);
+        entity.setCreatedDatetime(String.valueOf(LocalDateTime.now()));
+        entity.setExpiryTime(System.currentTimeMillis() + 2 * 60 * 1000);
+        emailOtpRepository.save(entity);
+        return otp;
+    }
+
+
+    @Override
+    public FinalResponse sendOtp(String email, String otp) {
+        FinalResponse finalResponse=new FinalResponse();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your OTP for Verification");
+        message.setText("Your OTP is: " + otp + "\n\nValid for 2 minutes.");
+
+        mailSender.send(message);
+        finalResponse.setMessage("OTP sent to email");
+        finalResponse.setId(otp);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getOtpForVerification(String userNodeId){
+        FinalResponse finalResponse=new FinalResponse();
+        EmailOtp emailOtp= emailOtpRepository.findTopByUserNodeIdOrderByCreatedDatetimeDesc(userNodeId);
+        finalResponse.setResponse(emailOtp);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
