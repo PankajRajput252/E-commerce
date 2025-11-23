@@ -1,0 +1,23 @@
+package com.mineCryptos.controller;
+
+import com.mineCryptos.model.FinalResponse;
+import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
+import com.mineCryptos.service.Service.WithdrawalService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@CrossOrigin("*")
+@RestController
+@RequestMapping("/api/withdraw")
+public class WithdrawalController {
+
+    @Autowired
+    private WithdrawalService withdrawalService;
+
+    @PostMapping("/btc")
+    public FinalResponse withdrawBTC(
+            @RequestBody BtcWithdrawRequest request
+    ) {
+        return withdrawalService.createBtcWithdrawal(request);
+    }
+}
