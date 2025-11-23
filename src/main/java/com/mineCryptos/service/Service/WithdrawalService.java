@@ -4,5 +4,9 @@ import com.mineCryptos.model.FinalResponse;
 import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
 
 public interface WithdrawalService {
-    FinalResponse createBtcWithdrawal(BtcWithdrawRequest request);
+    FinalResponse createWithdrawal(BtcWithdrawRequest request);
+
+    FinalResponse approveWithdrawal(Integer withdrawalRequestPkId);
+
+    FinalResponse processWithdrawal(Integer id);
 }

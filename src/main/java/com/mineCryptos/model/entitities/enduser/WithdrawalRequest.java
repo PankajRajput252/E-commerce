@@ -18,13 +18,13 @@ public class WithdrawalRequest extends StandardFieldClass {
     private  Integer withdrawalRequestPkId;
 
     @Column(name = "CURRENCY_CODE")
-    private String currencyCode;            // MLM user who initiates withdrawal
+    private String currencyCode;            // (e.g., BNB, BTC, USDT, ETH)
 
     @Column(name = "USER_NODE_ID")
     private String userNodeId;
 
     @Column(name = "WALLET_TYPE")
-    private String walletType;          // e.g., "USDT.BEP20"
+    private String walletType;          // e.g.,  (e.g., BSC, BTC, ERC20, TRC20)  NETWORK
 
     @Column(name = "WALLET_ADDRESS")
     private String walletAddress;       // e.g., user's BEP20 address
@@ -41,6 +41,8 @@ public class WithdrawalRequest extends StandardFieldClass {
     @Column(name = "STATUS")
     private String status = "PENDING";  // PENDING, APPROVED, REJECTED
 
+    @Column(name = "TXN_ID")
+    private String txId;
 
     @Column(name = "UPDATED_AT_DATE_TIME")
     private LocalDateTime updatedAtDateTime;
@@ -147,5 +149,13 @@ public class WithdrawalRequest extends StandardFieldClass {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getTxId() {
+        return txId;
+    }
+
+    public void setTxId(String txId) {
+        this.txId = txId;
     }
 }
