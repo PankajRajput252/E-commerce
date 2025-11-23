@@ -62,6 +62,8 @@ public class IndividualServiceImpl implements IndividualService {
     private CryptoDepositRepository cryptoDepositRepository;
     @Autowired
     private UserWalletAddressRepository userWalletAddressRepository;
+    @Autowired
+    private UserWalletRepository userWalletRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -889,6 +891,15 @@ public class IndividualServiceImpl implements IndividualService {
         }
         else {
             withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        if(Util.isDefined(withdrawalRequestList)){
+            withdrawalRequestList.stream().map((withdrawalRequest)->{
+                String userName= userRepository.fetchUserNameBasedOnNodeId(withdrawalRequest.getUserNodeId(),"ACTIVE");
+                withdrawalRequest.setUserName(userName);
+                UserWallet userWallet=userWalletRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE",withdrawalRequest.getUserNodeId());
+                withdrawalRequest.setUserWallet(userWallet);
+                return withdrawalRequest;
+            }).collect(Collectors.toList());
         }
         return withdrawalRequestList;
     }

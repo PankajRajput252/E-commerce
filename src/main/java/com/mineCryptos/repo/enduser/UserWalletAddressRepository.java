@@ -12,6 +12,7 @@ public interface UserWalletAddressRepository extends JpaRepository<UserWalletAdd
     UserWalletAddress findByUserWalletAddressPkIdAndActiveStateCodeFkId(Integer inputPkId, String filterBy);
 
     List<UserWalletAddress> findByActiveStateCodeFkIdAndUserNodeId(String filterBy, String inputFkId, Pageable pageable);
+    UserWalletAddress findByActiveStateCodeFkIdAndUserNodeId(String filterBy, String inputFkId);
 
     int countByUserWalletAddressPkIdAndActiveStateCodeFkId(Integer inputPkId, String filterBy);
 

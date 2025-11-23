@@ -53,6 +53,11 @@ public class WithdrawalRequest extends StandardFieldClass {
     @Column(name = "OTP")
     private String otp;
 
+    @Transient
+    private String userName;
+    @Transient
+    private UserWallet userWallet;
+
     public Integer getWithdrawalRequestPkId() {
         return withdrawalRequestPkId;
     }
@@ -157,5 +162,21 @@ public class WithdrawalRequest extends StandardFieldClass {
 
     public void setTxId(String txId) {
         this.txId = txId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public UserWallet getUserWallet() {
+        return userWallet;
+    }
+
+    public void setUserWallet(UserWallet userWallet) {
+        this.userWallet = userWallet;
     }
 }
