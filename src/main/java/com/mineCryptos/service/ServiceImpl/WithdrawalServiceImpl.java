@@ -142,6 +142,20 @@ public class WithdrawalServiceImpl implements WithdrawalService {
         }
     }
 
+    @Override
+    public FinalResponse reject(Integer withdrawalRequestPkId) {
+        FinalResponse finalResponse = new FinalResponse();
+        WithdrawalRequest req = withdrawalRequestRepository.findById(withdrawalRequestPkId)
+                .map(existing -> {
+                    existing.setStatus("REJECTED");
+                    return withdrawalRequestRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Withdrawal Request  not found"));
+
+        refund(req);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
     @Transactional
     public void refund(WithdrawalRequest req) {
         UserWallet wallet = userWalletRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE", req.getUserNodeId());

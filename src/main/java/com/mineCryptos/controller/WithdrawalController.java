@@ -35,4 +35,9 @@ public class WithdrawalController {
     public FinalResponse process(@PathVariable Integer withdrawalRequestPkId) {
         return withdrawalService.processWithdrawal(withdrawalRequestPkId);
     }
+
+    @PutMapping("/reject/{withdrawalRequestPkId}")
+    public FinalResponse reject(@PathVariable Integer withdrawalRequestPkId) {
+        return withdrawalService.reject(withdrawalRequestPkId);
+    }
 }

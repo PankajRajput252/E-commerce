@@ -9,4 +9,6 @@ public interface WithdrawalService {
     FinalResponse approveWithdrawal(Integer withdrawalRequestPkId);
 
     FinalResponse processWithdrawal(Integer id);
+
+    FinalResponse reject(Integer withdrawalRequestPkId);
 }
