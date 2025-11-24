@@ -878,7 +878,7 @@ public class IndividualServiceImpl implements IndividualService {
             count = withdrawalRequestRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId);
         }
         else {
-            count = withdrawalRequestRepository.countByActiveStateCodeFkId(filterBy);
+            count = withdrawalRequestRepository.countByActiveStateCodeFkIdAndStatus(filterBy,"PENDING");
         }
 
         return count;
@@ -897,7 +897,7 @@ public class IndividualServiceImpl implements IndividualService {
             withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId, pageable);
         }
         else {
-            withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkId(filterBy, pageable);
+            withdrawalRequestList = withdrawalRequestRepository.findByActiveStateCodeFkIdAndStatus(filterBy,"PENDING", pageable);
         }
         if(Util.isDefined(withdrawalRequestList)){
             withdrawalRequestList.stream().map((withdrawalRequest)->{

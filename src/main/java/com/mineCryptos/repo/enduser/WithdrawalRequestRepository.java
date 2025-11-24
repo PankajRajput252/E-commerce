@@ -18,4 +18,8 @@ public interface WithdrawalRequestRepository extends JpaRepository<WithdrawalReq
     List<WithdrawalRequest> findByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId, Pageable pageable);
 
     int countByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId);
+
+    List<WithdrawalRequest> findByActiveStateCodeFkIdAndStatus(String filterBy, String pending, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndStatus(String filterBy, String pending);
 }
