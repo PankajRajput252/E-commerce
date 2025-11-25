@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -312,25 +313,26 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
-    public FinalResponse addMiningPackage(MiningPackage miningPackage) {
+    @Transactional
+    public FinalResponse addMiningPackage(MiningPackage miningPackage) throws FinalException {
         FinalResponse finalResponse=new FinalResponse();
 //        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
-            if (miningPackage.getPackageAmount().compareTo(new BigDecimal("100")) < 0 ||
-                    miningPackage.getPackageAmount().remainder(new BigDecimal("10")).compareTo(BigDecimal.ZERO) != 0) {
-            throw new IllegalArgumentException("Amount must be >= 100 and in multiples of 10");
+
+        double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+        double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+
+        if ((currentCapitalAmount + currentNodeAmount) !=miningPackage.getPackageAmount().doubleValue()) {
+            throw new FinalException(" Please purchase subscription plan.");
         }
 
-        // 2. Validate transaction password and OTP
-        // (Assume validateTransactionPassword() and validateOtp() are implemented)
-//        if (!validateTransactionPassword(request.getUserId(), request.getTransactionPassword())) {
-//            throw new IllegalArgumentException("Invalid transaction password");
-//        }
-//
-//        if (!validateOtp(request.getUserId(), request.getOtp())) {
-//            throw new IllegalArgumentException("Invalid OTP");
-//        }
-
         miningPackageRepository.save(miningPackage);
+        BigDecimal halfAmount = miningPackage.getPackageAmount().divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        // deducting halfamount from capital and half from Node
+        double totalCapitalAmount=currentCapitalAmount-halfAmount.doubleValue();
+        walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,miningPackage.getUserNodeCode());
+
+        double totalNodeAmount=currentNodeAmount-halfAmount.doubleValue();
+        walletRepository.updateNodeWalletOfUser(totalNodeAmount,miningPackage.getUserNodeCode());
 
         if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
             processServicePurchase(miningPackage.getUserNodeCode(), miningPackage.getPackageAmount());
@@ -1066,10 +1068,11 @@ public class IndividualServiceImpl implements IndividualService {
         if (sponsoredParent == null) return;
 
 
-        List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.SERVICE_GENERATION,"ACTIVE");
-        // assume one rule only for direct service
-        IncomeType rule = rules.stream().findFirst().orElse(null);
-        if (rule == null) return;
+//        List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.SERVICE_GENERATION,"ACTIVE");
+//        // assume one rule only for direct service
+//        IncomeType rule = rules.stream().findFirst().orElse(null);
+//        if (rule == null) return;
+        IncomeType rule = incomeTypeRepository.findByActiveStateCodeFkIdAndIncomeTypeCode("ACTIVE",IncomeTypeEnum.SERVICE_GENERATION.name());
 
 
         BigDecimal payout = calculateByRule(rule, amount);

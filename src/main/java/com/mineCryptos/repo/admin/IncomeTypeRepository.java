@@ -16,5 +16,7 @@ public interface IncomeTypeRepository extends JpaRepository<IncomeType,Integer> 
 
     int countByIncomeTypePkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
 
+    IncomeType findByActiveStateCodeFkIdAndIncomeTypeCode(String active, String code);
+
     List<IncomeType> findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum incomeTypeEnum, String active);
 }
