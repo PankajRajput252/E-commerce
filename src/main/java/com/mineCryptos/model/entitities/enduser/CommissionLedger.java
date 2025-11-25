@@ -33,6 +33,9 @@ public class CommissionLedger extends StandardFieldClass {
     @Column(name = "IS_SETTLED")
     private boolean isSettled;
 
+    @Transient
+    private String userName;
+
     public Integer getCommissionLedgerPkId() {
         return commissionLedgerPkId;
     }
@@ -79,5 +82,13 @@ public class CommissionLedger extends StandardFieldClass {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

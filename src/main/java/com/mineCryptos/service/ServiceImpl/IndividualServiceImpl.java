@@ -197,24 +197,73 @@ public class IndividualServiceImpl implements IndividualService {
 
     private List<IndividualIncomeSummary> populateIndividualIncomeSummaryView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
         List<IndividualIncomeSummary> individualIncomeSummaryList = new ArrayList<>();
-        if(!Util.isDefined(filterBy)) {
-            filterBy="ACTIVE";
+//        if(!Util.isDefined(filterBy)) {
+//            filterBy="ACTIVE";
+//        }
+//        if (Util.isDefined(inputPkId)) {
+//            IndividualIncomeSummary individualIncomeSummary = individualIncomeSummaryRepository.findByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+//            individualIncomeSummaryList.add(individualIncomeSummary);
+//        }
+//        else if(Util.isDefined(inputFkId)){
+//            individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId, pageable);
+//        }
+//        else {
+//            individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkId(filterBy, pageable);
+//        }
+        BigDecimal serviceGenAmount = BigDecimal.ZERO;
+        BigDecimal clubIncome = BigDecimal.ZERO;
+        BigDecimal matchingIncome = BigDecimal.ZERO;
+        BigDecimal rewardIncome = BigDecimal.ZERO;
+        BigDecimal fastTrackBonus = BigDecimal.ZERO;
+        BigDecimal miningProfitSharing = BigDecimal.ZERO;
+        BigDecimal miningGeneration = BigDecimal.ZERO;
+        BigDecimal nodeBusinnesSharing = BigDecimal.ZERO;
+        List<CommissionLedger> commissionLedgerList = comissionLedgerRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE",inputFkId,null);
+        if(Util.isDefined(commissionLedgerList)) {
+            for (CommissionLedger commissionLedger : commissionLedgerList) {
+                if (commissionLedger.getIncomeType().equalsIgnoreCase("SERVICE_GENERATION")) {
+                    serviceGenAmount = serviceGenAmount.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("CLUB_INCOME")) {
+                    clubIncome = clubIncome.add(commissionLedger.getAmount());
+                } else if (commissionLedger.getIncomeType().equalsIgnoreCase("MATCHING_INCOME")) {
+                    matchingIncome = matchingIncome.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("REWARD_INCOME")) {
+                    rewardIncome = rewardIncome.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("FAST_TRACK_BONUS")) {
+                    fastTrackBonus = fastTrackBonus.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("MINING_PROFIT_SHARING")) {
+                    miningProfitSharing = miningProfitSharing.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("MINING_GENERATION")) {
+                    miningGeneration = miningGeneration.add(commissionLedger.getAmount());
+                }
+                else if (commissionLedger.getIncomeType().equalsIgnoreCase("NODE_BUSINESS_SHARING")) {
+                    nodeBusinnesSharing = nodeBusinnesSharing.add(commissionLedger.getAmount());
+                }
+            }
+
         }
-        if (Util.isDefined(inputPkId)) {
-            IndividualIncomeSummary individualIncomeSummary = individualIncomeSummaryRepository.findByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
-            individualIncomeSummaryList.add(individualIncomeSummary);
-        }
-        else if(Util.isDefined(inputFkId)){
-            individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy,inputFkId, pageable);
-        }
-        else {
-            individualIncomeSummaryList = individualIncomeSummaryRepository.findByActiveStateCodeFkId(filterBy, pageable);
-        }
+        IndividualIncomeSummary individualIncomeSummary =new IndividualIncomeSummary();
+        individualIncomeSummary.setServiceGenerationAmount(serviceGenAmount.doubleValue());
+        individualIncomeSummary.setClubIncomeAmount(clubIncome.doubleValue());
+        individualIncomeSummary.setMatchingIncomeAmount(matchingIncome.doubleValue());
+        individualIncomeSummary.setRewardIncomeAmount(rewardIncome.doubleValue());
+        individualIncomeSummary.setFastTrackBonusAmount(fastTrackBonus.doubleValue());
+        individualIncomeSummary.setMiningProfitSharingAmount(miningProfitSharing.doubleValue());
+        individualIncomeSummary.setMiningGenerationIncomeAmount(miningGeneration.doubleValue());
+        individualIncomeSummary.setNodeBusinessSharingAmount(nodeBusinnesSharing.doubleValue());
+        individualIncomeSummaryList.add(individualIncomeSummary);
+
         if(Util.isDefined(individualIncomeSummaryList)){
-            individualIncomeSummaryList.stream().map((individualIncomeSummary)->{
-                String userName= userRepository.fetchUserNameBasedOnNodeId(individualIncomeSummary.getUserNodeId(),"ACTIVE");
-                individualIncomeSummary.setUserName(userName);
-                return individualIncomeSummary;
+            individualIncomeSummaryList.stream().map((incomeSumm)->{
+                String userName= userRepository.fetchUserNameBasedOnNodeId(inputFkId,"ACTIVE");
+                incomeSumm.setUserName(userName);
+                incomeSumm.setUserNodeId(inputFkId);
+                return incomeSumm;
             }).collect(Collectors.toList());
         }
         return individualIncomeSummaryList;
@@ -1064,7 +1113,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     private void payDirectReferral(User buyer, BigDecimal amount) {
-        User sponsoredParent = userRepository.findByParentNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(),"ACTIVE");
+        User sponsoredParent = userRepository.findByNodeIdAndActiveStateCodeFkId(buyer.getParentNodeId(),"ACTIVE");
         if (sponsoredParent == null) return;
 
 
