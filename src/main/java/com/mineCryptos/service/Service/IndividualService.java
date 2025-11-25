@@ -131,4 +131,6 @@ public interface IndividualService {
     FinalResponse sendOtp(String email, String otp);
 
     FinalResponse getOtpForVerification(String userNodeId);
+
+    FinalResponse getRankMaster();
 }

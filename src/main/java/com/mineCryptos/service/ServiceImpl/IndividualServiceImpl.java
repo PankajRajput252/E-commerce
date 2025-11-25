@@ -6,12 +6,14 @@ import com.mineCryptos.model.User;
 import com.mineCryptos.model.Util;
 import com.mineCryptos.model.entitities.IncomeTypeEnum;
 import com.mineCryptos.model.entitities.admin.IncomeType;
+import com.mineCryptos.model.entitities.admin.RankMaster;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.enduser.*;
 import com.mineCryptos.repo.CommissionLedgerRepository;
 import com.mineCryptos.repo.UserMapRepository;
 import com.mineCryptos.repo.UserRepository;
 import com.mineCryptos.repo.admin.IncomeTypeRepository;
+import com.mineCryptos.repo.admin.RankMasterRepository;
 import com.mineCryptos.repo.enduser.*;
 import com.mineCryptos.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +74,8 @@ public class IndividualServiceImpl implements IndividualService {
 
     @Autowired
     private JavaMailSender mailSender;
+    @Autowired
+    private RankMasterRepository rankMasterRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -1948,6 +1952,16 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse finalResponse=new FinalResponse();
         EmailOtp emailOtp= emailOtpRepository.findTopByUserNodeIdOrderByCreatedDatetimeDesc(userNodeId);
         finalResponse.setResponse(emailOtp);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getRankMaster(){
+        FinalResponse finalResponse=new FinalResponse();
+        List<RankMaster> rankMasterList=new ArrayList<>();
+        rankMasterList=rankMasterRepository.findAll();
+        finalResponse.setData(rankMasterList);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }

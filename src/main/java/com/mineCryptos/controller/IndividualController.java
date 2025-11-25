@@ -537,4 +537,10 @@ public class IndividualController {
         return individualService.getOtpForVerification(userNodeId);
     }
 
+    @GetMapping("/getRankMaster")
+    public FinalResponse getRankMaster(
+    ) throws FinalException {
+        return individualService.getRankMaster();
+    }
+
 }

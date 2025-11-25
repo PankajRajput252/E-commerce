@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -356,11 +357,15 @@ public class AdminServiceImpl implements AdminService {
     public FinalResponse confirmUser(String nodeId) {
         FinalResponse finalResponse = new FinalResponse();
         User user = userRepository.findByNodeIdAndActiveStateCodeFkId(nodeId, "ACTIVE");
+        int totalActiveTeamLeft= userRepository. totalLeftTeam(nodeId);
+        int totalActiveTeamRight= userRepository. totalRightTeam(nodeId);
         if (Util.isDefined(user)) {
             Optional<User> users = Optional.ofNullable(user);
             users.map(existing -> {
                 existing.setDateOfActivation(LocalDateTime.now());
                 existing.setUserStatus("ACTIVE");
+                existing.setLeftVolume( BigDecimal.valueOf(totalActiveTeamLeft));
+                existing.setRightVolume( BigDecimal.valueOf(totalActiveTeamRight));
                 if(Util.isDefined(existing.getReferralCode())) {
                     existing.setParentNodeId(existing.getReferralCode());
                 }
