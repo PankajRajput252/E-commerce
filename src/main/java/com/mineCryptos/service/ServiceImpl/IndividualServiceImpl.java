@@ -245,27 +245,29 @@ public class IndividualServiceImpl implements IndividualService {
                     nodeBusinnesSharing = nodeBusinnesSharing.add(commissionLedger.getAmount());
                 }
             }
+            IndividualIncomeSummary individualIncomeSummary =new IndividualIncomeSummary();
+            individualIncomeSummary.setServiceGenerationAmount(serviceGenAmount.doubleValue());
+            individualIncomeSummary.setClubIncomeAmount(clubIncome.doubleValue());
+            individualIncomeSummary.setMatchingIncomeAmount(matchingIncome.doubleValue());
+            individualIncomeSummary.setRewardIncomeAmount(rewardIncome.doubleValue());
+            individualIncomeSummary.setFastTrackBonusAmount(fastTrackBonus.doubleValue());
+            individualIncomeSummary.setMiningProfitSharingAmount(miningProfitSharing.doubleValue());
+            individualIncomeSummary.setMiningGenerationIncomeAmount(miningGeneration.doubleValue());
+            individualIncomeSummary.setNodeBusinessSharingAmount(nodeBusinnesSharing.doubleValue());
+            individualIncomeSummaryList.add(individualIncomeSummary);
+
+            if(Util.isDefined(individualIncomeSummaryList)){
+                individualIncomeSummaryList.stream().map((incomeSumm)->{
+                    String userName= userRepository.fetchUserNameBasedOnNodeId(inputFkId,"ACTIVE");
+                    incomeSumm.setUserName(userName);
+                    incomeSumm.setUserNodeId(inputFkId);
+                    return incomeSumm;
+                }).collect(Collectors.toList());
+            }
 
         }
-        IndividualIncomeSummary individualIncomeSummary =new IndividualIncomeSummary();
-        individualIncomeSummary.setServiceGenerationAmount(serviceGenAmount.doubleValue());
-        individualIncomeSummary.setClubIncomeAmount(clubIncome.doubleValue());
-        individualIncomeSummary.setMatchingIncomeAmount(matchingIncome.doubleValue());
-        individualIncomeSummary.setRewardIncomeAmount(rewardIncome.doubleValue());
-        individualIncomeSummary.setFastTrackBonusAmount(fastTrackBonus.doubleValue());
-        individualIncomeSummary.setMiningProfitSharingAmount(miningProfitSharing.doubleValue());
-        individualIncomeSummary.setMiningGenerationIncomeAmount(miningGeneration.doubleValue());
-        individualIncomeSummary.setNodeBusinessSharingAmount(nodeBusinnesSharing.doubleValue());
-        individualIncomeSummaryList.add(individualIncomeSummary);
 
-        if(Util.isDefined(individualIncomeSummaryList)){
-            individualIncomeSummaryList.stream().map((incomeSumm)->{
-                String userName= userRepository.fetchUserNameBasedOnNodeId(inputFkId,"ACTIVE");
-                incomeSumm.setUserName(userName);
-                incomeSumm.setUserNodeId(inputFkId);
-                return incomeSumm;
-            }).collect(Collectors.toList());
-        }
+
         return individualIncomeSummaryList;
     }
     @Override
