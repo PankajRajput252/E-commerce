@@ -39,6 +39,9 @@ public class MiningPackage extends StandardFieldClass {
     @Column(name = "LOCAL_DATE_TIME")
     private LocalDateTime localDateTime;
 
+    @Transient
+    private double nodeAmount;
+
     public Integer getMiningPackagePkId() {
         return miningPackagePkId;
     }
@@ -101,5 +104,13 @@ public class MiningPackage extends StandardFieldClass {
 
     public void setPackageStatus(String packageStatus) {
         this.packageStatus = packageStatus;
+    }
+
+    public double getNodeAmount() {
+        return nodeAmount;
+    }
+
+    public void setNodeAmount(double nodeAmount) {
+        this.nodeAmount = nodeAmount;
     }
 }

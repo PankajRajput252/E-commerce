@@ -359,6 +359,13 @@ public class IndividualServiceImpl implements IndividualService {
         else {
             miningPackageList = miningPackageRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
+        if (Util.isDefined(miningPackageList)) {
+            miningPackageList.stream().map((miningPackage) -> {
+                double nodeWalletAmount = walletRepository.fetchUserNodeWalletAmount(inputFkId, "ACTIVE");
+                miningPackage.setNodeAmount(nodeWalletAmount);
+                return miningPackage;
+            }).collect(Collectors.toList());
+        }
         return miningPackageList;
     }
 
@@ -1151,8 +1158,10 @@ public class IndividualServiceImpl implements IndividualService {
             BigDecimal matched = left.min(right);
             if (matched.compareTo(BigDecimal.ZERO) > 0) {
        // fetch matching rules
-                List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.MATCHING_INCOME,"ACTIVE");
-                IncomeType rule = rules.stream().findFirst().orElse(null);
+//                List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.MATCHING_INCOME,"ACTIVE");
+//                IncomeType rule = rules.stream().findFirst().orElse(null);
+                IncomeType rule = incomeTypeRepository.findByActiveStateCodeFkIdAndIncomeTypeCode("ACTIVE",IncomeTypeEnum.SERVICE_GENERATION.name());
+
                 if (rule != null) {
                     BigDecimal payout = calculateByRule(rule, matched);
                     saveLedger(upline.getNodeId(), String.valueOf(IncomeTypeEnum.MATCHING_INCOME), payout, "Pair matched: " + matched);
@@ -1202,8 +1211,10 @@ public class IndividualServiceImpl implements IndividualService {
         BigDecimal threshold = BigDecimal.valueOf(100000);
         if (teamSales.compareTo(threshold) >= 0) {
            // get reward rule
-            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.REWARD_INCOME,"ACTIVE");
-            IncomeType rule = rules.stream().findFirst().orElse(null);
+//            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.REWARD_INCOME,"ACTIVE");
+//            IncomeType rule = rules.stream().findFirst().orElse(null);
+            IncomeType rule = incomeTypeRepository.findByActiveStateCodeFkIdAndIncomeTypeCode("ACTIVE",IncomeTypeEnum.SERVICE_GENERATION.name());
+
             if (rule != null) {
                 BigDecimal reward = calculateByRule(rule, teamSales);
                 saveLedger(u.getNodeId(), String.valueOf(IncomeTypeEnum.REWARD_INCOME), reward, "Team sales reward");
@@ -1222,8 +1233,10 @@ public class IndividualServiceImpl implements IndividualService {
     public void evaluateFastTrack(User newUser, LocalDateTime joinDate, int directReferrals) {
         LocalDateTime cutoff = joinDate.plusDays(30);
         if (LocalDateTime.now().isBefore(cutoff) && directReferrals >= 5) {
-            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.FAST_TRACK_BONUS,"ACTIVE");
-            IncomeType rule = rules.stream().findFirst().orElse(null);
+//            List<IncomeType> rules = incomeTypeRepository.findByIncomeTypeCodeAndActiveStateCodeFkId(IncomeTypeEnum.FAST_TRACK_BONUS,"ACTIVE");
+//            IncomeType rule = rules.stream().findFirst().orElse(null);
+            IncomeType rule = incomeTypeRepository.findByActiveStateCodeFkIdAndIncomeTypeCode("ACTIVE",IncomeTypeEnum.SERVICE_GENERATION.name());
+
             if (rule != null) {
                 BigDecimal bonus = rule.getPercentage(); // often fixed
                 saveLedger(newUser.getNodeId(), String.valueOf(IncomeTypeEnum.FAST_TRACK_BONUS), bonus, "Fast track bonus");
