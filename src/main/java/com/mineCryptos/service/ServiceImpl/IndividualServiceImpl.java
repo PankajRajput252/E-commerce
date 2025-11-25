@@ -1311,6 +1311,12 @@ public class IndividualServiceImpl implements IndividualService {
         ledger.setAmount(amount);
         ledger.setNote(notes);
         comissionLedgerRepository.save(ledger);
+
+        Wallet wallet=walletRepository.findByActiveStateCodeFkIdAndUserNodeCode("ACTIVE",userId);
+        if(Util.isDefined(wallet)){
+           double totalMineAmount= wallet.getMineWallet()+amount.doubleValue();
+           walletRepository.updateMineWalletOfUser(totalMineAmount,userId);
+        }
     }
 
 
