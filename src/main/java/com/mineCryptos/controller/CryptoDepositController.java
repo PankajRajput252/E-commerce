@@ -167,8 +167,12 @@ public class CryptoDepositController {
         return hexString.toString();
     }
 
-
-
+    @PostMapping("/confirmManually")
+    FinalResponse confirmManually(
+            @RequestParam(value = "paymentId") String paymentId,
+            @RequestParam(value = "txHash", required = false) String txHash){
+        return cryptoDepositService.confirmManually(paymentId, txHash);
+    }
 
 
 }

@@ -28,6 +28,16 @@ public class UserWallet extends StandardFieldClass {
     @Column(name = "FRONZEN_BALANCE")
     private BigDecimal frozenBalance; // hold amount during withdrawal
 
+    public UserWallet() {
+    }
+
+    public UserWallet(String userNodeId, String walletAddress, BigDecimal balance, BigDecimal frozenBalance) {
+        this.userNodeId = userNodeId;
+        this.walletAddress = walletAddress;
+        this.balance = balance;
+        this.frozenBalance = frozenBalance;
+    }
+
     public Integer getUserWalletPkId() {
         return userWalletPkId;
     }

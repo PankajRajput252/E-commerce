@@ -95,6 +95,7 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         deposit.setAmount(request.getAmount());
         deposit.setUserNodeId(request.getUserNodeId());
         deposit.setPaymentStatus("PENDING");
+        deposit.setPayAddress(response.get("pay_address").toString());
         cryptoDepositRepository.save(deposit);
         if(Util.isDefined(request.getDepositPkId())){
          depositFundRepository.updatePaymentIdBasedOnPkId(deposit.getPaymentId(),request.getUserNodeId() ,  request.getDepositPkId());
@@ -188,10 +189,17 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
 
         // Update user wallet
         UserWallet wallet = userWalletRepository.findByActiveStateCodeFkIdAndUserNodeId("ACTIVE", deposit.getUserNodeId());
+
         if (Util.isDefined(wallet)) {
             wallet.setBalance(wallet.getBalance().add(deposit.getAmount()));
             userWalletRepository.save(wallet);
+
+        } else {
+            UserWallet userWallet = new UserWallet(deposit.getUserNodeId(), deposit.getPayAddress(), BigDecimal.ZERO, BigDecimal.ZERO);
+            userWallet.setBalance(BigDecimal.ZERO.add(deposit.getAmount()));
+            userWalletRepository.save(userWallet);
         }
+
       FinalResponse finalResponse=  adminService.confirmDeposit(paymentId);
         if (!finalResponse.getStatusCode().equals("200")) {
             return;
@@ -421,4 +429,10 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         return null;
     }
 
+    @Override
+   public FinalResponse confirmManually(String paymentId, String txHash){
+        FinalResponse finalResponse=new FinalResponse();
+        confirmDeposit(paymentId, txHash);
+        return finalResponse;
+    }
 }

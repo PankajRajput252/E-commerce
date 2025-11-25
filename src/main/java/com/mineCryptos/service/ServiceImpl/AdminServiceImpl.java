@@ -364,6 +364,9 @@ public class AdminServiceImpl implements AdminService {
                 if(Util.isDefined(existing.getReferralCode())) {
                     existing.setParentNodeId(existing.getReferralCode());
                 }
+                else{
+                    existing.setParentNodeId("NODE24770625");
+                }
                 return userRepository.save(existing);
             });
 //            Wallet wallet = new Wallet();
