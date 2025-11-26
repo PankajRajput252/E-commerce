@@ -387,6 +387,11 @@ public class IndividualServiceImpl implements IndividualService {
             throw new FinalException(" Please purchase subscription plan.");
         }
 
+        Long count=miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCodeAndMode("ACTIVE",miningPackage.getUserNodeCode(),"NODE");
+        if(count<=0 ){
+            throw new FinalException(" Please first purchase ServicePackage,then start mining.");
+        }
+
         miningPackageRepository.save(miningPackage);
         BigDecimal halfAmount = miningPackage.getPackageAmount().divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
         // deducting halfamount from capital and half from Node
@@ -396,9 +401,9 @@ public class IndividualServiceImpl implements IndividualService {
         double totalNodeAmount=currentNodeAmount-halfAmount.doubleValue();
         walletRepository.updateNodeWalletOfUser(totalNodeAmount,miningPackage.getUserNodeCode());
 
-        if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
-            processServicePurchase(miningPackage.getUserNodeCode(), miningPackage.getPackageAmount());
-        }
+//        if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
+         processServicePurchase(miningPackage.getUserNodeCode(), miningPackage.getPackageAmount());
+//        }
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
