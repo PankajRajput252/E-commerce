@@ -31,6 +31,9 @@ public class AccountStatement  extends StandardFieldClass {
     @Column(name = "DEBIT")
     private double debit;
 
+    public AccountStatement() {
+    }
+
     public Integer getAccountStatementPkId() {
         return accountStatementPkId;
     }

@@ -640,6 +640,17 @@ public class IndividualServiceImpl implements IndividualService {
             }
 
         }
+        AccountStatement accountStatement=new AccountStatement();
+        accountStatement.setDebit(walletTransaction.getAmount());
+        accountStatement.setUserNodeId(walletTransaction.getFromUserId());
+        accountStatement.setParticular("This is amount "+ walletTransaction.getAmount()+"is debited during Transfer.");
+        addAccountStatement(accountStatement);
+
+        AccountStatement accountStatement1=new AccountStatement();
+        accountStatement1.setCredit(walletTransaction.getAmount());
+        accountStatement1.setUserNodeId(walletTransaction.getToUserId());
+        accountStatement1.setParticular("This is amount "+ walletTransaction.getAmount()+"is credited during Transfer done by"+walletTransaction.getFromUserId()+".");
+        addAccountStatement(accountStatement1);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
@@ -995,6 +1006,11 @@ public class IndividualServiceImpl implements IndividualService {
         Util.setCommonDefaultAttributes(withdrawalRequest);
 
         withdrawalRequestRepository.save(withdrawalRequest);
+        AccountStatement accountStatement=new AccountStatement();
+        accountStatement.setDebit(withdrawalRequest.getAmount().doubleValue());
+        accountStatement.setUserNodeId(withdrawalRequest.getUserNodeId());
+        accountStatement.setParticular("This is amount "+ withdrawalRequest.getAmount()+"is debited during WithdrawalRequest.");
+        addAccountStatement(accountStatement);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return  finalResponse;
     }

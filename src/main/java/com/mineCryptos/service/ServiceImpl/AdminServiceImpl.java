@@ -8,6 +8,7 @@ import com.mineCryptos.model.entitities.admin.AdminDashboardInfo;
 import com.mineCryptos.model.entitities.admin.IncomeType;
 import com.mineCryptos.model.entitities.admin.RankReward;
 import com.mineCryptos.model.entitities.admin.SubscriptionDefinition;
+import com.mineCryptos.model.entitities.enduser.AccountStatement;
 import com.mineCryptos.model.entitities.enduser.DepositFund;
 import com.mineCryptos.model.entitities.enduser.Wallet;
 import com.mineCryptos.model.entitities.enduser.WalletTransaction;
@@ -257,7 +258,11 @@ public class AdminServiceImpl implements AdminService {
                     return finalResponse;
                 }
             }
-
+            AccountStatement accountStatement=new AccountStatement();
+            accountStatement.setCredit(depositFund.getAmount());
+            accountStatement.setUserNodeId(depositFund.getUserNodeCode());
+            accountStatement.setParticular("This is amount "+ depositFund.getAmount()+"is credited during deposit.");
+           individualService.addAccountStatement(accountStatement);
         } else {
             Util.setMessage(finalResponse, "100", "Error:Deposit not found.");
             return finalResponse;
