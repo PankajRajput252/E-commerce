@@ -20,15 +20,15 @@ public interface WalletRepository extends JpaRepository<Wallet,Integer> {
 
 
     @Query("SELECT t.capitalWallet FROM Wallet t where t.userNodeCode = ?1 And t.activeStateCodeFkId =?2")
-    double fetchUserCapitalWalletAmount(String userNodeCode, String active);
+    Double fetchUserCapitalWalletAmount(String userNodeCode, String active);
 
 
     @Query("SELECT t.nodeWallet FROM Wallet t where t.userNodeCode = ?1 And t.activeStateCodeFkId =?2")
-    double fetchUserNodeWalletAmount(String userNodeCode, String active);
+    Double fetchUserNodeWalletAmount(String userNodeCode, String active);
 
 
     @Query("SELECT t.mineWallet FROM Wallet t where t.userNodeCode = ?1 And t.activeStateCodeFkId =?2")
-    double fetchUserMineWalletAmount(String userNodeCode, String active);
+    Double fetchUserMineWalletAmount(String userNodeCode, String active);
 
     @Modifying
     @Query(value = "UPDATE eu_wallet\n" +

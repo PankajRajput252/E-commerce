@@ -379,9 +379,11 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse addMiningPackage(MiningPackage miningPackage) throws FinalException {
         FinalResponse finalResponse=new FinalResponse();
 //        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
-
-        double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
-        double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+        Double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+        Double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+        if(!Util.isDefined(currentCapitalAmount) && !Util.isDefined(currentNodeAmount)) {
+            throw new FinalException(" Please first Deposit Amount in Wallet.");
+        }
 
 //        if ((currentCapitalAmount + currentNodeAmount) !=miningPackage.getPackageAmount().doubleValue()) {
 //            throw new FinalException(" Please purchase subscription plan.");
@@ -1181,6 +1183,12 @@ public class IndividualServiceImpl implements IndividualService {
         while (upline != null) {
             BigDecimal left = upline.getLeftVolume();
             BigDecimal right = upline.getRightVolume();
+            if(Util.isDefined(left) && Util.isDefined(right)){
+
+            }
+            else{
+                return;
+            }
             BigDecimal matched = left.min(right);
             if (matched.compareTo(BigDecimal.ZERO) > 0) {
        // fetch matching rules
