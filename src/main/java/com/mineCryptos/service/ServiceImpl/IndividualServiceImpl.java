@@ -382,7 +382,8 @@ public class IndividualServiceImpl implements IndividualService {
         Double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
         Double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
         if(!Util.isDefined(currentCapitalAmount) && !Util.isDefined(currentNodeAmount)) {
-            throw new FinalException(" Please first Deposit Amount in Wallet.");
+            Util.setMessage(finalResponse, "100", "Error: Please first Deposit Amount in Wallet.");
+            return finalResponse;
         }
 
 //        if ((currentCapitalAmount + currentNodeAmount) !=miningPackage.getPackageAmount().doubleValue()) {
@@ -391,7 +392,8 @@ public class IndividualServiceImpl implements IndividualService {
         if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
             Long count = miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCodeAndMode("ACTIVE", miningPackage.getUserNodeCode(), "NODE");
             if (count < 0) {
-                throw new FinalException(" Please first purchase ServicePackage,then start mining.");
+                Util.setMessage(finalResponse, "100", "Error: Please first purchase ServicePackage,then start mining.");
+                return finalResponse;
             }
         }
 
