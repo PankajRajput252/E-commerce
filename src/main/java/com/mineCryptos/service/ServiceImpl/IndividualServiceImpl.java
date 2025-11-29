@@ -383,13 +383,14 @@ public class IndividualServiceImpl implements IndividualService {
         double currentCapitalAmount=walletRepository.fetchUserCapitalWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
         double currentNodeAmount=walletRepository.fetchUserNodeWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
 
-        if ((currentCapitalAmount + currentNodeAmount) !=miningPackage.getPackageAmount().doubleValue()) {
-            throw new FinalException(" Please purchase subscription plan.");
-        }
-
-        Long count=miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCodeAndMode("ACTIVE",miningPackage.getUserNodeCode(),"NODE");
-        if(count<=0 ){
-            throw new FinalException(" Please first purchase ServicePackage,then start mining.");
+//        if ((currentCapitalAmount + currentNodeAmount) !=miningPackage.getPackageAmount().doubleValue()) {
+//            throw new FinalException(" Please purchase subscription plan.");
+//        }
+        if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
+            Long count = miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCodeAndMode("ACTIVE", miningPackage.getUserNodeCode(), "NODE");
+            if (count < 0) {
+                throw new FinalException(" Please first purchase ServicePackage,then start mining.");
+            }
         }
 
         miningPackageRepository.save(miningPackage);
