@@ -375,7 +375,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addMiningPackage(MiningPackage miningPackage) throws FinalException {
         FinalResponse finalResponse=new FinalResponse();
 //        if (miningPackage.getPackageAmount() < 100 || miningPackage.getPackageAmount() % 10 != 0) {
@@ -391,20 +391,25 @@ public class IndividualServiceImpl implements IndividualService {
 //        }
         if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
             Long count = miningPackageRepository.countByActiveStateCodeFkIdAndUserNodeCodeAndMode("ACTIVE", miningPackage.getUserNodeCode(), "NODE");
-            if (count < 0) {
+            if (count <=0) {
                 Util.setMessage(finalResponse, "100", "Error: Please first purchase ServicePackage,then start mining.");
                 return finalResponse;
             }
         }
 
         miningPackageRepository.save(miningPackage);
-        BigDecimal halfAmount = miningPackage.getPackageAmount().divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
-        // deducting halfamount from capital and half from Node
-        double totalCapitalAmount=currentCapitalAmount-halfAmount.doubleValue();
-        walletRepository.updateCapitalWalletOfUser(totalCapitalAmount,miningPackage.getUserNodeCode());
+            BigDecimal halfAmount = miningPackage.getPackageAmount().divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+            // deducting halfamount from capital and half from Node
+            double totalCapitalAmount = currentCapitalAmount - halfAmount.doubleValue();
+            walletRepository.updateCapitalWalletOfUser(totalCapitalAmount, miningPackage.getUserNodeCode());
 
-        double totalNodeAmount=currentNodeAmount-halfAmount.doubleValue();
-        walletRepository.updateNodeWalletOfUser(totalNodeAmount,miningPackage.getUserNodeCode());
+            double totalNodeAmount = currentNodeAmount - halfAmount.doubleValue();
+            walletRepository.updateNodeWalletOfUser(totalNodeAmount, miningPackage.getUserNodeCode());
+
+            if(miningPackage.getMode().equalsIgnoreCase("MINING")){
+                Double currentMineWallets=walletRepository.fetchUserMineWalletAmount(miningPackage.getUserNodeCode(),"ACTIVE");
+                walletRepository.updateMineWalletOfUser(currentMineWallets+miningPackage.getPackageAmount().doubleValue(), miningPackage.getUserNodeCode());
+            }
 
 //        if (miningPackage.getMode().equalsIgnoreCase("MINING")) {
          processServicePurchase(miningPackage.getUserNodeCode(), miningPackage.getPackageAmount());
