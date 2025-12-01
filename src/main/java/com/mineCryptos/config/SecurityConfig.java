@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf()  .ignoringAntMatchers("/api/deposit/webhook") // Explicitly ignore webhook
                 .disable()
                 .authorizeHttpRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/deposit/webhook").permitAll()
                 .antMatchers(HttpMethod.GET).permitAll()
@@ -80,6 +81,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration corsConfiguration=new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedOriginPattern("*");
+        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedOrigin("http://stylo-coin-frontend.s3-website.ap-south-1.amazonaws.com");
+        corsConfiguration.addAllowedOrigin("https://stylo-coin-frontend.s3-website.ap-south-1.amazonaws.com");
+        corsConfiguration.addAllowedOrigin("https://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com");
+        corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*"); // Allow ALL headers
         corsConfiguration.addAllowedHeader("Authorization");
         corsConfiguration.addAllowedHeader("Content-Type");
