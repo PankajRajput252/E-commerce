@@ -240,6 +240,10 @@ public class IndividualController {
     public FinalResponse updateSupportTicket(@PathVariable Integer id, @RequestBody SupportTicket supportTicket) {
         return individualService.updateSupportTicket(id, supportTicket);
     }
+    @PutMapping("/resolveSupport/{id}")
+    public FinalResponse resolveSupport(@PathVariable Integer id) {
+        return individualService.resolveSupport(id);
+    }
 
     @DeleteMapping("/deleteSupportTicket/{id}")
     public FinalResponse deleteSupportTicket(@PathVariable Integer id) {

@@ -910,7 +910,7 @@ public class IndividualServiceImpl implements IndividualService {
             Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
             return finalResponse;
         }
-
+        supportTicket.setStatus("IN_PROGRESS");
         Util.setCommonDefaultAttributes(supportTicket);
 
         supportTicketRepository.save(supportTicket);
@@ -928,6 +928,18 @@ public class IndividualServiceImpl implements IndividualService {
                     existing.setUserNodeId(supportTicket.getUserNodeId());
                     existing.setMessage(supportTicket.getMessage());
                     existing.setStatus(supportTicket.getStatus());
+                    return supportTicketRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" Support ticket  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse resolveSupport(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        supportTicketRepository.findById(id)
+                .map(existing -> {
+                    existing.setStatus("RESOLVED");
                     return supportTicketRepository.save(existing);
                 }).orElseThrow(() -> new RuntimeException(" Support ticket  not found"));
         finalResponse = Util.setSuccessMessage(finalResponse);

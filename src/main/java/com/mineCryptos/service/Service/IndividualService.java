@@ -133,4 +133,6 @@ public interface IndividualService {
     FinalResponse getOtpForVerification(String userNodeId);
 
     FinalResponse getRankMaster();
+
+    FinalResponse resolveSupport(Integer id);
 }
