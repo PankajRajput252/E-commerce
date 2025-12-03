@@ -143,4 +143,12 @@ public interface IndividualService {
     FinalResponse updateExchangeRequest(Integer id, ExchangeRequest exchangeRequest);
 
     FinalResponse deleteExchangeRequest(Integer id);
+
+    FinalResponse addExchangeActivityLog(ExchangeActivityLog exchangeActivityLog);
+
+    FinalResponse getExchangeActivityLog(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse updateExchangeActivityLog(Integer id, ExchangeActivityLog exchangeActivityLog);
+
+    FinalResponse deleteExchangeActivityLog(Integer id);
 }

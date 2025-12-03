@@ -579,4 +579,36 @@ public class IndividualController {
         return individualService.deleteExchangeRequest(id);
     }
 
+
+    @GetMapping("/getExchangeActivityLog")
+    public FinalResponse getExchangeActivityLog(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        return individualService.getExchangeActivityLog(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addExchangeActivityLog")
+    public FinalResponse addExchangeActivityLog(@RequestBody ExchangeActivityLog exchangeActivityLog) throws FinalException {
+        return this.individualService.addExchangeActivityLog(exchangeActivityLog);
+    }
+
+    @PutMapping("/updateExchangeActivityLog/{id}")
+    public FinalResponse updateExchangeActivityLog(@PathVariable Integer id, @RequestBody ExchangeActivityLog exchangeActivityLog) {
+        return individualService.updateExchangeActivityLog(id, exchangeActivityLog);
+    }
+
+    @DeleteMapping("/deleteExchangeActivityLog/{id}")
+    public FinalResponse deleteExchangeActivityLog(@PathVariable Integer id) {
+        return individualService.deleteExchangeActivityLog(id);
+    }
+
 }

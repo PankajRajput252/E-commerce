@@ -78,6 +78,8 @@ public class IndividualServiceImpl implements IndividualService {
     private RankMasterRepository rankMasterRepository;
     @Autowired
     private ExchangeRequestRepository exchangeRequestRepository;
+    @Autowired
+    private ExchangeActivityLogRepository exchangeActivityLogRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -2097,6 +2099,83 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse deleteExchangeRequest(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         exchangeRequestRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse addExchangeActivityLog(ExchangeActivityLog exchangeActivityLog) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        exchangeActivityLog.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(exchangeActivityLog.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+        Util.setCommonDefaultAttributes(exchangeActivityLog);
+        exchangeActivityLogRepository.save(exchangeActivityLog);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getExchangeActivityLog(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<ExchangeActivityLog> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<ExchangeActivityLog> exchangeActivityLogList = populateExchangeActivityLogView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateExchangeActivityLogCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(exchangeActivityLogList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateExchangeActivityLogCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = exchangeActivityLogRepository.countByExchangeActivityLogPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else {
+            count = exchangeActivityLogRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<ExchangeActivityLog> populateExchangeActivityLogView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<ExchangeActivityLog> exchangeActivityLogList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            ExchangeActivityLog exchangeActivityLog = exchangeActivityLogRepository.findByExchangeActivityLogPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            exchangeActivityLogList.add(exchangeActivityLog);
+        }  else {
+            exchangeActivityLogList = exchangeActivityLogRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return exchangeActivityLogList;
+    }
+
+    @Override
+    public FinalResponse updateExchangeActivityLog(Integer id, ExchangeActivityLog exchangeActivityLog) {
+        FinalResponse finalResponse = new FinalResponse();
+        exchangeActivityLogRepository.findById(id)
+                .map(existing -> {
+                    existing.setRequestId(exchangeActivityLog.getRequestId());
+                    existing.setActionBy(exchangeActivityLog.getActionBy());
+                    existing.setActionType(exchangeActivityLog.getActionType());
+                    existing.setMessage(exchangeActivityLog.getMessage());
+                    return exchangeActivityLogRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" ExchangeActivityLog not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteExchangeActivityLog(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        exchangeActivityLogRepository.deleteById(id);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
