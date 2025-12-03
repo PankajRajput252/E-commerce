@@ -135,4 +135,12 @@ public interface IndividualService {
     FinalResponse getRankMaster();
 
     FinalResponse resolveSupport(Integer id);
+
+    FinalResponse getExchangeRequest(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addExchangeRequest(ExchangeRequest exchangeRequest);
+
+    FinalResponse updateExchangeRequest(Integer id, ExchangeRequest exchangeRequest);
+
+    FinalResponse deleteExchangeRequest(Integer id);
 }

@@ -76,6 +76,8 @@ public class IndividualServiceImpl implements IndividualService {
     private JavaMailSender mailSender;
     @Autowired
     private RankMasterRepository rankMasterRepository;
+    @Autowired
+    private ExchangeRequestRepository exchangeRequestRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -2014,5 +2016,90 @@ public class IndividualServiceImpl implements IndividualService {
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
+
+
+    @Override
+    public FinalResponse getExchangeRequest(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<ExchangeRequest> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<ExchangeRequest> exchangeRequestList = populateExchangeRequestView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateExchangeRequestCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(exchangeRequestList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateExchangeRequestCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = exchangeRequestRepository.countByExchangeRequestPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else if (Util.isDefined(inputFkId)) {
+            count = exchangeRequestRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
+        } else {
+            count = exchangeRequestRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<ExchangeRequest> populateExchangeRequestView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<ExchangeRequest> exchangeRequestList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            ExchangeRequest userWalletAddress = exchangeRequestRepository.findByExchangeRequestPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            exchangeRequestList.add(userWalletAddress);
+        } else if (Util.isDefined(inputFkId)) {
+            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
+        } else {
+            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return exchangeRequestList;
+    }
+
+    @Override
+    public FinalResponse addExchangeRequest(ExchangeRequest exchangeRequest) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        exchangeRequest.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(exchangeRequest.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+
+        Util.setCommonDefaultAttributes(exchangeRequest);
+
+        exchangeRequestRepository.save(exchangeRequest);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateExchangeRequest(Integer id, ExchangeRequest exchangeRequest) {
+        FinalResponse finalResponse = new FinalResponse();
+        exchangeRequestRepository.findById(id)
+                .map(existing -> {
+                    existing.setUserNodeId(exchangeRequest.getUserNodeId());
+                    existing.setAmountBTC(exchangeRequest.getAmountBTC());
+                    existing.setRateUsdt(exchangeRequest.getRateUsdt());
+                    existing.setStatus(exchangeRequest.getStatus());
+                    return exchangeRequestRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" ExchangeRequest not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteExchangeRequest(Integer id) {
+        FinalResponse finalResponse = new FinalResponse();
+        exchangeRequestRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
 
 }

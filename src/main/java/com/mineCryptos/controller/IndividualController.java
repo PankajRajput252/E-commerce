@@ -547,4 +547,36 @@ public class IndividualController {
         return individualService.getRankMaster();
     }
 
+
+    @GetMapping("/getExchangeRequest")
+    public FinalResponse getExchangeRequest(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        return individualService.getExchangeRequest(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addExchangeRequest")
+    public FinalResponse addExchangeRequest(@RequestBody ExchangeRequest exchangeRequest) throws FinalException {
+        return this.individualService.addExchangeRequest(exchangeRequest);
+    }
+
+    @PutMapping("/updateExchangeRequest/{id}")
+    public FinalResponse updateExchangeRequest(@PathVariable Integer id, @RequestBody ExchangeRequest exchangeRequest) {
+        return individualService.updateExchangeRequest(id, exchangeRequest);
+    }
+
+    @DeleteMapping("/deleteExchangeRequest/{id}")
+    public FinalResponse deleteExchangeRequest(@PathVariable Integer id) {
+        return individualService.deleteExchangeRequest(id);
+    }
+
 }
