@@ -151,4 +151,8 @@ public interface IndividualService {
     FinalResponse updateExchangeActivityLog(Integer id, ExchangeActivityLog exchangeActivityLog);
 
     FinalResponse deleteExchangeActivityLog(Integer id);
+
+    FinalResponse acceptRequest(Integer requestId, String userId);
+
+    FinalResponse completeRequest(Integer requestId, String userId);
 }

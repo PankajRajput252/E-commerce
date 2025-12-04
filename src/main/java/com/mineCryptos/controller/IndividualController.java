@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/individual")
@@ -611,4 +613,13 @@ public class IndividualController {
         return individualService.deleteExchangeActivityLog(id);
     }
 
+    @PutMapping("/acceptRequest/{requestId}/{userId}")
+    public FinalResponse acceptRequest(@PathVariable Integer requestId, @PathVariable String userId) {
+        return individualService.acceptRequest(requestId, userId);
+    }
+
+    @PutMapping("/completeRequest/{requestId}/{userId}")
+    public FinalResponse completeRequest(@PathVariable Integer requestId, @PathVariable String userId) {
+        return individualService.completeRequest(requestId, userId);
+    }
 }

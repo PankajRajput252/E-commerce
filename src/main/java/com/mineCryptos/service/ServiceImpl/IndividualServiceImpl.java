@@ -1853,6 +1853,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteUserWalletAddress(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         userWalletAddressRepository.deleteById(id);
@@ -1861,6 +1862,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateUserWalletAddress(Integer id, UserWalletAddress userWalletAddress) {
         FinalResponse finalResponse = new FinalResponse();
         userWalletAddressRepository.findById(id)
@@ -1880,6 +1882,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addUserWalletAddress(UserWalletAddress userWalletAddress) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -2063,6 +2066,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addExchangeRequest(ExchangeRequest exchangeRequest) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -2074,13 +2078,22 @@ public class IndividualServiceImpl implements IndividualService {
         }
 
         Util.setCommonDefaultAttributes(exchangeRequest);
+        exchangeRequest.setStatus("OPEN");
+        exchangeRequest= exchangeRequestRepository.save(exchangeRequest);
+        ExchangeActivityLog exchangeActivityLog = new ExchangeActivityLog();
+        exchangeActivityLog.setRequestId(exchangeRequest.getExchangeRequestPkId());
+        exchangeActivityLog.setActionType("CREATE_REQUEST");
+        exchangeActivityLog.setActionBy(exchangeRequest.getUserNodeId());
+        exchangeActivityLog.setMessage(exchangeRequest.getUserNodeId()+"User created exchange request");
+        finalResponse= addExchangeActivityLog(exchangeActivityLog);
 
-        exchangeRequestRepository.save(exchangeRequest);
+
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateExchangeRequest(Integer id, ExchangeRequest exchangeRequest) {
         FinalResponse finalResponse = new FinalResponse();
         exchangeRequestRepository.findById(id)
@@ -2096,6 +2109,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteExchangeRequest(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         exchangeRequestRepository.deleteById(id);
@@ -2104,6 +2118,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addExchangeActivityLog(ExchangeActivityLog exchangeActivityLog) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -2158,6 +2173,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateExchangeActivityLog(Integer id, ExchangeActivityLog exchangeActivityLog) {
         FinalResponse finalResponse = new FinalResponse();
         exchangeActivityLogRepository.findById(id)
@@ -2173,9 +2189,60 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteExchangeActivityLog(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         exchangeActivityLogRepository.deleteById(id);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    // Accept request
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse acceptRequest(Integer requestId, String userId) {
+        FinalResponse finalResponse = new FinalResponse();
+        ExchangeRequest req = exchangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (!req.getStatus().equals("OPEN")) {
+            Util.setMessage(finalResponse, "100", "Error: Request is already locked or completed.");
+            return finalResponse;
+        }
+
+        req.setStatus("LOCKED");
+        ExchangeRequest updated = exchangeRequestRepository.save(req);
+
+        ExchangeActivityLog exchangeActivityLog = new ExchangeActivityLog();
+        exchangeActivityLog.setRequestId(requestId);
+        exchangeActivityLog.setActionType("ACCEPT_REQUEST");
+        exchangeActivityLog.setActionBy(userId);
+        exchangeActivityLog.setMessage("User " + userId + " accepted request");
+        finalResponse = addExchangeActivityLog(exchangeActivityLog);
+        finalResponse.setResponse(updated);
+
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FinalResponse completeRequest(Integer requestId, String userId) {
+        FinalResponse finalResponse=new FinalResponse();
+        ExchangeRequest req = exchangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        req.setStatus("COMPLETED");
+        ExchangeRequest updated = exchangeRequestRepository.save(req);
+
+        ExchangeActivityLog exchangeActivityLog = new ExchangeActivityLog();
+        exchangeActivityLog.setRequestId(requestId);
+        exchangeActivityLog.setActionType("COMPLETE");
+        exchangeActivityLog.setActionBy(userId);
+        exchangeActivityLog.setMessage("Trade completed");
+        finalResponse = addExchangeActivityLog(exchangeActivityLog);
+        finalResponse.setResponse(updated);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
