@@ -15,10 +15,7 @@ import com.mineCryptos.service.Service.AdminService;
 import com.mineCryptos.service.Service.CryptoDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
@@ -113,8 +110,16 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         BigDecimal finalPriceAmount = req.getAmount();
 
         if("INR".equalsIgnoreCase(req.getSelectedCurrency())) {
+            BigDecimal minAmount = getMinAmount("inr", "usdt");
+
+            if (req.getAmount().compareTo(minAmount) < 0) {
+                throw new RuntimeException("Minimum allowed amount is " + minAmount + " INR");
+
+            }
             BigDecimal rate = fetchConversionRate("INR", "USD");  // OR INR→USDT
             finalPriceAmount = req.getAmount().multiply(rate);
+
+
         }
 
         Map<String, Object> payload = new HashMap<>();
@@ -177,11 +182,44 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         String url = baseUrl + "/estimate?amount=1&currency_from="
                 + from.toLowerCase() + "&currency_to=" + to.toLowerCase();
 
-        ResponseEntity<Map> res =
-                restTemplate.getForEntity(url, Map.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", apiKey);
+        headers.set("Accept", "application/json");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> res = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                Map.class
+        );
 
         return new BigDecimal(res.getBody().get("estimated_amount").toString());
     }
+
+    public BigDecimal getMinAmount(String from, String to) {
+
+        String url = baseUrl + "/min-amount?currency_from="
+                + from.toLowerCase() + "&currency_to=" + to.toLowerCase();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", apiKey);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                Map.class
+        );
+
+        return new BigDecimal(response.getBody().get("min_amount").toString());
+    }
+
 
 
 
