@@ -131,6 +131,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addWalletData(Wallet wallet) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -149,6 +150,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateWalletData(Integer walletId, Wallet wallet) {
         FinalResponse finalResponse = new FinalResponse();
         walletRepository.findById(walletId)
@@ -165,6 +167,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteWalletData(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         walletRepository.deleteById(id);
@@ -279,6 +282,7 @@ public class IndividualServiceImpl implements IndividualService {
         return individualIncomeSummaryList;
     }
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addIndividualIncomeSummary(IndividualIncomeSummary individualIncomeSummary) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -297,6 +301,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateIndividualIncomeSummary(Integer id, IndividualIncomeSummary individualIncomeSummary) {
         FinalResponse finalResponse = new FinalResponse();
         individualIncomeSummaryRepository.findById(id)
@@ -316,6 +321,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteIndividualIncomeSummary(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         individualIncomeSummaryRepository.deleteById(id);
@@ -433,6 +439,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateMiningPackage(Integer id, MiningPackage miningPackage) {
         FinalResponse finalResponse = new FinalResponse();
         miningPackageRepository.findById(id)
@@ -449,6 +456,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteMiningPackage(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         miningPackageRepository.deleteById(id);
@@ -510,6 +518,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addDepositFund(DepositFund depositFund) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -529,6 +538,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateDepositFund(Integer id, DepositFund depositFund) {
         FinalResponse finalResponse = new FinalResponse();
         depositFundRepository.findById(id)
@@ -546,6 +556,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteDepositFund(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         depositFundRepository.deleteById(id);
@@ -905,6 +916,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addSupportTicket(SupportTicket supportTicket) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -923,6 +935,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateSupportTicket(Integer id, SupportTicket supportTicket) {
         FinalResponse finalResponse = new FinalResponse();
         supportTicketRepository.findById(id)
@@ -939,6 +952,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse resolveSupport(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         supportTicketRepository.findById(id)
@@ -951,6 +965,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteSupportTicket(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         supportTicketRepository.deleteById(id);
@@ -1019,6 +1034,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addWithDrawalRequest(WithdrawalRequest withdrawalRequest) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1042,6 +1058,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateWithDrawalRequest(Integer id, WithdrawalRequest withdrawalRequest) {
         FinalResponse finalResponse = new FinalResponse();
         withdrawalRequestRepository.findById(id)
@@ -1059,6 +1076,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteWithDrawalRequest(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         withdrawalRequestRepository.deleteById(id);
@@ -1114,6 +1132,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addCommissionLedger(CommissionLedger commissionLedger) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1132,6 +1151,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateCommissionLedger(Integer id, CommissionLedger commissionLedger) {
         FinalResponse finalResponse = new FinalResponse();
         comissionLedgerRepository.findById(id)
@@ -1147,6 +1167,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteCommissionLedger(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         comissionLedgerRepository.deleteById(id);
@@ -1425,6 +1446,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addIncomeSummary(IncomeSummary incomeSummary) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1443,6 +1465,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateIncomeSummary(Integer id, IncomeSummary incomeSummary) {
         FinalResponse finalResponse = new FinalResponse();
         incomeSummaryRepository.findById(id)
@@ -1458,6 +1481,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteIncomeSummary(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         incomeSummaryRepository.deleteById(id);
@@ -1508,6 +1532,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addAccountStatement(AccountStatement accountStatement) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1526,6 +1551,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateAccountStatement(Integer id, AccountStatement accountStatement) {
         FinalResponse finalResponse = new FinalResponse();
         accountStatementRepository.findById(id)
@@ -1541,6 +1567,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteAccountStatement(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         accountStatementRepository.deleteById(id);
@@ -1592,6 +1619,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addBusinessHistory(BusinessHistory businessHistory) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1610,6 +1638,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateBusinessHistory(Integer id, BusinessHistory businessHistory) {
         FinalResponse finalResponse = new FinalResponse();
         businessHistoryRepository.findById(id)
@@ -1627,6 +1656,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteBusinessHistory(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         businessHistoryRepository.deleteById(id);
@@ -1677,6 +1707,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addIndividualRankReward(IndividualRankReward individualRankReward) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1696,6 +1727,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateIndividualRankReward(Integer id, IndividualRankReward individualRankReward) {
         FinalResponse finalResponse = new FinalResponse();
         individualRankRewardRepository.findById(id)
@@ -1713,6 +1745,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteIndividualRankReward(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         individualRankRewardRepository.deleteById(id);
@@ -1763,6 +1796,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addCryptoDeposit(CryptoDeposit cryptoDeposit) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -1781,6 +1815,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateCryptoDeposit(Integer id, CryptoDeposit cryptoDeposit) {
         FinalResponse finalResponse = new FinalResponse();
         cryptoDepositRepository.findById(id)

@@ -89,6 +89,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addRankAndReward(RankReward rankReward) throws FinalException {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -115,6 +116,7 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateRankAndReward(Integer rankId, RankReward updatedRank) {
         FinalResponse finalResponse = new FinalResponse();
          rankRewardRepository.findById(rankId)
@@ -130,6 +132,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
    public FinalResponse deleteRankAndReward(Integer id){
         FinalResponse finalResponse = new FinalResponse();
         rankRewardRepository.deleteById(id);
@@ -174,6 +177,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addIncomeType(IncomeType incomeType) throws FinalException {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -194,6 +198,7 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateIncomeType(Integer rankId, IncomeType incomeType) {
         FinalResponse finalResponse = new FinalResponse();
         incomeTypeRepository.findById(rankId)
@@ -209,6 +214,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteIncomeType(Integer id){
         FinalResponse finalResponse = new FinalResponse();
         incomeTypeRepository.deleteById(id);
@@ -472,6 +478,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse addSubscriptionDefinition(SubscriptionDefinition subscriptionDefinition) {
         FinalResponse finalResponse = new FinalResponse();
         String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
@@ -491,6 +498,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse updateSubscriptionDefinition(Integer id, SubscriptionDefinition subscriptionDefinition) {
         FinalResponse finalResponse = new FinalResponse();
         subscriptionDefinitionRepo.findById(id)
@@ -507,6 +515,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FinalResponse deleteSubscriptionDefinition(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
         subscriptionDefinitionRepo.deleteById(id);
