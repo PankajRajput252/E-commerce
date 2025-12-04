@@ -20,6 +20,8 @@ public interface CryptoDepositService {
 
     FinalResponse confirmManually(String paymentId, String txHash);
 
+    Map<String, Object> createDepositV2(DepositRequest request);
+
 //    void processWebhookRaw(String rawBody, String signature);
 
 //     void processWebhook(Map<String, Object> body, String sig, String rawBody);

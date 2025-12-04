@@ -104,6 +104,86 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         return res.getBody();
     }
 
+    @Transactional
+    public Map<String, Object> createDepositV2(DepositRequest req) {
+
+        String payCurrency = mapUserCurrency(req.getSelectedCurrency());
+
+        // Step 1: Convert INR → USD using NowPayments rate
+        BigDecimal finalPriceAmount = req.getAmount();
+
+        if("INR".equalsIgnoreCase(req.getSelectedCurrency())) {
+            BigDecimal rate = fetchConversionRate("INR", "USD");  // OR INR→USDT
+            finalPriceAmount = req.getAmount().multiply(rate);
+        }
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("price_amount", finalPriceAmount);
+        payload.put("price_currency", "usd");   // keeps consistent
+        payload.put("pay_currency", payCurrency);
+        payload.put("ipn_callback_url", "http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/deposit/webhook");
+
+//        payload.put("is_fixed_rate", true);
+//        payload.put("strict_amount", true);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", apiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<?> entity = new HttpEntity<>(payload, headers);
+
+        ResponseEntity<Map> res =
+                restTemplate.postForEntity(baseUrl + "/payment", entity, Map.class);
+
+        Map<String, Object> response = res.getBody();
+
+        CryptoDeposit deposit = new CryptoDeposit();
+        deposit.setPaymentId(response.get("payment_id").toString());
+        deposit.setAmount(req.getAmount());  // Original INR/USDT amount user entered
+        deposit.setCurrency(req.getSelectedCurrency());
+        deposit.setUserNodeId(req.getUserNodeId());
+        deposit.setPayAddress(response.get("pay_address").toString());
+        deposit.setPaymentStatus("PENDING");
+        deposit.setUserNodeId(req.getUserNodeId());
+
+        cryptoDepositRepository.save(deposit);
+        if(Util.isDefined(req.getDepositPkId())){
+            depositFundRepository.updatePaymentIdBasedOnPkId(deposit.getPaymentId(),req.getUserNodeId() ,  req.getDepositPkId());
+        }
+
+        return response;
+    }
+
+    private String mapUserCurrency(String currency) {
+
+        switch (currency.toUpperCase()) {
+            case "INR":
+                return "usdttrc20"; // INR is converted to USDT internally
+            case "USDT":
+                return "usdttrc20";
+            case "BTC":
+                return "btc";
+            case "BNB":
+                return "bnbbsc";
+            case "ETH":
+                return "eth";
+            default:
+                return "usdttrc20";
+        }
+    }
+
+    private BigDecimal fetchConversionRate(String from, String to) {
+
+        String url = baseUrl + "/estimate?amount=1&currency_from="
+                + from.toLowerCase() + "&currency_to=" + to.toLowerCase();
+
+        ResponseEntity<Map> res =
+                restTemplate.getForEntity(url, Map.class);
+
+        return new BigDecimal(res.getBody().get("estimated_amount").toString());
+    }
+
+
 
 
 //    public void processWebhook(Map<String, Object> body, String sig) {

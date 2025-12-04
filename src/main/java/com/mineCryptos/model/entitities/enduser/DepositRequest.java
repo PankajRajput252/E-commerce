@@ -7,6 +7,8 @@ public class DepositRequest {
     private String userNodeId;
     private BigDecimal amount;
     private Integer depositPkId;
+    private String selectedCurrency;   // INR / USDT / BTC / BNB
+
 
     public String getUserNodeId() {
         return userNodeId;
@@ -30,5 +32,13 @@ public class DepositRequest {
 
     public void setDepositPkId(Integer depositPkId) {
         this.depositPkId = depositPkId;
+    }
+
+    public String getSelectedCurrency() {
+        return selectedCurrency;
+    }
+
+    public void setSelectedCurrency(String selectedCurrency) {
+        this.selectedCurrency = selectedCurrency;
     }
 }

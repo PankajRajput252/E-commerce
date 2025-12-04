@@ -39,7 +39,7 @@ public class CryptoDepositController {
 
     @PostMapping("/deposit/create")
     public ResponseEntity<?> createDeposit(@RequestBody DepositRequest request) {
-        return ResponseEntity.ok(cryptoDepositService.createDeposit(request));
+        return ResponseEntity.ok(cryptoDepositService.createDepositV2(request));
     }
 //
 //    @PostMapping("/deposit/webhook")
