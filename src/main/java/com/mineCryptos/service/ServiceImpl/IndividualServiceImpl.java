@@ -80,6 +80,8 @@ public class IndividualServiceImpl implements IndividualService {
     private ExchangeRequestRepository exchangeRequestRepository;
     @Autowired
     private ExchangeActivityLogRepository exchangeActivityLogRepository;
+    @Autowired
+    private ExchangeTradeRepository exchangeTradeRepository;
 
     @Override
     public FinalResponse getWalletData(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
@@ -2135,7 +2137,7 @@ public class IndividualServiceImpl implements IndividualService {
                 .map(existing -> {
                     existing.setUserNodeId(exchangeRequest.getUserNodeId());
                     existing.setAmountBTC(exchangeRequest.getAmountBTC());
-                    existing.setRateUsdt(exchangeRequest.getRateUsdt());
+                    existing.setRate(exchangeRequest.getRate());
                     existing.setStatus(exchangeRequest.getStatus());
                     return exchangeRequestRepository.save(existing);
                 }).orElseThrow(() -> new RuntimeException(" ExchangeRequest not found"));
@@ -2254,6 +2256,12 @@ public class IndividualServiceImpl implements IndividualService {
         exchangeActivityLog.setActionBy(userId);
         exchangeActivityLog.setMessage("User " + userId + " accepted request");
         finalResponse = addExchangeActivityLog(exchangeActivityLog);
+
+        ExchangeTrade trade = new ExchangeTrade();
+        trade.setRequestId(req.getExchangeRequestPkId());
+        trade.setSellerId(req.getUserNodeId());
+        trade.setBuyerId(userId);
+        trade.setExchangeStatus("PENDING");
         finalResponse.setResponse(updated);
 
         finalResponse = Util.setSuccessMessage(finalResponse);
@@ -2271,6 +2279,10 @@ public class IndividualServiceImpl implements IndividualService {
         req.setStatus("COMPLETED");
         ExchangeRequest updated = exchangeRequestRepository.save(req);
 
+        ExchangeTrade exchangeTrade=exchangeTradeRepository.findByRequestIdAndActiveStateCodeFkId(requestId,"ACTIVE");
+        exchangeTrade.setExchangeStatus("COMPLETED");
+        exchangeTradeRepository.save(exchangeTrade);
+
         ExchangeActivityLog exchangeActivityLog = new ExchangeActivityLog();
         exchangeActivityLog.setRequestId(requestId);
         exchangeActivityLog.setActionType("COMPLETE");
@@ -2280,6 +2292,71 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse.setResponse(updated);
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getExchangeTrade(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+        FinalResponse<ExchangeTrade> finalResponse = new FinalResponse<>();
+        Pageable pageable = Util.getPageable(size, page);
+        List<ExchangeTrade> exchangeTradeList = populateExchangeTradeView(inputPkId, inputFkId, filterBy, searchValue, pageable);
+        int count = populateExchangeTradeCount(inputPkId, inputFkId, filterBy);
+        finalResponse.setData(exchangeTradeList);
+        finalResponse.setCount(count);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+    private int populateExchangeTradeCount(Integer inputPkId, String inputFkId, String filterBy) {
+        int count = 0;
+        if (!Util.isDefined(filterBy)) {
+            filterBy = "ACTIVE";
+        }
+        if (Util.isDefined(inputPkId)) {
+            count = exchangeTradeRepository.countByExchangeTradePkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+        } else {
+            count = exchangeTradeRepository.countByActiveStateCodeFkId(filterBy);
+        }
+
+        return count;
+    }
+
+    private List<ExchangeTrade> populateExchangeTradeView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+        List<ExchangeTrade> exchangeTradeList = new ArrayList<>();
+        if (Util.isDefined(inputPkId)) {
+            ExchangeTrade exchangeTrade = exchangeTradeRepository.findByExchangeTradePkIdAndActiveStateCodeFkId(inputPkId, filterBy);
+            exchangeTradeList.add(exchangeTrade);
+        }  else {
+            exchangeTradeList = exchangeTradeRepository.findByActiveStateCodeFkId(filterBy, pageable);
+        }
+        return exchangeTradeList;
+    }
+
+    @Override
+    public FinalResponse addExchangeTrade(ExchangeTrade exchangeTrade) {
+        FinalResponse finalResponse = new FinalResponse();
+        String vLastModifiedDateTime = Util.getCurrentUTCTimestampString();
+        exchangeTrade.setEffectiveDateTime(vLastModifiedDateTime);
+        //effective date cannot be greater than present date
+        if (Util.compareDate(exchangeTrade.getEffectiveDateTime(), vLastModifiedDateTime) > 0) {
+            Util.setMessage(finalResponse, "100", "Error: Effective date time cannot be greater than the present moment.");
+            return finalResponse;
+        }
+        exchangeTrade.setExchangeStatus("IN_PROGRESS");
+        Util.setCommonDefaultAttributes(exchangeTrade);
+        exchangeTradeRepository.save(exchangeTrade);
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateExchangeTrade(Integer id, ExchangeTrade exchangeTrade) {
+        return null;
+    }
+
+    @Override
+    public FinalResponse deleteExchangeTrade(Integer id) {
+        return null;
     }
 
 

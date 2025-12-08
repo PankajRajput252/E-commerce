@@ -622,4 +622,36 @@ public class IndividualController {
     public FinalResponse completeRequest(@PathVariable Integer requestId, @PathVariable String userId) {
         return individualService.completeRequest(requestId, userId);
     }
+
+
+    @GetMapping("/getExchangeTrade")
+    public FinalResponse getExchangeTrade(
+            @RequestParam(value = "inputPkId", required = false) String inputPkId,
+            @RequestParam(value = "inputFkId", required = false) String inputFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size,
+            @RequestParam(value = "filterBy", required = false) String filterBy,
+            @RequestParam(value = "searchValue", required = false) String searchValue
+    ) throws FinalException {
+        Integer inputPkIdInt = null;
+        if (Util.isDefined(inputPkId)) {
+            inputPkIdInt = Util.convertStringToInteger(inputPkId);
+        }
+        return individualService.getExchangeTrade(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+    }
+
+    @PostMapping("/addExchangeTrade")
+    public FinalResponse addExchangeTrade(@RequestBody ExchangeTrade exchangeTrade) throws FinalException {
+        return this.individualService.addExchangeTrade(exchangeTrade);
+    }
+
+    @PutMapping("/updateExchangeTrade/{id}")
+    public FinalResponse updateExchangeTrade(@PathVariable Integer id, @RequestBody ExchangeTrade exchangeTrade) {
+        return individualService.updateExchangeTrade(id, exchangeTrade);
+    }
+
+    @DeleteMapping("/deleteExchangeTrade/{id}")
+    public FinalResponse deleteExchangeTrade(@PathVariable Integer id) {
+        return individualService.deleteExchangeTrade(id);
+    }
 }

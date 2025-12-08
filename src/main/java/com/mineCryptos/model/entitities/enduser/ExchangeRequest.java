@@ -19,11 +19,17 @@ public class ExchangeRequest extends StandardFieldClass {
     @Column(name = "USER_NODE_ID")
     private String userNodeId;
 
+    @Column(name = "FROM_CURRENCY")
+    private String fromCurrency ;
+
+    @Column(name = "TO_CURRENCY")
+    private String toCurrency ;
+
     @Column(name = "AMOUNT_BTC")
     private BigDecimal amountBTC;
 
-    @Column(name = "RATE_USDT")
-    private BigDecimal rateUsdt;
+    @Column(name = "RATE")
+    private BigDecimal rate;
 
     @Column(name = "STATUS")
     private String status;
@@ -52,19 +58,35 @@ public class ExchangeRequest extends StandardFieldClass {
         this.amountBTC = amountBTC;
     }
 
-    public BigDecimal getRateUsdt() {
-        return rateUsdt;
-    }
-
-    public void setRateUsdt(BigDecimal rateUsdt) {
-        this.rateUsdt = rateUsdt;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getFromCurrency() {
+        return fromCurrency;
+    }
+
+    public void setFromCurrency(String fromCurrency) {
+        this.fromCurrency = fromCurrency;
+    }
+
+    public String getToCurrency() {
+        return toCurrency;
+    }
+
+    public void setToCurrency(String toCurrency) {
+        this.toCurrency = toCurrency;
+    }
+
+    public BigDecimal getRate() {
+        return rate;
+    }
+
+    public void setRate(BigDecimal rate) {
+        this.rate = rate;
     }
 }

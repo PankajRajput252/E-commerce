@@ -155,4 +155,12 @@ public interface IndividualService {
     FinalResponse acceptRequest(Integer requestId, String userId);
 
     FinalResponse completeRequest(Integer requestId, String userId);
+
+    FinalResponse getExchangeTrade(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+
+    FinalResponse addExchangeTrade(ExchangeTrade exchangeTrade);
+
+    FinalResponse updateExchangeTrade(Integer id, ExchangeTrade exchangeTrade);
+
+    FinalResponse deleteExchangeTrade(Integer id);
 }
