@@ -2097,7 +2097,7 @@ public class IndividualServiceImpl implements IndividualService {
         } else if (Util.isDefined(inputFkId)) {
             exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
         } else {
-            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkId(filterBy, pageable);
+            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkIdAndStatus(filterBy,"OPEN", pageable);
         }
         return exchangeRequestList;
     }
