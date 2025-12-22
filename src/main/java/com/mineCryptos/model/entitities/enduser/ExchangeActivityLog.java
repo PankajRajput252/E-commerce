@@ -27,6 +27,9 @@ public class ExchangeActivityLog extends StandardFieldClass {
     @Column(name = "MESSAGE")
     private String message;
 
+    @Transient
+    private ExchangeRequest exchangeRequest;
+
     public Integer getExchangeActivityLogPkId() {
         return exchangeActivityLogPkId;
     }
@@ -65,5 +68,13 @@ public class ExchangeActivityLog extends StandardFieldClass {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public ExchangeRequest getExchangeRequest() {
+        return exchangeRequest;
+    }
+
+    public void setExchangeRequest(ExchangeRequest exchangeRequest) {
+        this.exchangeRequest = exchangeRequest;
     }
 }

@@ -2206,6 +2206,13 @@ public class IndividualServiceImpl implements IndividualService {
         }  else {
             exchangeActivityLogList = exchangeActivityLogRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
+        if(Util.isDefined(exchangeActivityLogList)){
+            exchangeActivityLogList.stream().map((exchangeActivityLog)->{
+                ExchangeRequest exchangeRequest = exchangeRequestRepository.findByExchangeRequestPkIdAndActiveStateCodeFkId(exchangeActivityLog.getRequestId(), "ACTIVE");
+                exchangeActivityLog.setExchangeRequest(exchangeRequest);
+                return exchangeActivityLog;
+            }).collect(Collectors.toList());
+        }
         return exchangeActivityLogList;
     }
 
