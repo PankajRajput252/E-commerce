@@ -37,6 +37,9 @@ public class ExchangeRequest extends StandardFieldClass {
     @Column(name = "STATUS")
     private String status;
 
+    @Transient
+    private ExchangeTrade exchangeTrade;
+
     public Integer getExchangeRequestPkId() {
         return exchangeRequestPkId;
     }
@@ -99,5 +102,13 @@ public class ExchangeRequest extends StandardFieldClass {
 
     public void setExchangeAddress(String exchangeAddress) {
         this.exchangeAddress = exchangeAddress;
+    }
+
+    public ExchangeTrade getExchangeTrade() {
+        return exchangeTrade;
+    }
+
+    public void setExchangeTrade(ExchangeTrade exchangeTrade) {
+        this.exchangeTrade = exchangeTrade;
     }
 }

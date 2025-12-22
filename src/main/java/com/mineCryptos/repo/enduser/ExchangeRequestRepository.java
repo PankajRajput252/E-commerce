@@ -20,4 +20,6 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     int countByActiveStateCodeFkIdAndUserNodeId(String filterBy, String inputFkId);
 
     List<ExchangeRequest> findByActiveStateCodeFkIdAndStatus(String filterBy, String open, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndStatus(String filterBy, String open);
 }
