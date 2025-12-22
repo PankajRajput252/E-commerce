@@ -2262,6 +2262,7 @@ public class IndividualServiceImpl implements IndividualService {
         trade.setSellerId(req.getUserNodeId());
         trade.setBuyerId(userId);
         trade.setExchangeStatus("PENDING");
+        exchangeTradeRepository.save(trade);
         finalResponse.setResponse(updated);
 
         finalResponse = Util.setSuccessMessage(finalResponse);

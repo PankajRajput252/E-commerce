@@ -25,6 +25,9 @@ public class ExchangeRequest extends StandardFieldClass {
     @Column(name = "TO_CURRENCY")
     private String toCurrency ;
 
+    @Column(name = "EXCHANGE_ADDRESS")
+    private String exchangeAddress ;
+
     @Column(name = "AMOUNT_BTC")
     private BigDecimal amountBTC;
 
@@ -88,5 +91,13 @@ public class ExchangeRequest extends StandardFieldClass {
 
     public void setRate(BigDecimal rate) {
         this.rate = rate;
+    }
+
+    public String getExchangeAddress() {
+        return exchangeAddress;
+    }
+
+    public void setExchangeAddress(String exchangeAddress) {
+        this.exchangeAddress = exchangeAddress;
     }
 }
