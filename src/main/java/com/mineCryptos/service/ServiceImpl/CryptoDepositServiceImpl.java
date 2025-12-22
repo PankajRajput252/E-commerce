@@ -112,10 +112,12 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         if("INR".equalsIgnoreCase(req.getSelectedCurrency())) {
             BigDecimal minAmount = getMinAmount("inr", "usdt");
 
-            if (req.getAmount().compareTo(minAmount) < 0) {
-                throw new RuntimeException("Minimum allowed amount is " + minAmount + " INR");
-
-            }
+//            if (req.getAmount().compareTo(minAmount) < 0) {
+//                Util.setMessage(finalResponse, "100", "Error: Request is already locked or completed.");
+//                return finalResponse;
+//                throw new RuntimeException("Minimum allowed amount is " + minAmount + " INR");
+//
+//            }
             BigDecimal rate = fetchConversionRate("INR", "USD");  // OR INR→USDT
             finalPriceAmount = req.getAmount().multiply(rate);
 
