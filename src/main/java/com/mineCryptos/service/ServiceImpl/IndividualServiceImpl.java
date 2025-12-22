@@ -2083,7 +2083,7 @@ public class IndividualServiceImpl implements IndividualService {
         } else if (Util.isDefined(inputFkId)) {
             count = exchangeRequestRepository.countByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId);
         } else {
-            count = exchangeRequestRepository.countByActiveStateCodeFkIdAndStatus(filterBy,"OPEN");
+            count = exchangeRequestRepository.countByActiveStateCodeFkId(filterBy);
         }
 
         return count;
@@ -2097,11 +2097,11 @@ public class IndividualServiceImpl implements IndividualService {
         } else if (Util.isDefined(inputFkId)) {
             exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkIdAndUserNodeId(filterBy, inputFkId, pageable);
         } else {
-            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkIdAndStatus(filterBy,"OPEN", pageable);
+            exchangeRequestList = exchangeRequestRepository.findByActiveStateCodeFkId(filterBy, pageable);
         }
         if(Util.isDefined(exchangeRequestList)){
             exchangeRequestList.stream().map((exchangeRequest)->{
-                ExchangeTrade exchangeTrade = exchangeTradeRepository.findByRequestIdAndActiveStateCodeFkId(exchangeRequest.getExchangeRequestPkId(), "ACTIVE");
+                ExchangeTrade exchangeTrade = exchangeTradeRepository.findByRequestIdAndActiveStateCodeFkIdOrderByCreatedDatetimeDesc(exchangeRequest.getExchangeRequestPkId(), "ACTIVE");
                 exchangeRequest.setExchangeTrade(exchangeTrade);
                 return exchangeRequest;
             }).collect(Collectors.toList());

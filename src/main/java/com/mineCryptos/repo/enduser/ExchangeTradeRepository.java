@@ -17,4 +17,6 @@ public interface ExchangeTradeRepository extends JpaRepository<ExchangeTrade, In
     int countByActiveStateCodeFkId(String filterBy);
 
     ExchangeTrade findByRequestIdAndActiveStateCodeFkId(Integer requestId, String active);
+
+    ExchangeTrade findByRequestIdAndActiveStateCodeFkIdOrderByCreatedDatetimeDesc(Integer exchangeRequestPkId, String active);
 }
