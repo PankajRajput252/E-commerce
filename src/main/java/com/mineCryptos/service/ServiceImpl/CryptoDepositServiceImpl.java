@@ -179,7 +179,8 @@ public class CryptoDepositServiceImpl implements CryptoDepositService {
         }
     }
 
-    private BigDecimal fetchConversionRate(String from, String to) {
+    @Override
+    public BigDecimal fetchConversionRate(String from, String to) {
 
         String url = baseUrl + "/estimate?amount=1&currency_from="
                 + from.toLowerCase() + "&currency_to=" + to.toLowerCase();

@@ -5,6 +5,7 @@ import com.mineCryptos.model.entitities.enduser.BtcWithdrawRequest;
 import com.mineCryptos.model.entitities.enduser.DepositRequest;
 import com.mineCryptos.model.entitities.enduser.WithdrawalRequest;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 public interface CryptoDepositService {
@@ -25,4 +26,5 @@ public interface CryptoDepositService {
 //    void processWebhookRaw(String rawBody, String signature);
 
 //     void processWebhook(Map<String, Object> body, String sig, String rawBody);
+     BigDecimal fetchConversionRate(String from, String to);
 }

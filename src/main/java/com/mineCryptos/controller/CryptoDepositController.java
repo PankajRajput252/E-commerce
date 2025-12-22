@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -172,6 +173,12 @@ public class CryptoDepositController {
             @RequestParam(value = "paymentId") String paymentId,
             @RequestParam(value = "txHash", required = false) String txHash){
         return cryptoDepositService.confirmManually(paymentId, txHash);
+    }
+
+    // String from, String to
+    @GetMapping("/fetchConversionRate/{from}/{to}")
+    public BigDecimal fetchConversionRate(@PathVariable String from, @PathVariable String to) {
+        return  cryptoDepositService.fetchConversionRate(from,to);
     }
 
 
