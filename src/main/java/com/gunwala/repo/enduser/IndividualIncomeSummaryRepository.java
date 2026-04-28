@@ -1,0 +1,21 @@
+package com.gunwala.repo.enduser;
+
+import com.gunwala.model.entitities.enduser.IndividualIncomeSummary;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface IndividualIncomeSummaryRepository extends JpaRepository<IndividualIncomeSummary,Integer> {
+    IndividualIncomeSummary findByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    List<IndividualIncomeSummary> findByActiveStateCodeFkId(String active, Pageable pageable);
+
+    int countByActiveStateCodeFkId(String active);
+
+    int countByIndividualIncomeSummaryPkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    List<IndividualIncomeSummary> findByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndUserNodeId(String active, String inputFkId);
+}

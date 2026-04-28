@@ -1,0 +1,29 @@
+package com.gunwala.repo.enduser;
+
+import com.gunwala.model.entitities.enduser.MiningPackage;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface MiningPackageRepository extends JpaRepository<MiningPackage,Integer>{
+    List<MiningPackage> findByActiveStateCodeFkId(String active, Pageable pageable);
+
+    MiningPackage findByMiningPackagePkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    int countByActiveStateCodeFkId(String active);
+
+    int countByMiningPackagePkIdAndActiveStateCodeFkId(Integer inputPkId, String active);
+
+    List<MiningPackage> findByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndUserNodeCode(String active, String inputFkId);
+
+    MiningPackage findByModeAndActiveStateCodeFkId(String inputPkId, String filterBy);
+
+    List<MiningPackage> findByModeAndActiveStateCodeFkIdAndUserNodeCode(String inputPkId, String filterBy, String inputFkId, Pageable pageable);
+
+    int countByModeAndActiveStateCodeFkIdAndUserNodeCode(String inputPkId, String filterBy, String inputFkId);
+
+    Long countByActiveStateCodeFkIdAndUserNodeCodeAndMode(String active, String userNodeCode, String node);
+}
