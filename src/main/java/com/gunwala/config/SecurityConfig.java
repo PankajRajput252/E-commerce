@@ -43,6 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeHttpRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/deposit/webhook").permitAll()
                 .antMatchers(HttpMethod.GET).permitAll()

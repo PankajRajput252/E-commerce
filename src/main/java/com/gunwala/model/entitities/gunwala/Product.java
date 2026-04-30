@@ -68,6 +68,9 @@ public class Product extends StandardFieldClass {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
+    @Column(name = "IS_STORE_PRODUCT")
+    private boolean isStoreProduct;
+
     @Transient
     private List<ProductImage> productImageList;
 
@@ -222,5 +225,13 @@ public class Product extends StandardFieldClass {
 
     public void setProductImageList(List<ProductImage> productImageList) {
         this.productImageList = productImageList;
+    }
+
+    public boolean getIsStoreProduct() {
+        return isStoreProduct;
+    }
+
+    public void setIsStoreProduct(boolean isStoreProduct) {
+        this.isStoreProduct = isStoreProduct;
     }
 }
