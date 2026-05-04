@@ -18,4 +18,8 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
     List<Product> findByActiveStateCodeFkIdAndSellerId(String filterBy, String inputFkId, Pageable pageable);
 
     List<Product> findByActiveStateCodeFkId(String filterBy, Pageable pageable);
+
+    List<Product> findByActiveStateCodeFkIdAndCategoryId(String filterBy, Integer categoryId, Pageable pageable);
+
+    int countByActiveStateCodeFkIdAndCategoryId(String activeStateCodeFkId, Integer attr0);
 }

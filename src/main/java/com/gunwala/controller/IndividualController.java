@@ -34,14 +34,19 @@ public class IndividualController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "25") int size,
             @RequestParam(value = "filterBy", required = false) String filterBy,
-            @RequestParam(value = "searchValue", required = false) String searchValue
+            @RequestParam(value = "searchValue", required = false) String searchValue,
+            @RequestParam(value = "categoryId", required = false) String categoryId
     ) throws FinalException {
         Integer inputPkIdInt = null;
         Integer inputFkIdInt = null;
+        Integer categoryIdInt = null;
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
-        return individualService.getProduct(inputPkIdInt, inputFkId, page, size, filterBy, searchValue);
+        if (Util.isDefined(categoryId)) {
+            categoryIdInt = Util.convertStringToInteger(categoryId);
+        }
+        return individualService.getProduct(inputPkIdInt, inputFkId, page, size, filterBy, searchValue,categoryIdInt);
     }
 
 

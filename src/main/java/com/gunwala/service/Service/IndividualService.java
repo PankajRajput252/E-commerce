@@ -10,7 +10,7 @@ import com.gunwala.model.entitities.gunwala.ProductImage;
 public interface IndividualService {
     FinalResponse addProduct(Product product);
 
-    FinalResponse getProduct(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue);
+    FinalResponse getProduct(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId);
 
     FinalResponse deleteProduct(Integer id);
 

@@ -66,20 +66,23 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getProduct(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue) {
+    public FinalResponse getProduct(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId) {
         FinalResponse<Product> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
-        List<Product> productList = populateProductView(inputPkId,inputFkId, filterBy,searchValue, pageable);
-        int count = populateUserViewCount(inputPkId, inputFkId, filterBy);
+        List<Product> productList = populateProductView(inputPkId,inputFkId, filterBy,searchValue, pageable,categoryId);
+        int count = populateProductViewCount(inputPkId, inputFkId, filterBy,categoryId);
         finalResponse.setData(productList);
         finalResponse.setCount( count);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
 
-    private int populateUserViewCount(Integer inputPkId, String inputFkId, String filterBy) {
+    private int populateProductViewCount(Integer inputPkId, String inputFkId, String filterBy,Integer categoryId) {
         int count = 0;
-        if(Util.isDefined(filterBy)) {
+        if(Util.isDefined(categoryId)){
+            count = productRepository.countByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId);
+        }
+        else if(Util.isDefined(filterBy)) {
             if (Util.isDefined(inputPkId)) {
                 count = productRepository.countByProductPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
             } else if (Util.isDefined(inputFkId)) {
@@ -95,10 +98,13 @@ public class IndividualServiceImpl implements IndividualService {
         return count;
     }
 
-    private List<Product> populateProductView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable) {
+    private List<Product> populateProductView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable,Integer categoryId) {
 
         List<Product> productList = new ArrayList<>();
-        if(Util.isDefined(filterBy)) {
+        if(Util.isDefined(categoryId)){
+            productList = productRepository.findByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId, pageable);
+        }
+       else if(Util.isDefined(filterBy)) {
             if (Util.isDefined(inputPkId)) {
                 Product product = productRepository.findByProductPkIdAndActiveStateCodeFkId(inputPkId, filterBy);
                 productList.add(product);
