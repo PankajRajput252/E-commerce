@@ -7,6 +7,7 @@ import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.Category;
+import com.gunwala.model.entitities.gunwala.Favorites;
 import com.gunwala.model.entitities.gunwala.Product;
 import com.gunwala.model.entitities.gunwala.ProductImage;
 import com.gunwala.service.Service.IndividualService;
@@ -153,6 +154,7 @@ public class IndividualController {
         if (Util.isDefined(inputPkId)) {
             inputPkIdInt = Util.convertStringToInteger(inputPkId);
         }
+
         if (Util.isDefined(inputPkId)) {
             inputFkIdInt = Util.convertStringToInteger(inputFkId);
         }
@@ -198,6 +200,39 @@ public class IndividualController {
     public FinalResponse deleteSupportTicket(@PathVariable Integer id) {
         return this.individualService.deleteSupportTicket(id);
     }
+
+    @GetMapping("/getFavorites")
+    public FinalResponse getFavorites(@RequestParam(value = "favoritesPkId", required = false) String favoritesPkId, @RequestParam(value = "userFkId", required = false) String userFkId, @RequestParam(value = "productFkId", required = false) String productFkId){
+        Integer favoritesPkIdInt=null;
+        Integer productFkIdInt=null;
+
+        if(Util.isDefined(favoritesPkId)){
+            favoritesPkIdInt=Util.convertStringToInteger(favoritesPkId);
+        }
+
+        if(Util.isDefined(productFkIdInt)){
+            productFkIdInt=Util.convertStringToInteger(productFkId);
+        }
+
+        return individualService.getFavorites(favoritesPkIdInt,userFkId,productFkIdInt);
+    }
+
+    @PostMapping("/postFavorites")
+    public FinalResponse postFavorites(@RequestBody Favorites favorites){
+        return individualService.postFavorites(favorites);
+    }
+
+    @PutMapping("/updateFavorites")
+    public FinalResponse updateFavorites(@RequestBody Favorites favorites){
+        return individualService.updateFavorrites(favorites);
+    }
+
+    @DeleteMapping("/deleteFavorites")
+        public FinalResponse updateFavorites(@RequestParam (value = "favoritePkId") Integer favoritePkId){
+            return individualService.deleteFavorites(favoritePkId);
+        }
+
+
 
 
 }

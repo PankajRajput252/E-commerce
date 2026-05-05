@@ -4,6 +4,7 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.Category;
+import com.gunwala.model.entitities.gunwala.Favorites;
 import com.gunwala.model.entitities.gunwala.Product;
 import com.gunwala.model.entitities.gunwala.ProductImage;
 
@@ -49,4 +50,12 @@ public interface IndividualService {
     FinalResponse resolveSupport(Integer id);
 
     FinalResponse deleteSupportTicket(Integer id);
+
+    FinalResponse getFavorites(Integer favoritesPkIdInt, String userFkIdInt, Integer productFkIdInt);
+
+    FinalResponse postFavorites(Favorites favorites);
+
+    FinalResponse updateFavorrites(Favorites favorites);
+
+    FinalResponse deleteFavorites(Integer favoritePkId);
 }

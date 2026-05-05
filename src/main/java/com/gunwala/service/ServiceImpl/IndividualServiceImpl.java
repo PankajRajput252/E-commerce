@@ -5,12 +5,14 @@ import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.Category;
+import com.gunwala.model.entitities.gunwala.Favorites;
 import com.gunwala.model.entitities.gunwala.Product;
 import com.gunwala.model.entitities.gunwala.ProductImage;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.repo.admin.SubscriptionDefinitionRepo;
 import com.gunwala.repo.enduser.SupportTicketRepository;
 import com.gunwala.repo.gunwala.CategoryRepository;
+import com.gunwala.repo.gunwala.FavoriteRepository;
 import com.gunwala.repo.gunwala.ProductImageRepository;
 import com.gunwala.repo.gunwala.ProductRepository;
 import com.gunwala.service.Service.ImageUploadService;
@@ -19,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +45,8 @@ public class IndividualServiceImpl implements IndividualService {
     private UserRepository userRepository;
     @Autowired
     private ImageUploadService imageUploadService;
+    @Autowired
+    private FavoriteRepository favoriteRepository;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -430,7 +436,6 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
 
-
     private Long populateSupportTicketCount(Integer inputPkId, String inputFkId, String filterBy) {
         Long count = Long.valueOf(0L);
         if (Util.isDefined(inputPkId)) {
@@ -455,7 +460,6 @@ public class IndividualServiceImpl implements IndividualService {
         else if (Util.isDefined(inputFkId)) {
             supportTicketList = this.supportTicketRepository.findByUserNodeIdAndActiveStateCodeFkId(inputFkId,"ACTIVE");
         } else {
-
             supportTicketList = this.supportTicketRepository.findAll();
         }
         supportTicketList.stream().map(supportTicket -> {
@@ -515,6 +519,57 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+    @Override
+    public FinalResponse getFavorites(Integer favoritesPkId, String userFkId, Integer productFkId) {
+        FinalResponse<Favorites> finalResponse=new FinalResponse();
+        List<Favorites> favoritesList=new ArrayList<>();
+        if(Util.isDefined(favoritesPkId)){
+            favoritesList=favoriteRepository.findByFavoritesPkId(favoritesPkId);
+        } else if (Util.isDefined(userFkId)) {
+            favoritesList=favoriteRepository.findByUserFkId(userFkId);
+        } else if (Util.isDefined(productFkId)) {
+            favoritesList=favoriteRepository.findByProductFkId(productFkId);
+        }else{
+            favoritesList=favoriteRepository.findAll();
+        }
+
+        if(favoritesList.size()>0){
+            for(Favorites favorites : favoritesList){
+                favorites.setUserName(userRepository.fetchUserNameBasedOnNodeId(favorites.getUserFkId(), "ACTIVE"));
+            }
+        }
+
+        finalResponse.setData(favoritesList);
+        return finalResponse;
+
+    }
+
+    @Override
+    public FinalResponse postFavorites(Favorites favorites) {
+        FinalResponse finalResponse = new FinalResponse();
+        favorites.setCreatedAt(LocalDateTime.now());
+        favoriteRepository.save(favorites);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse updateFavorrites(Favorites favorites) {
+        favoriteRepository.updateFavorite(favorites.getFavoritesPkId(),favorites.getUserFkId(),favorites.getProductFkId(),favorites.getCreatedAt());
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteFavorites(Integer favoritePkId) {
+        favoriteRepository.deleteById(favoritePkId);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 
 
 }
