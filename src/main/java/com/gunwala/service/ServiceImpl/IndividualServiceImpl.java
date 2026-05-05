@@ -575,8 +575,8 @@ public class IndividualServiceImpl implements IndividualService {
         dashBoardDetails.setActiveUser(userRepository.countByActiveStateCodeFkId("ACTIVE"));
         dashBoardDetails.setInActiveUser(userRepository.countByActiveStateCodeFkId("INACTIVE"));
         dashBoardDetails.setTotalUser((int) userRepository.count());
-//        dashBoardDetails.setNormalUser();
-//        dashBoardDetails.setPremiumUser();
+        dashBoardDetails.setNormalUser(userRepository.countByUserTypeAndActiveStateCodeFkId("NORMAL_USER","ACTIVE"));
+        dashBoardDetails.setPremiumUser(userRepository.countByIsPremiumAndActiveStateCodeFkId(true,"ACTIVE"));
         dashBoardDetails.setTotalProduct((int)productRepository.count());
 
         FinalResponse finalResponse = new FinalResponse();
