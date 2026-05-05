@@ -4,10 +4,7 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.repo.admin.SubscriptionDefinitionRepo;
 import com.gunwala.repo.enduser.SupportTicketRepository;
@@ -568,6 +565,23 @@ public class IndividualServiceImpl implements IndividualService {
         favoriteRepository.deleteById(favoritePkId);
         FinalResponse finalResponse=new FinalResponse();
         Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getDashBoardDetail() {
+        DashBoardDetails dashBoardDetails = new DashBoardDetails();
+
+        dashBoardDetails.setActiveUser(userRepository.countByActiveStateCodeFkId("ACTIVE"));
+        dashBoardDetails.setInActiveUser(userRepository.countByActiveStateCodeFkId("INACTIVE"));
+        dashBoardDetails.setTotalUser((int) userRepository.count());
+//        dashBoardDetails.setNormalUser();
+//        dashBoardDetails.setPremiumUser();
+        dashBoardDetails.setTotalProduct((int)productRepository.count());
+
+        FinalResponse finalResponse = new FinalResponse();
+        finalResponse.setResponse(dashBoardDetails);
+
         return finalResponse;
     }
 

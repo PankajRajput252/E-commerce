@@ -58,4 +58,6 @@ public interface IndividualService {
     FinalResponse updateFavorrites(Favorites favorites);
 
     FinalResponse deleteFavorites(Integer favoritePkId);
+
+    FinalResponse getDashBoardDetail();
 }

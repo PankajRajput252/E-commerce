@@ -232,6 +232,10 @@ public class IndividualController {
             return individualService.deleteFavorites(favoritePkId);
         }
 
+    @GetMapping("/getDashBoardDetail")
+    public FinalResponse getDashBoardDetail(){
+        return individualService.getDashBoardDetail();
+    }
 
 
 

@@ -48,8 +48,12 @@ public class UserServiceImpl implements UserService {
             Util.setMessage(finalResponse, "100", "Error: This User Phone already exists.");
             return finalResponse;
         }
-        if(user.getReferralCode() == null || user.getReferralCode().trim().isEmpty()){
-            user.setReferralCode("NODE24770625");
+
+        if(user.getIsUserIsAdmin()){
+            user.setUserType("ADMIN");
+        }
+        else {
+            user.setUserType("NORMAL");
         }
 
         Util.setCommonDefaultAttributes(user);
@@ -247,10 +251,14 @@ public class UserServiceImpl implements UserService {
         if(Util.isDefined(user.getIsUserIsAdmin())) {
             Role role = this.roleRepository.findById(FinalConstants.ADMIN_USER).get();
             user.getRoles().add(role);
+            user.setUserType("ADMIN_USER");
+
         }
         else{
             Role role = this.roleRepository.findById(FinalConstants.NORMAL_USER).get();
             user.getRoles().add(role);
+            user.setUserType("NORMAL_USER");
+
         }
         userRepository.save(user);
         finalResponse = Util.setSuccessMessage(finalResponse);
