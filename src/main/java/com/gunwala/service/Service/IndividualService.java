@@ -3,10 +3,7 @@ package com.gunwala.service.Service;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 
 public interface IndividualService {
     FinalResponse addProduct(Product product);
@@ -60,4 +57,12 @@ public interface IndividualService {
     FinalResponse deleteFavorites(Integer favoritePkId);
 
     FinalResponse getDashBoardDetail();
+
+    FinalResponse getUserWallet(Integer userWalletPkId, String userFkId);
+
+    FinalResponse postUserWallet(UserWallet userWallet);
+
+    FinalResponse deleteUserWallet(Integer userWalletPkId, String userFkId);
+
+    FinalResponse putUserWallet(UserWallet userWallet);
 }

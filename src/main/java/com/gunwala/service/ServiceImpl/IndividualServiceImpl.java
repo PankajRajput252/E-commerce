@@ -8,10 +8,7 @@ import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.repo.admin.SubscriptionDefinitionRepo;
 import com.gunwala.repo.enduser.SupportTicketRepository;
-import com.gunwala.repo.gunwala.CategoryRepository;
-import com.gunwala.repo.gunwala.FavoriteRepository;
-import com.gunwala.repo.gunwala.ProductImageRepository;
-import com.gunwala.repo.gunwala.ProductRepository;
+import com.gunwala.repo.gunwala.*;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +42,8 @@ public class IndividualServiceImpl implements IndividualService {
     private ImageUploadService imageUploadService;
     @Autowired
     private FavoriteRepository favoriteRepository;
+    @Autowired
+    private UserWalletRepo userWalletRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -583,6 +583,55 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse.setResponse(dashBoardDetails);
 
         return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getUserWallet(Integer userWalletPkId, String userFkId) {
+        FinalResponse <UserWallet> finalResponse=new FinalResponse<>();
+        List <UserWallet> userWalletList = new ArrayList<>();
+
+        if(Util.isDefined(userWalletPkId)){
+            userWalletList=userWalletRepo.findByUserWalletPkId(userWalletPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userWalletList=userWalletRepo.findByUserFkId(userFkId);
+        }else{
+            userWalletList=userWalletRepo.findAll();
+        }
+
+        finalResponse.setData(userWalletList);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse postUserWallet(UserWallet userWallet) {
+        userWalletRepo.save(userWallet);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteUserWallet(Integer userWalletPkId, String userFkId) {
+        if(Util.isDefined(userWalletPkId)){
+            userWalletRepo.deleteById(userWalletPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userWalletRepo.deleteByUserFkId(userFkId);
+        }
+        FinalResponse finalResponse=new FinalResponse();
+        finalResponse=Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse putUserWallet(UserWallet userWallet) {
+        userWalletRepo.updateUserWallet(userWallet.getUserWalletPkId(),userWallet.getUserFkId(),userWallet.getPaidFor(),userWallet.getAmount(),userWallet.getCurrecyCode(),userWallet.getCreatedDatetime());
+        FinalResponse finalResponse=new FinalResponse();
+        finalResponse=Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
     }
 
 

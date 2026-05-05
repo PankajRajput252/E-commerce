@@ -6,10 +6,7 @@ import com.gunwala.model.User;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -235,6 +232,32 @@ public class IndividualController {
     @GetMapping("/getDashBoardDetail")
     public FinalResponse getDashBoardDetail(){
         return individualService.getDashBoardDetail();
+    }
+
+    @GetMapping("/getUserWallet")
+    public FinalResponse getUserWallet(
+            @RequestParam (value = "userWalletPkId",required=false) Integer userWalletPkId,
+            @RequestParam (value = "userFkId",required=false) String userFkId
+            ){
+        return individualService.getUserWallet(userWalletPkId,userFkId);
+    }
+
+    @PostMapping("/postUserWallet")
+    public FinalResponse postUserWallet(@RequestBody UserWallet userWallet){
+        return individualService.postUserWallet(userWallet);
+    }
+
+    @DeleteMapping("/deleteUserWallet")
+    public FinalResponse deleteUserWallet(
+            @RequestParam (value = "userWalletPkId",required=false) Integer userWalletPkId,
+            @RequestParam (value = "userFkId",required=false) String userFkId
+    ){
+        return individualService.deleteUserWallet(userWalletPkId,userFkId);
+    }
+
+    @PutMapping("/putUserWallet")
+    public FinalResponse putUserWallet(@RequestBody UserWallet userWallet){
+        return individualService.putUserWallet(userWallet);
     }
 
 

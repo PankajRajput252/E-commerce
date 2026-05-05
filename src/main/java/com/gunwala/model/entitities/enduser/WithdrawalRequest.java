@@ -2,6 +2,7 @@ package com.gunwala.model.entitities.enduser;
 
 
 import com.gunwala.model.StandardFieldClass;
+import com.gunwala.model.entitities.gunwala.UserWallet;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
