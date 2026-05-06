@@ -64,4 +64,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Integer countByUserTypeAndActiveStateCodeFkId(String normalUser, String active);
 
     Integer countByIsPremiumAndActiveStateCodeFkId(boolean b, String active);
+
+    String findByUserPkId(Integer userPkId);
 }

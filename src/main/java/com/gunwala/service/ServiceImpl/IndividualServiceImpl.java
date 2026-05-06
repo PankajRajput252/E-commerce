@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.persistence.RollbackException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,10 @@ public class IndividualServiceImpl implements IndividualService {
     private FavoriteRepository favoriteRepository;
     @Autowired
     private UserWalletRepo userWalletRepo;
+    @Autowired
+    private UserVisitRepo userVisitRepo;
+    @Autowired
+    private UserReviewRepo userReviewRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -632,6 +637,105 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse finalResponse=new FinalResponse();
         finalResponse=Util.setSuccessMessage(finalResponse);
         return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId) {
+        FinalResponse<UserVisit> finalResponse = new FinalResponse<>();
+        List <UserVisit> list=new ArrayList<>();
+        if(Util.isDefined(userVisitPkId)){
+            list=userVisitRepo.findByUserVisitPkId(userVisitPkId);
+        } else if (Util.isDefined(userFkId)) {
+            list =userVisitRepo.findByUserFkId(userFkId);
+        }else{
+            list=userVisitRepo.findAll();
+        }
+
+        finalResponse.setData(list);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+
+    }
+
+
+
+    @Override
+    public FinalResponse deleteUserVisit(Integer userVisitPkId) {
+        userVisitRepo.deleteById(userVisitPkId);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse postUserVisit(UserVisit userVisit) {
+        userVisitRepo.save(userVisit);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse putUserVisit(UserVisit userVisit) {
+        userVisitRepo.updateUserVisit(userVisit.getUserVisitPkId(),userVisit.getUserFkId(),userVisit.getProductFkId(),userVisit.getVisitedDateTime());
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+
+    @Override
+    public FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId) {
+        FinalResponse<UserReview> finalResponse=new FinalResponse<>();
+        List <UserReview> userReviewList=new ArrayList<>();
+        if(Util.isDefined(userReviewPkId)){
+            userReviewList=userReviewRepo.findByUserReviewPkId(userReviewPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userReviewList=userReviewRepo.findByUserFkId(userFkId);
+        } else if (Util.isDefined(productFkId)) {
+            userReviewList=userReviewRepo.findByProductFkId(productFkId);
+        }else{
+            userReviewList=userReviewRepo.findAll();
+        }
+
+        if(!userReviewList.isEmpty()){
+            for(UserReview userReview : userReviewList){
+                Integer UserPkId =Integer.parseInt(userReview.getUserFkId());
+                userReview.setUserName(userRepository.findByUserPkId(UserPkId));
+            }
+        }
+        finalResponse.setData(userReviewList);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse deleteUserReview(Integer userReviewList) {
+        userReviewRepo.deleteById(userReviewList);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse postUserReview(UserReview userReview) {
+        userReviewRepo.save(userReview);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse putUserReview(UserReview userReview) {
+        userReviewRepo.updateUserReview(userReview.getUserReviewPkId(),userReview.getUserFkId(),userReview.getProductFkId(),userReview.getComment(),userReview.getCreatedDateTime());
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
     }
 
 

@@ -65,4 +65,20 @@ public interface IndividualService {
     FinalResponse deleteUserWallet(Integer userWalletPkId, String userFkId);
 
     FinalResponse putUserWallet(UserWallet userWallet);
+
+    FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId);
+
+    FinalResponse deleteUserVisit(Integer userVisitPkId);
+
+    FinalResponse postUserVisit(UserVisit userVisit);
+
+    FinalResponse putUserVisit(UserVisit userVisit);
+
+    FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId);
+
+    FinalResponse deleteUserReview(Integer userReviewPkId);
+
+    FinalResponse postUserReview(UserReview userReview);
+
+    FinalResponse putUserReview(UserReview userReview);
 }

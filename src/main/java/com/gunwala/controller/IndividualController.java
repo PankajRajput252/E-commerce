@@ -261,5 +261,55 @@ public class IndividualController {
     }
 
 
+    @GetMapping("/getUserVisit")
+    public FinalResponse getUserVisit(
+            @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId,
+            @RequestParam (value="userFkId" , required = false) Integer userFkId
+    ){
+      return individualService.getUserVisit(userVisitPkId,userFkId);
+    }
+
+    @DeleteMapping("/deleteUserVisit")
+    public FinalResponse deleteUserVisit(
+            @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId
+    ){
+        return individualService.deleteUserVisit(userVisitPkId);
+    }
+
+    @PostMapping("/postUserVisit")
+    public FinalResponse postUserVisit(@RequestBody UserVisit userVisit){
+        return individualService.postUserVisit(userVisit);
+    }
+
+    @PutMapping("/putUserVisit")
+    public FinalResponse putUserVisit(@RequestBody UserVisit userVisit){
+        return individualService.putUserVisit(userVisit);
+    }
+
+    @GetMapping("/getUserReview")
+    public FinalResponse getUserReview(
+            @RequestParam (value="userReviewPkId", required = false) Integer userReviewPkId,
+            @RequestParam (value="userFkId" , required = false) Integer userFkId,
+            @RequestParam (value="productFkId", required = false) Integer productFkId
+    ){
+        return individualService.getUserReview(userReviewPkId,userFkId,productFkId);
+    }
+
+    @DeleteMapping("/deleteUserReview")
+    public FinalResponse deleteUserReview(
+            @RequestParam (value="userReviewPkId", required = false) Integer userReviewPkId
+    ){
+        return individualService.deleteUserReview(userReviewPkId);
+    }
+
+    @PostMapping("/postUserReview")
+    public FinalResponse postUserReview(@RequestBody UserReview userReview){
+        return individualService.postUserReview(userReview);
+    }
+
+    @PutMapping("/putUserReview")
+    public FinalResponse putUserVisit(@RequestBody UserReview userReview){
+        return individualService.putUserReview(userReview);
+    }
 
 }
