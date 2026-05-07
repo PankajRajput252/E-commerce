@@ -6,10 +6,7 @@ import com.gunwala.model.User;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -232,7 +229,87 @@ public class IndividualController {
             return individualService.deleteFavorites(favoritePkId);
         }
 
+    @GetMapping("/getDashBoardDetail")
+    public FinalResponse getDashBoardDetail(){
+        return individualService.getDashBoardDetail();
+    }
+
+    @GetMapping("/getUserWallet")
+    public FinalResponse getUserWallet(
+            @RequestParam (value = "userWalletPkId",required=false) Integer userWalletPkId,
+            @RequestParam (value = "userFkId",required=false) String userFkId
+            ){
+        return individualService.getUserWallet(userWalletPkId,userFkId);
+    }
+
+    @PostMapping("/postUserWallet")
+    public FinalResponse postUserWallet(@RequestBody UserWallet userWallet){
+        return individualService.postUserWallet(userWallet);
+    }
+
+    @DeleteMapping("/deleteUserWallet")
+    public FinalResponse deleteUserWallet(
+            @RequestParam (value = "userWalletPkId",required=false) Integer userWalletPkId,
+            @RequestParam (value = "userFkId",required=false) String userFkId
+    ){
+        return individualService.deleteUserWallet(userWalletPkId,userFkId);
+    }
+
+    @PutMapping("/putUserWallet")
+    public FinalResponse putUserWallet(@RequestBody UserWallet userWallet){
+        return individualService.putUserWallet(userWallet);
+    }
 
 
+    @GetMapping("/getUserVisit")
+    public FinalResponse getUserVisit(
+            @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId,
+            @RequestParam (value="userFkId" , required = false) Integer userFkId
+    ){
+      return individualService.getUserVisit(userVisitPkId,userFkId);
+    }
+
+    @DeleteMapping("/deleteUserVisit")
+    public FinalResponse deleteUserVisit(
+            @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId
+    ){
+        return individualService.deleteUserVisit(userVisitPkId);
+    }
+
+    @PostMapping("/postUserVisit")
+    public FinalResponse postUserVisit(@RequestBody UserVisit userVisit){
+        return individualService.postUserVisit(userVisit);
+    }
+
+    @PutMapping("/putUserVisit")
+    public FinalResponse putUserVisit(@RequestBody UserVisit userVisit){
+        return individualService.putUserVisit(userVisit);
+    }
+
+    @GetMapping("/getUserReview")
+    public FinalResponse getUserReview(
+            @RequestParam (value="userReviewPkId", required = false) Integer userReviewPkId,
+            @RequestParam (value="userFkId" , required = false) Integer userFkId,
+            @RequestParam (value="productFkId", required = false) Integer productFkId
+    ){
+        return individualService.getUserReview(userReviewPkId,userFkId,productFkId);
+    }
+
+    @DeleteMapping("/deleteUserReview")
+    public FinalResponse deleteUserReview(
+            @RequestParam (value="userReviewPkId", required = false) Integer userReviewPkId
+    ){
+        return individualService.deleteUserReview(userReviewPkId);
+    }
+
+    @PostMapping("/postUserReview")
+    public FinalResponse postUserReview(@RequestBody UserReview userReview){
+        return individualService.postUserReview(userReview);
+    }
+
+    @PutMapping("/putUserReview")
+    public FinalResponse putUserVisit(@RequestBody UserReview userReview){
+        return individualService.putUserReview(userReview);
+    }
 
 }

@@ -3,10 +3,7 @@ package com.gunwala.service.Service;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 
 public interface IndividualService {
     FinalResponse addProduct(Product product);
@@ -58,4 +55,30 @@ public interface IndividualService {
     FinalResponse updateFavorrites(Favorites favorites);
 
     FinalResponse deleteFavorites(Integer favoritePkId);
+
+    FinalResponse getDashBoardDetail();
+
+    FinalResponse getUserWallet(Integer userWalletPkId, String userFkId);
+
+    FinalResponse postUserWallet(UserWallet userWallet);
+
+    FinalResponse deleteUserWallet(Integer userWalletPkId, String userFkId);
+
+    FinalResponse putUserWallet(UserWallet userWallet);
+
+    FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId);
+
+    FinalResponse deleteUserVisit(Integer userVisitPkId);
+
+    FinalResponse postUserVisit(UserVisit userVisit);
+
+    FinalResponse putUserVisit(UserVisit userVisit);
+
+    FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId);
+
+    FinalResponse deleteUserReview(Integer userReviewPkId);
+
+    FinalResponse postUserReview(UserReview userReview);
+
+    FinalResponse putUserReview(UserReview userReview);
 }

@@ -4,17 +4,11 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
-import com.gunwala.model.entitities.gunwala.Category;
-import com.gunwala.model.entitities.gunwala.Favorites;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.model.entitities.gunwala.ProductImage;
+import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.repo.admin.SubscriptionDefinitionRepo;
 import com.gunwala.repo.enduser.SupportTicketRepository;
-import com.gunwala.repo.gunwala.CategoryRepository;
-import com.gunwala.repo.gunwala.FavoriteRepository;
-import com.gunwala.repo.gunwala.ProductImageRepository;
-import com.gunwala.repo.gunwala.ProductRepository;
+import com.gunwala.repo.gunwala.*;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +43,12 @@ public class IndividualServiceImpl implements IndividualService {
     private FavoriteRepository favoriteRepository;
     @Autowired
     private SubscriptionDefinitionRepo subscriptionDefinitionRepo;
+    @Autowired
+    private UserWalletRepo userWalletRepo;
+    @Autowired
+    private UserVisitRepo userVisitRepo;
+    @Autowired
+    private UserReviewRepo userReviewRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -566,6 +568,171 @@ public class IndividualServiceImpl implements IndividualService {
     @Transactional
     public FinalResponse deleteFavorites(Integer favoritePkId) {
         favoriteRepository.deleteById(favoritePkId);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getDashBoardDetail() {
+        DashBoardDetails dashBoardDetails = new DashBoardDetails();
+
+        dashBoardDetails.setActiveUser(userRepository.countByActiveStateCodeFkId("ACTIVE"));
+        dashBoardDetails.setInActiveUser(userRepository.countByActiveStateCodeFkId("INACTIVE"));
+        dashBoardDetails.setTotalUser((int) userRepository.count());
+        dashBoardDetails.setNormalUser(userRepository.countByUserTypeAndActiveStateCodeFkId("NORMAL_USER","ACTIVE"));
+        dashBoardDetails.setPremiumUser(userRepository.countByIsPremiumAndActiveStateCodeFkId(true,"ACTIVE"));
+        dashBoardDetails.setTotalProduct((int)productRepository.count());
+
+        FinalResponse finalResponse = new FinalResponse();
+        finalResponse.setResponse(dashBoardDetails);
+
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getUserWallet(Integer userWalletPkId, String userFkId) {
+        FinalResponse <UserWallet> finalResponse=new FinalResponse<>();
+        List <UserWallet> userWalletList = new ArrayList<>();
+
+        if(Util.isDefined(userWalletPkId)){
+            userWalletList=userWalletRepo.findByUserWalletPkId(userWalletPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userWalletList=userWalletRepo.findByUserFkId(userFkId);
+        }else{
+            userWalletList=userWalletRepo.findAll();
+        }
+
+        finalResponse.setData(userWalletList);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse postUserWallet(UserWallet userWallet) {
+        userWalletRepo.save(userWallet);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteUserWallet(Integer userWalletPkId, String userFkId) {
+        if(Util.isDefined(userWalletPkId)){
+            userWalletRepo.deleteById(userWalletPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userWalletRepo.deleteByUserFkId(userFkId);
+        }
+        FinalResponse finalResponse=new FinalResponse();
+        finalResponse=Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse putUserWallet(UserWallet userWallet) {
+        userWalletRepo.updateUserWallet(userWallet.getUserWalletPkId(),userWallet.getUserFkId(),userWallet.getPaidFor(),userWallet.getAmount(),userWallet.getCurrecyCode(),userWallet.getCreatedDatetime());
+        FinalResponse finalResponse=new FinalResponse();
+        finalResponse=Util.setSuccessMessage(finalResponse);
+        return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId) {
+        FinalResponse<UserVisit> finalResponse = new FinalResponse<>();
+        List <UserVisit> list=new ArrayList<>();
+        if(Util.isDefined(userVisitPkId)){
+            list=userVisitRepo.findByUserVisitPkId(userVisitPkId);
+        } else if (Util.isDefined(userFkId)) {
+            list =userVisitRepo.findByUserFkId(userFkId);
+        }else{
+            list=userVisitRepo.findAll();
+        }
+
+        finalResponse.setData(list);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+
+    }
+
+
+
+    @Override
+    public FinalResponse deleteUserVisit(Integer userVisitPkId) {
+        userVisitRepo.deleteById(userVisitPkId);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse postUserVisit(UserVisit userVisit) {
+        userVisitRepo.save(userVisit);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse putUserVisit(UserVisit userVisit) {
+        userVisitRepo.updateUserVisit(userVisit.getUserVisitPkId(),userVisit.getUserFkId(),userVisit.getProductFkId(),userVisit.getVisitedDateTime());
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+
+
+
+    @Override
+    public FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId) {
+        FinalResponse<UserReview> finalResponse=new FinalResponse<>();
+        List <UserReview> userReviewList=new ArrayList<>();
+        if(Util.isDefined(userReviewPkId)){
+            userReviewList=userReviewRepo.findByUserReviewPkId(userReviewPkId);
+        } else if (Util.isDefined(userFkId)) {
+            userReviewList=userReviewRepo.findByUserFkId(userFkId);
+        } else if (Util.isDefined(productFkId)) {
+            userReviewList=userReviewRepo.findByProductFkId(productFkId);
+        }else{
+            userReviewList=userReviewRepo.findAll();
+        }
+
+        if(!userReviewList.isEmpty()){
+            for(UserReview userReview : userReviewList){
+                Integer UserPkId =Integer.parseInt(userReview.getUserFkId());
+                userReview.setUserName(userRepository.findByUserPkId(UserPkId));
+            }
+        }
+        finalResponse.setData(userReviewList);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse deleteUserReview(Integer userReviewList) {
+        userReviewRepo.deleteById(userReviewList);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse postUserReview(UserReview userReview) {
+        userReviewRepo.save(userReview);
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Transactional
+    @Override
+    public FinalResponse putUserReview(UserReview userReview) {
+        userReviewRepo.updateUserReview(userReview.getUserReviewPkId(),userReview.getUserFkId(),userReview.getProductFkId(),userReview.getComment(),userReview.getCreatedDateTime());
         FinalResponse finalResponse=new FinalResponse();
         Util.setSuccessMessage(finalResponse);
         return finalResponse;

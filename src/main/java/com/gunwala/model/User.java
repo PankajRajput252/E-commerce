@@ -67,7 +67,11 @@ public class User  extends StandardFieldClass implements UserDetails {
     @Column(name = "PROFILE_IMAGE_URL",length = 1000)
     private String profileImageUrl; // <-- store S3 URL here
 
+    @Column(name = "USER_TYPE")
+    private String userType;
 
+    @Column(name = "IS_PREMIUM")
+    private boolean isPremium;
 
 
     @Transient
@@ -281,5 +285,21 @@ public class User  extends StandardFieldClass implements UserDetails {
 
     public void setUserIsAdmin(boolean userIsAdmin) {
         isUserIsAdmin = userIsAdmin;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
+    public boolean getIsPremium() {
+        return isPremium;
+    }
+
+    public void setIsPremium(boolean premium) {
+        this.isPremium = premium;
     }
 }
