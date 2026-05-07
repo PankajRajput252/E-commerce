@@ -38,8 +38,6 @@ public class IndividualServiceImpl implements IndividualService {
     @Autowired
     private ProductImageRepository productImageRepository;
     @Autowired
-    private SubscriptionDefinitionRepo subscriptionDefinitionRepo;
-    @Autowired
     private SupportTicketRepository supportTicketRepository;
     @Autowired
     private UserRepository userRepository;
@@ -47,6 +45,8 @@ public class IndividualServiceImpl implements IndividualService {
     private ImageUploadService imageUploadService;
     @Autowired
     private FavoriteRepository favoriteRepository;
+    @Autowired
+    private SubscriptionDefinitionRepo subscriptionDefinitionRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})

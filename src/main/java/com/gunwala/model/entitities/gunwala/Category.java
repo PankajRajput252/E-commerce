@@ -2,9 +2,10 @@ package com.gunwala.model.entitities.gunwala;
 
 
 import com.gunwala.model.StandardFieldClass;
+import jakarta.persistence.*;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+
 
 @Entity
 @Table(name = "category")

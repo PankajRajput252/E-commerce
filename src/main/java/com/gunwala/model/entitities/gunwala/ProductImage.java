@@ -3,7 +3,7 @@ package com.gunwala.model.entitities.gunwala;
 import com.gunwala.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "product_image")

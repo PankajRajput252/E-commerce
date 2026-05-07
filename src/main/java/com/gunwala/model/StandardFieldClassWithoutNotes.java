@@ -1,13 +1,11 @@
 package com.gunwala.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

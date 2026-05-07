@@ -1,6 +1,6 @@
 package com.gunwala.model.entitities.gunwala;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

@@ -3,8 +3,7 @@ package com.gunwala.model.entitities.gunwala;
 import com.gunwala.model.StandardFieldClass;
 import lombok.Data;
 import org.hibernate.annotations.Where;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;

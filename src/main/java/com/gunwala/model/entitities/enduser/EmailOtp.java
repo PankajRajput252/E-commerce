@@ -1,6 +1,6 @@
 package com.gunwala.model.entitities.enduser;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "email_otp")

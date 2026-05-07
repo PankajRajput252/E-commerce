@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.13</version>
+		<version>3.2.5</version>  <!-- ✅ upgraded from 2.7.13 -->
 		<relativePath/>
 	</parent>
 
@@ -61,11 +61,23 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- JWT — only once, use 0.9.1 -->
+		<!-- JWT — upgrade for Spring Boot 3 -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Razorpay -->
@@ -84,18 +96,12 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.36</version>  <!-- latest, supports JDK 25 -->
+			<version>1.18.36</version>
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JAXB -->
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-			<version>2.3.0</version>
-		</dependency>
 
-		<!-- Gson — fixed groupId -->
+		<!-- Gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -108,7 +114,7 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-		<!-- AWS S3 — fixed groupId -->
+		<!-- AWS S3 -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
@@ -131,8 +137,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
-			<!-- ✅ This is what was missing — fixes TypeTag::UNKNOWN -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -149,7 +153,6 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 

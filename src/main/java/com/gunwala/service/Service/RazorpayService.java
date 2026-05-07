@@ -8,6 +8,7 @@ import com.gunwala.repo.gunwala.RazorpayOrderRepository;
 import com.gunwala.repo.gunwala.RazorpayPaymentRepository;
 import com.gunwala.repo.gunwala.RazorpayRefundRepository;
 import com.razorpay.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;

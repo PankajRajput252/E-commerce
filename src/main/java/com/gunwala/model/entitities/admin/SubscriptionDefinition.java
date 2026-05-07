@@ -3,8 +3,7 @@ package com.gunwala.model.entitities.admin;
 
 import com.gunwala.model.StandardFieldClass;
 import org.hibernate.annotations.Where;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

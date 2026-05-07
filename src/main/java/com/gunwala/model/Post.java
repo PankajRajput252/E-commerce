@@ -3,7 +3,7 @@ package com.gunwala.model;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.net.URL;
 import java.util.UUID;
 

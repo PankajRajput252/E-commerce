@@ -1,12 +1,13 @@
 package com.gunwala.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
+
 
 @MappedSuperclass
 public abstract class StandardFieldClass {
