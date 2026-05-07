@@ -66,7 +66,7 @@ public interface IndividualService {
 
     FinalResponse putUserWallet(UserWallet userWallet);
 
-    FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId);
+    FinalResponse getUserVisit(Integer userVisitPkId, String userFkId);
 
     FinalResponse deleteUserVisit(Integer userVisitPkId);
 
@@ -74,7 +74,7 @@ public interface IndividualService {
 
     FinalResponse putUserVisit(UserVisit userVisit);
 
-    FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId);
+    FinalResponse getUserReview(Integer userReviewPkId, String userFkId, Integer productFkId);
 
     FinalResponse deleteUserReview(Integer userReviewPkId);
 

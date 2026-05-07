@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserReviewRepo extends JpaRepository<UserReview,Integer> {
     List<UserReview> findByUserReviewPkId(Integer userReviewPkId);
 
-    List<UserReview> findByUserFkId(Integer userFkId);
+    List<UserReview> findByUserFkId(String userFkId);
 
     List<UserReview> findByProductFkId(Integer productFkId);
 

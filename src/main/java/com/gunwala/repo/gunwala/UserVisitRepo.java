@@ -11,7 +11,7 @@ import java.util.List;
 public interface UserVisitRepo extends JpaRepository<UserVisit,Integer> {
     List<UserVisit> findByUserVisitPkId(Integer userVisitPkId);
 
-    List<UserVisit> findByUserFkId(Integer userFkId);
+    List<UserVisit> findByUserFkId(String userFkId);
 
     @Modifying
     @Query(value = "UPDATE user_visit SET USER_FK_ID=:userFkId,PRODUCT_FK_ID=:productFkId,VISITED_DATETIME=:visitedDateTime WHERE USER_VISIT_PK_ID=:userVisitPkId",nativeQuery = true)

@@ -640,7 +640,7 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getUserVisit(Integer userVisitPkId, Integer userFkId) {
+    public FinalResponse getUserVisit(Integer userVisitPkId, String userFkId) {
         FinalResponse<UserVisit> finalResponse = new FinalResponse<>();
         List <UserVisit> list=new ArrayList<>();
         if(Util.isDefined(userVisitPkId)){
@@ -688,7 +688,7 @@ public class IndividualServiceImpl implements IndividualService {
 
 
     @Override
-    public FinalResponse getUserReview(Integer userReviewPkId, Integer userFkId, Integer productFkId) {
+    public FinalResponse getUserReview(Integer userReviewPkId, String userFkId, Integer productFkId) {
         FinalResponse<UserReview> finalResponse=new FinalResponse<>();
         List <UserReview> userReviewList=new ArrayList<>();
         if(Util.isDefined(userReviewPkId)){
