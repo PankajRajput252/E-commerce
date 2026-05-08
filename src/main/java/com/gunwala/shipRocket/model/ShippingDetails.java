@@ -1,6 +1,6 @@
 package com.gunwala.shipRocket.model;
 
-public class shipping_details {
+public class ShippingDetails {
     private String shipping_customer_name;
     private String shipping_last_name;
     private String shipping_address;

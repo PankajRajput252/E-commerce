@@ -1,6 +1,6 @@
 package com.gunwala.shipRocket.model;
 
-public class order_items {
+public class OrderItems {
     private String sku;
     private String name;
     private Integer units;

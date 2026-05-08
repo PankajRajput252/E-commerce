@@ -1,6 +1,6 @@
 package com.gunwala.shipRocket.model;
 
-public class TokenResponse {
+public class ShipRocketTokenResponse {
 
     private Integer company_id;
     private String created_at;

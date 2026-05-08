@@ -8,6 +8,7 @@ import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.service.Service.IndividualService;
+import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -311,5 +312,26 @@ public class IndividualController {
     public FinalResponse putUserVisit(@RequestBody UserReview userReview){
         return individualService.putUserReview(userReview);
     }
+
+    @GetMapping("/generateAuthBridgeToken")
+    public FinalResponse generateAuthBridgeToken (){
+        return individualService.generateAuthBridgeToken();
+    }
+
+    @GetMapping("/generateAuthbridgeReportDetail")
+    public FinalResponse generateAuthbridgeReportDetail(@RequestParam ("requestId") String requestId){
+        return individualService.generateAuthbridgeReportDetail(requestId);
+    }
+
+    @GetMapping("/generateOrderTokenResponse")
+    public FinalResponse generateOrderTokenResponse(){
+        return individualService.generateOrderTokenResponse();
+    }
+
+    @GetMapping("/getShiprocketOrderResponse")
+    public FinalResponse getShiprocketOrderResponse(){
+        return individualService.getShiprocketOrderResponse();
+    }
+
 
 }

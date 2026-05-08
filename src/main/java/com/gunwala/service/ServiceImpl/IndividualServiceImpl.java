@@ -1,5 +1,8 @@
 package com.gunwala.service.ServiceImpl;
 
+import com.gunwala.authbridge.AuthbridgeSeviceProxy;
+import com.gunwala.authbridge.model.AuthbridgeReportDetail;
+import com.gunwala.authbridge.model.TokenResponse;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
@@ -11,6 +14,11 @@ import com.gunwala.repo.enduser.SupportTicketRepository;
 import com.gunwala.repo.gunwala.*;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
+import com.gunwala.shipRocket.ShiprocketServiceProxy;
+import com.gunwala.shipRocket.model.OrderRequestBody;
+import com.gunwala.shipRocket.model.OrderResponse;
+import com.gunwala.shipRocket.model.ShipRocketTokenResponse;
+import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -49,6 +57,10 @@ public class IndividualServiceImpl implements IndividualService {
     private UserVisitRepo userVisitRepo;
     @Autowired
     private UserReviewRepo userReviewRepo;
+    @Autowired
+    private AuthbridgeSeviceProxy authbridgeSeviceProxy;
+    @Autowired
+    private ShiprocketServiceProxy shiprocketServiceProxy;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -738,5 +750,42 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+    @Override
+    @Transactional
+    public FinalResponse generateAuthBridgeToken() {
+        FinalResponse finalResponse = new FinalResponse();
+        TokenResponse tokenResponse = authbridgeSeviceProxy.generateToken("Centum_Demo","c9da57d00d933e5827d65391578da0a2");
+        finalResponse.setResponse(tokenResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse generateAuthbridgeReportDetail(String requestId) {
+        FinalResponse finalResponse = new FinalResponse();
+        TokenResponse tokenResponse = authbridgeSeviceProxy.generateToken("Centum_Demo","c9da57d00d933e5827d65391578da0a2");
+        String token = tokenResponse.getResponse().getToken();
+        AuthbridgeReportDetail authbridgeReportDetail = authbridgeSeviceProxy.generateAuthbridgeReportDetail("Centum_Demo",token,requestId);
+        finalResponse.setResponse(authbridgeReportDetail);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse generateOrderTokenResponse() {
+        FinalResponse finalResponse = new FinalResponse();
+        ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
+        shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
+        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
+        ShipRocketTokenResponse shipRocketTokenResponse=shiprocketServiceProxy.generateOrderTokenResponse(shiprocketTokenRequest);
+        finalResponse.setResponse(shipRocketTokenResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getShiprocketOrderResponse() {
+        FinalResponse finalResponse = new FinalResponse();
+        OrderRequestBody orderRequestBody=new OrderRequestBody();
+        OrderResponse orderResponse=shiprocketServiceProxy.getShiprocketOrderResponse(orderRequestBody);
+
+    }
 
 }

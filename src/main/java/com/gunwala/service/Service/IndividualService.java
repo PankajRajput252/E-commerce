@@ -81,4 +81,14 @@ public interface IndividualService {
     FinalResponse postUserReview(UserReview userReview);
 
     FinalResponse putUserReview(UserReview userReview);
+
+    FinalResponse generateAuthBridgeToken();
+
+    FinalResponse generateAuthbridgeReportDetail(String requestId);
+
+    FinalResponse generateOrderTokenResponse();
+
+    FinalResponse getShiprocketTokenResponse();
+
+    FinalResponse getShiprocketOrderResponse();
 }
