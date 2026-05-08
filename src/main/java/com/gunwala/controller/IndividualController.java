@@ -8,6 +8,7 @@ import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.service.Service.IndividualService;
+import com.gunwala.shipRocket.model.OrderRequestBody;
 import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -328,9 +329,9 @@ public class IndividualController {
         return individualService.generateOrderTokenResponse();
     }
 
-    @GetMapping("/getShiprocketOrderResponse")
-    public FinalResponse getShiprocketOrderResponse(){
-        return individualService.getShiprocketOrderResponse();
+    @PostMapping("/createShiprocketOrder")
+    public FinalResponse createShiprocketOrder(@RequestBody OrderRequestBody orderRequestBody){
+        return individualService.createShiprocketOrder(orderRequestBody);
     }
 
 

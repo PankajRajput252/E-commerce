@@ -4,6 +4,7 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.*;
+import com.gunwala.shipRocket.model.OrderRequestBody;
 
 public interface IndividualService {
     FinalResponse addProduct(Product product);
@@ -88,7 +89,6 @@ public interface IndividualService {
 
     FinalResponse generateOrderTokenResponse();
 
-    FinalResponse getShiprocketTokenResponse();
+    FinalResponse createShiprocketOrder(OrderRequestBody orderRequestBody);
 
-    FinalResponse getShiprocketOrderResponse();
 }

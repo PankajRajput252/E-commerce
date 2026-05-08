@@ -27,9 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -779,13 +777,32 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse.setResponse(shipRocketTokenResponse);
         return finalResponse;
     }
+    private Map<String, String> fetchHeaders(ShiprocketTokenRequest shiprocketTokenRequest) {
+        ShipRocketTokenResponse shipRocketTokenResponse=shiprocketServiceProxy.generateOrderTokenResponse(shiprocketTokenRequest);
+
+        if (!Util.isDefined(shipRocketTokenResponse)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> headers = new HashMap();
+        String headerAutorization = "Bearer " + shipRocketTokenResponse.getToken();
+        String headerContentType = "application/json";
+        headers.put("Authorization", headerAutorization);
+        headers.put("Content-Type", headerContentType);
+        headers.put("Accept", "*/*");
+        return headers;
+    }
 
     @Override
-    public FinalResponse getShiprocketOrderResponse() {
+    public FinalResponse createShiprocketOrder(OrderRequestBody orderRequestBody) {
         FinalResponse finalResponse = new FinalResponse();
-        OrderRequestBody orderRequestBody=new OrderRequestBody();
-        OrderResponse orderResponse=shiprocketServiceProxy.getShiprocketOrderResponse(orderRequestBody);
+        ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
+        shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
+        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
+        Map<String, String> headers = fetchHeaders(shiprocketTokenRequest);
 
+        OrderResponse orderResponse=shiprocketServiceProxy.createShiprocketOrderResponse(headers,orderRequestBody);
+        finalResponse.setResponse(orderResponse);
+        return  finalResponse;
     }
 
 }
