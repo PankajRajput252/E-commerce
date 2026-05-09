@@ -68,7 +68,7 @@ public interface IndividualService {
 
     FinalResponse putUserWallet(UserWallet userWallet);
 
-    FinalResponse getUserVisit(Integer userVisitPkId, String userFkId,Integer productFkId);
+    FinalResponse getUserVisit(String userVisitPkId, String userFkId,String productFkId);
 
     FinalResponse deleteUserVisit(Integer userVisitPkId);
 

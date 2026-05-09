@@ -647,19 +647,20 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getUserVisit(Integer userVisitPkId, String userFkId, Integer productFkId) {
+    public FinalResponse getUserVisit(String userVisitPkId, String userFkId, String productFkId) {
         FinalResponse<UserVisit> finalResponse = new FinalResponse<>();
         List <UserVisit> list=new ArrayList<>();
         if(Util.isDefined(userVisitPkId)){
-            list=userVisitRepo.findByUserVisitPkId(userVisitPkId);
+            Integer userVisitPkIdInt = Integer.parseInt(userVisitPkId);
+            list=userVisitRepo.findByUserVisitPkId(userVisitPkIdInt);
         } else if (Util.isDefined(userFkId)) {
             list =userVisitRepo.findByUserFkId(userFkId);
         } else if (Util.isDefined(productFkId)) {
-            list = userVisitRepo.findByProductFkId(productFkId);
+            Integer productFkIdInt = Integer.parseInt(productFkId);
+            list = userVisitRepo.findByProductFkId(productFkIdInt);
         } else{
             list=userVisitRepo.findAll();
         }
-
         finalResponse.setData(list);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;

@@ -266,9 +266,9 @@ public class IndividualController {
 
     @GetMapping("/getUserVisit")
     public FinalResponse getUserVisit(
-            @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId,
+            @RequestParam (value="userVisitPkId", required = false) String  userVisitPkId,
             @RequestParam (value="userFkId" , required = false) String userFkId,
-            @RequestParam (value = "productFkId" , required = false) Integer productFkId
+            @RequestParam (value = "productFkId" , required = false) String productFkId
     ){
       return individualService.getUserVisit(userVisitPkId,userFkId,productFkId);
     }
