@@ -3,12 +3,12 @@ package com.gunwala.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,27 +17,32 @@ import java.util.function.Function;
 @Component
 public class JwtTokenHelper {
 
+    // 5 hours
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
 
-    // 64+ byte Base64 encoded key
-    private static final String SECRET_KEY =
-            "VGhpc0lzQVN1cGVyU2VjdXJlSFM1MTJLZXlGb3JHdW53YWxhQXBwMjAyNlNlY3JldEtleUZvckpXVA==";
+    // MUST be 64+ characters for HS512
+    private static final String SECRET =
+            "ThisIsMyVerySecureJwtSecretKeyForHS512AlgorithmGunwalaApplication2026SecureKey123";
 
-    private final SecretKey key;
+    // Create secure signing key
+    private final SecretKey key =
+            Keys.hmacShaKeyFor(
+                    SECRET.getBytes(StandardCharsets.UTF_8)
+            );
 
-    public JwtTokenHelper() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
-
+    // Retrieve username from JWT token
     public String getUsernameFromToken(String token) {
+
         return getClaimFromToken(token, Claims::getSubject);
     }
 
+    // Retrieve expiration date from JWT token
     public Date getExpirationDateFromToken(String token) {
+
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
+    // Retrieve claim from token
     public <T> T getClaimFromToken(
             String token,
             Function<Claims, T> claimsResolver
@@ -48,6 +53,7 @@ public class JwtTokenHelper {
         return claimsResolver.apply(claims);
     }
 
+    // Retrieve all claims from token
     private Claims getAllClaimsFromToken(String token) {
 
         return Jwts.parserBuilder()
@@ -57,6 +63,7 @@ public class JwtTokenHelper {
                 .getBody();
     }
 
+    // Check if token expired
     private Boolean isTokenExpired(String token) {
 
         final Date expiration = getExpirationDateFromToken(token);
@@ -64,13 +71,18 @@ public class JwtTokenHelper {
         return expiration.before(new Date());
     }
 
+    // Generate token for user
     public String generateToken(UserDetails userDetails) {
 
         Map<String, Object> claims = new HashMap<>();
 
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(
+                claims,
+                userDetails.getUsername()
+        );
     }
 
+    // Create JWT token
     private String doGenerateToken(
             Map<String, Object> claims,
             String subject
@@ -79,7 +91,9 @@ public class JwtTokenHelper {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuedAt(
+                        new Date(System.currentTimeMillis())
+                )
                 .setExpiration(
                         new Date(
                                 System.currentTimeMillis()
@@ -90,12 +104,14 @@ public class JwtTokenHelper {
                 .compact();
     }
 
+    // Validate token
     public Boolean validateToken(
             String token,
             UserDetails userDetails
     ) {
 
-        final String username = getUsernameFromToken(token);
+        final String username =
+                getUsernameFromToken(token);
 
         return (
                 username.equals(userDetails.getUsername())
