@@ -1,40 +1,66 @@
 package com.gunwala.shipRocket.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties
 public class OrderResponse {
-    private Long order_id;
-    private String channel_order_id;
-    private Long shipment_id;
+
+    @JsonProperty("order_id")
+    private Long orderId;
+
+    @JsonProperty("channel_order_id")
+    private String channelOrderId;
+
+    @JsonProperty("shipment_id")
+    private Long shipmentId;
+
     private String status;
-    private Integer status_code;
-    private Integer onboarding_completed_now;
-    private String awb_code;
-    private String courier_company_id;
-    private String courier_name;
-    private Boolean new_channel;
-    private String packaging_box_error;
 
-    public Long getOrder_id() {
-        return order_id;
+    @JsonProperty("status_code")
+    private Integer statusCode;
+
+    @JsonProperty("onboarding_completed_now")
+    private Integer onboardingCompletedNow;
+
+    @JsonProperty("awb_code")
+    private String awbCode;
+
+    @JsonProperty("courier_company_id")
+    private String courierCompanyId;
+
+    @JsonProperty("courier_name")
+    private String courierName;
+
+    @JsonProperty("new_channel")
+    private Boolean newChannel;
+
+    @JsonProperty("packaging_box_error")
+    private String packagingBoxError;
+
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setOrder_id(Long order_id) {
-        this.order_id = order_id;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
-    public String getChannel_order_id() {
-        return channel_order_id;
+    public String getChannelOrderId() {
+        return channelOrderId;
     }
 
-    public void setChannel_order_id(String channel_order_id) {
-        this.channel_order_id = channel_order_id;
+    public void setChannelOrderId(String channelOrderId) {
+        this.channelOrderId = channelOrderId;
     }
 
-    public Long getShipment_id() {
-        return shipment_id;
+    public Long getShipmentId() {
+        return shipmentId;
     }
 
-    public void setShipment_id(Long shipment_id) {
-        this.shipment_id = shipment_id;
+    public void setShipmentId(Long shipmentId) {
+        this.shipmentId = shipmentId;
     }
 
     public String getStatus() {
@@ -45,59 +71,59 @@ public class OrderResponse {
         this.status = status;
     }
 
-    public Integer getStatus_code() {
-        return status_code;
+    public Integer getStatusCode() {
+        return statusCode;
     }
 
-    public void setStatus_code(Integer status_code) {
-        this.status_code = status_code;
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 
-    public Integer getOnboarding_completed_now() {
-        return onboarding_completed_now;
+    public Integer getOnboardingCompletedNow() {
+        return onboardingCompletedNow;
     }
 
-    public void setOnboarding_completed_now(Integer onboarding_completed_now) {
-        this.onboarding_completed_now = onboarding_completed_now;
+    public void setOnboardingCompletedNow(Integer onboardingCompletedNow) {
+        this.onboardingCompletedNow = onboardingCompletedNow;
     }
 
-    public String getAwb_code() {
-        return awb_code;
+    public String getAwbCode() {
+        return awbCode;
     }
 
-    public void setAwb_code(String awb_code) {
-        this.awb_code = awb_code;
+    public void setAwbCode(String awbCode) {
+        this.awbCode = awbCode;
     }
 
-    public String getCourier_company_id() {
-        return courier_company_id;
+    public String getCourierCompanyId() {
+        return courierCompanyId;
     }
 
-    public void setCourier_company_id(String courier_company_id) {
-        this.courier_company_id = courier_company_id;
+    public void setCourierCompanyId(String courierCompanyId) {
+        this.courierCompanyId = courierCompanyId;
     }
 
-    public String getCourier_name() {
-        return courier_name;
+    public String getCourierName() {
+        return courierName;
     }
 
-    public void setCourier_name(String courier_name) {
-        this.courier_name = courier_name;
+    public void setCourierName(String courierName) {
+        this.courierName = courierName;
     }
 
-    public Boolean getNew_channel() {
-        return new_channel;
+    public Boolean getNewChannel() {
+        return newChannel;
     }
 
-    public void setNew_channel(Boolean new_channel) {
-        this.new_channel = new_channel;
+    public void setNewChannel(Boolean newChannel) {
+        this.newChannel = newChannel;
     }
 
-    public String getPackaging_box_error() {
-        return packaging_box_error;
+    public String getPackagingBoxError() {
+        return packagingBoxError;
     }
 
-    public void setPackaging_box_error(String packaging_box_error) {
-        this.packaging_box_error = packaging_box_error;
+    public void setPackagingBoxError(String packagingBoxError) {
+        this.packagingBoxError = packagingBoxError;
     }
 }

@@ -8,6 +8,7 @@ import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.*;
 import com.gunwala.service.Service.IndividualService;
+import com.gunwala.shipRocket.model.AwbRequestBody;
 import com.gunwala.shipRocket.model.OrderRequestBody;
 import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -266,9 +267,10 @@ public class IndividualController {
     @GetMapping("/getUserVisit")
     public FinalResponse getUserVisit(
             @RequestParam (value="userVisitPkId", required = false) Integer userVisitPkId,
-            @RequestParam (value="userFkId" , required = false) String userFkId
+            @RequestParam (value="userFkId" , required = false) String userFkId,
+            @RequestParam (value = "productFkId" , required = false) Integer productFkId
     ){
-      return individualService.getUserVisit(userVisitPkId,userFkId);
+      return individualService.getUserVisit(userVisitPkId,userFkId,productFkId);
     }
 
     @DeleteMapping("/deleteUserVisit")
@@ -333,6 +335,22 @@ public class IndividualController {
     public FinalResponse createShiprocketOrder(@RequestBody OrderRequestBody orderRequestBody){
         return individualService.createShiprocketOrder(orderRequestBody);
     }
+
+        @PostMapping("/generateAwbForShiprocket")
+    public FinalResponse generateAwb (@RequestBody AwbRequestBody awbRequestBody){
+        return individualService.generateAwb(awbRequestBody);
+    }
+
+    @PostMapping("/generatePickup")
+    public FinalResponse generatePickup(@RequestParam (value = "shipment_id") String shipment_id){
+        return individualService.generatePickup(shipment_id);
+    }
+
+    @GetMapping("/trackShipment/{shipment_id}")
+    public FinalResponse trackShipment(@PathVariable String shipment_id){
+        return individualService.trackShipment(shipment_id);
+    }
+
 
 
 }

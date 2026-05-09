@@ -23,6 +23,9 @@ public class UserReview {
     @Column(name = "CREATED_DATETIME")
     private LocalDateTime createdDateTime;
 
+    @Column(name = "rating")
+    private int rating;
+
     @Transient
     private String userName;
 
@@ -74,5 +77,11 @@ public class UserReview {
         this.createdDateTime = createdDateTime;
     }
 
+    public int getRating() {
+        return rating;
+    }
 
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
 }

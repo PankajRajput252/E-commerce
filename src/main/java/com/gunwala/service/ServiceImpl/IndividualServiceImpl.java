@@ -15,10 +15,7 @@ import com.gunwala.repo.gunwala.*;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
-import com.gunwala.shipRocket.model.OrderRequestBody;
-import com.gunwala.shipRocket.model.OrderResponse;
-import com.gunwala.shipRocket.model.ShipRocketTokenResponse;
-import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
+import com.gunwala.shipRocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -650,14 +647,16 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getUserVisit(Integer userVisitPkId, String userFkId) {
+    public FinalResponse getUserVisit(Integer userVisitPkId, String userFkId, Integer productFkId) {
         FinalResponse<UserVisit> finalResponse = new FinalResponse<>();
         List <UserVisit> list=new ArrayList<>();
         if(Util.isDefined(userVisitPkId)){
             list=userVisitRepo.findByUserVisitPkId(userVisitPkId);
         } else if (Util.isDefined(userFkId)) {
             list =userVisitRepo.findByUserFkId(userFkId);
-        }else{
+        } else if (Util.isDefined(productFkId)) {
+            list = userVisitRepo.findByProductFkId(productFkId);
+        } else{
             list=userVisitRepo.findAll();
         }
 
@@ -777,32 +776,54 @@ public class IndividualServiceImpl implements IndividualService {
         finalResponse.setResponse(shipRocketTokenResponse);
         return finalResponse;
     }
-    private Map<String, String> fetchHeaders(ShiprocketTokenRequest shiprocketTokenRequest) {
+    private Map<String, String> fetchHeaders() {
+        ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
+        shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
+        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
         ShipRocketTokenResponse shipRocketTokenResponse=shiprocketServiceProxy.generateOrderTokenResponse(shiprocketTokenRequest);
 
-        if (!Util.isDefined(shipRocketTokenResponse)) {
-            return Collections.emptyMap();
-        }
         Map<String, String> headers = new HashMap();
-        String headerAutorization = "Bearer " + shipRocketTokenResponse.getToken();
-        String headerContentType = "application/json";
-        headers.put("Authorization", headerAutorization);
-        headers.put("Content-Type", headerContentType);
+
+        headers.put("Content-Type", "application/json");
         headers.put("Accept", "*/*");
+        headers.put("Authorization",    "Bearer " + shipRocketTokenResponse.getToken());
         return headers;
     }
 
     @Override
     public FinalResponse createShiprocketOrder(OrderRequestBody orderRequestBody) {
         FinalResponse finalResponse = new FinalResponse();
-        ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
-        shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
-        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
-        Map<String, String> headers = fetchHeaders(shiprocketTokenRequest);
-
+        Map<String, String> headers = fetchHeaders();
         OrderResponse orderResponse=shiprocketServiceProxy.createShiprocketOrderResponse(headers,orderRequestBody);
         finalResponse.setResponse(orderResponse);
         return  finalResponse;
+    }
+
+    @Override
+    public FinalResponse generateAwb(AwbRequestBody awbRequestBody) {
+        FinalResponse finalResponse = new FinalResponse();
+        Map <String,String> headers=fetchHeaders();
+        AwbResponseAssaign awbResponseAssaign = shiprocketServiceProxy.generateAwb(headers,awbRequestBody);
+        finalResponse.setResponse(awbResponseAssaign);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse generatePickup(String shipmentId) {
+        FinalResponse finalResponse = new FinalResponse();
+        Map <String,String> headers=fetchHeaders();
+        PickupResponse pickupResponse = shiprocketServiceProxy.generatePickup(headers,shipmentId);
+        finalResponse.setResponse(pickupResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse trackShipment(String shipmentId) {
+        FinalResponse finalResponse=new FinalResponse();
+        Map<String, String> headers = fetchHeaders();
+        TrackingReaponse trackingReaponse=shiprocketServiceProxy.trackShipment(shipmentId,headers);
+        finalResponse.setResponse(trackingReaponse);
+        return finalResponse;
     }
 
 }

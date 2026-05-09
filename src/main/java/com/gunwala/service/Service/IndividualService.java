@@ -4,6 +4,7 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
 import com.gunwala.model.entitities.enduser.SupportTicket;
 import com.gunwala.model.entitities.gunwala.*;
+import com.gunwala.shipRocket.model.AwbRequestBody;
 import com.gunwala.shipRocket.model.OrderRequestBody;
 
 public interface IndividualService {
@@ -67,7 +68,7 @@ public interface IndividualService {
 
     FinalResponse putUserWallet(UserWallet userWallet);
 
-    FinalResponse getUserVisit(Integer userVisitPkId, String userFkId);
+    FinalResponse getUserVisit(Integer userVisitPkId, String userFkId,Integer productFkId);
 
     FinalResponse deleteUserVisit(Integer userVisitPkId);
 
@@ -91,4 +92,9 @@ public interface IndividualService {
 
     FinalResponse createShiprocketOrder(OrderRequestBody orderRequestBody);
 
+    FinalResponse generateAwb(AwbRequestBody awbRequestBody);
+
+    FinalResponse generatePickup(String shipmentId);
+
+    FinalResponse trackShipment(String shipmentId);
 }

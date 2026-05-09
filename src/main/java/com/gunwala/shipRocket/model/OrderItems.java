@@ -1,18 +1,14 @@
 package com.gunwala.shipRocket.model;
 
 public class OrderItems {
-    private String sku;
     private String name;
+    private String sku;
     private Integer units;
-    private Integer selling_price;
+    private String selling_price;
+    private String discount;
+    private String tax;
+    private Long hsn;
 
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
 
     public String getName() {
         return name;
@@ -20,6 +16,14 @@ public class OrderItems {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public Integer getUnits() {
@@ -30,11 +34,35 @@ public class OrderItems {
         this.units = units;
     }
 
-    public Integer getSelling_price() {
+    public String getSelling_price() {
         return selling_price;
     }
 
-    public void setSelling_price(Integer selling_price) {
+    public void setSelling_price(String selling_price) {
         this.selling_price = selling_price;
+    }
+
+    public String getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(String discount) {
+        this.discount = discount;
+    }
+
+    public String getTax() {
+        return tax;
+    }
+
+    public void setTax(String tax) {
+        this.tax = tax;
+    }
+
+    public Long getHsn() {
+        return hsn;
+    }
+
+    public void setHsn(Long hsn) {
+        this.hsn = hsn;
     }
 }
