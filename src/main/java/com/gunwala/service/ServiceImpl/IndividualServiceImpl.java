@@ -712,8 +712,7 @@ public class IndividualServiceImpl implements IndividualService {
 
         if(!userReviewList.isEmpty()){
             for(UserReview userReview : userReviewList){
-                Integer UserPkId =Integer.parseInt(userReview.getUserFkId());
-                userReview.setUserName(userRepository.findByUserPkId(UserPkId));
+                userReview.setUserName(userRepository.fetchUserNameBasedOnNodeId(userReview.getUserFkId(),"ACTIVE"));
             }
         }
         finalResponse.setData(userReviewList);

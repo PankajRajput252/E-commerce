@@ -292,11 +292,20 @@ public class IndividualController {
 
     @GetMapping("/getUserReview")
     public FinalResponse getUserReview(
-            @RequestParam (value="userReviewPkId", required = false) Integer userReviewPkId,
+            @RequestParam (value="userReviewPkId", required = false) String userReviewPkId,
             @RequestParam (value="userFkId" , required = false) String userFkId,
-            @RequestParam (value="productFkId", required = false) Integer productFkId
+            @RequestParam (value="productFkId", required = false) String productFkId
     ){
-        return individualService.getUserReview(userReviewPkId,userFkId,productFkId);
+        Integer userReviewPkIdInt=null;
+        Integer userFkIdInt=null;
+        Integer productFkIdInt=null;
+        if(Util.isDefined(userReviewPkId)){
+            userReviewPkIdInt=Util.convertStringToInteger(userReviewPkId);
+        }
+        if(Util.isDefined(productFkId)){
+            productFkIdInt=Util.convertStringToInteger(productFkId);
+        }
+        return individualService.getUserReview(userReviewPkIdInt,userFkId,productFkIdInt);
     }
 
     @DeleteMapping("/deleteUserReview")
