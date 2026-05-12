@@ -25,4 +25,5 @@ public interface FavoriteRepository extends JpaRepository<Favorites,Integer> {
     void updateFavorite(Integer favoritePkId,String userFkId, Integer productFkId, LocalDateTime createdAt);
 
 
+    int countByProductFkId(Integer productFkId);
 }

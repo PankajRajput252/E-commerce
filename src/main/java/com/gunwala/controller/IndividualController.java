@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/individual")
 public class IndividualController {
 
     @Autowired
@@ -217,7 +217,7 @@ public class IndividualController {
         return individualService.getFavorites(favoritesPkIdInt,userFkId,productFkIdInt);
     }
 
-    @PostMapping("/postFavorites")
+    @PostMapping("/addFavorite")
     public FinalResponse postFavorites(@RequestBody Favorites favorites){
         return individualService.postFavorites(favorites);
     }
@@ -359,6 +359,27 @@ public class IndividualController {
     public FinalResponse trackShipment(@PathVariable String shipment_id){
         return individualService.trackShipment(shipment_id);
     }
+
+    @GetMapping("/getSubCategory")
+    public FinalResponse getSubCategory(@RequestParam String SubCategoryPkId, @RequestParam String categoryFkId){
+        return individualService.getSubCategory(SubCategoryPkId,categoryFkId);
+    }
+
+    @DeleteMapping("/deleteSubCategory")
+    public FinalResponse deleteSubCategory(@RequestParam String SubCategoryPkId, @RequestParam String categoryFkId){
+        return individualService.deleteSubCategory(SubCategoryPkId,categoryFkId);
+    }
+
+    @PostMapping("/postSubCategory")
+    public FinalResponse postSubCategory(SubCategory subCategory){
+        return individualService.postSubCategory(subCategory);
+    }
+
+    @PutMapping("/putSubCategory")
+    public FinalResponse putSubCategory(SubCategory subCategory){
+        return individualService.putSubCategory(subCategory);
+    }
+
 
 
 

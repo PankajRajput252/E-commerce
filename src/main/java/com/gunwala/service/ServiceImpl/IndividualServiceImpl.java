@@ -3,6 +3,7 @@ package com.gunwala.service.ServiceImpl;
 import com.gunwala.authbridge.AuthbridgeSeviceProxy;
 import com.gunwala.authbridge.model.AuthbridgeReportDetail;
 import com.gunwala.authbridge.model.TokenResponse;
+import com.gunwala.exceptions.FinalException;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
@@ -56,6 +57,8 @@ public class IndividualServiceImpl implements IndividualService {
     private AuthbridgeSeviceProxy authbridgeSeviceProxy;
     @Autowired
     private ShiprocketServiceProxy shiprocketServiceProxy;
+    @Autowired
+    private SubCategoryRepo subCategoryRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -557,6 +560,10 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse postFavorites(Favorites favorites) {
         FinalResponse finalResponse = new FinalResponse();
         favorites.setCreatedAt(LocalDateTime.now());
+        int count= favoriteRepository.countByProductFkId(favorites.getProductFkId());
+        if(count>0){
+             throw new FinalException("Already exits");
+        }
         favoriteRepository.save(favorites);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
@@ -618,6 +625,10 @@ public class IndividualServiceImpl implements IndividualService {
     @Override
     @Transactional
     public FinalResponse postUserWallet(UserWallet userWallet) {
+        int count= userWalletRepo.countByCurrecyCode(userWallet.getCurrecyCode());
+        if(count>0){
+            throw new FinalException("duplicate");
+        }
         userWalletRepo.save(userWallet);
         FinalResponse finalResponse = new FinalResponse();
         Util.setSuccessMessage(finalResponse);
@@ -823,6 +834,59 @@ public class IndividualServiceImpl implements IndividualService {
         Map<String, String> headers = fetchHeaders();
         TrackingReaponse trackingReaponse=shiprocketServiceProxy.trackShipment(shipmentId,headers);
         finalResponse.setResponse(trackingReaponse);
+        return finalResponse;
+    }
+
+
+
+    @Override
+    public FinalResponse getSubCategory(String subCategoryPkId, String categoryFkId) {
+        FinalResponse <SubCategory> finalResponse = new FinalResponse<>();
+        List <SubCategory> list = new ArrayList<>();
+
+        if(Util.isDefined(subCategoryPkId)){
+            Integer IntegerPkId = Integer.parseInt(subCategoryPkId);
+            list = subCategoryRepo.findBySubCategoryPkId(IntegerPkId);
+        } else if (Util.isDefined(categoryFkId)) {
+            Integer IntegerFkId = Integer.parseInt(categoryFkId);
+            list = subCategoryRepo.findByCategoryFkId(IntegerFkId);
+        }else{
+            list = subCategoryRepo.findAll();
+        }
+
+        finalResponse.setData(list);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteSubCategory(String subCategoryPkId, String categoryFkId) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(subCategoryPkId)){
+            subCategoryRepo.deleteById(Integer.parseInt(subCategoryPkId));
+        } else if (Util.isDefined(categoryFkId)) {
+            subCategoryRepo.deleteByCategoryFkId(Integer.parseInt(categoryFkId));
+        }
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse postSubCategory(SubCategory subCategory) {
+        FinalResponse finalResponse=new FinalResponse();
+        subCategoryRepo.save(subCategory);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse putSubCategory(SubCategory subCategory) {
+        subCategoryRepo.
+                putSubCategory(subCategory.getSubCategoryPkId(),subCategory.getCategoryFkId(),subCategory.getSubCategoryName());
+        FinalResponse finalResponse=new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
 
