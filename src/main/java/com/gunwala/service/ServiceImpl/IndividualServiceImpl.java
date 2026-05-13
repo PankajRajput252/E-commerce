@@ -3,7 +3,6 @@ package com.gunwala.service.ServiceImpl;
 import com.gunwala.authbridge.AuthbridgeSeviceProxy;
 import com.gunwala.authbridge.model.AuthbridgeReportDetail;
 import com.gunwala.authbridge.model.TokenResponse;
-import com.gunwala.exceptions.FinalException;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.time.LocalDateTime;
@@ -560,10 +558,6 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse postFavorites(Favorites favorites) {
         FinalResponse finalResponse = new FinalResponse();
         favorites.setCreatedAt(LocalDateTime.now());
-        int count= favoriteRepository.countByProductFkId(favorites.getProductFkId());
-        if(count>0){
-             throw new FinalException("Already exits");
-        }
         favoriteRepository.save(favorites);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
@@ -626,9 +620,6 @@ public class IndividualServiceImpl implements IndividualService {
     @Transactional
     public FinalResponse postUserWallet(UserWallet userWallet) {
         int count= userWalletRepo.countByCurrecyCode(userWallet.getCurrecyCode());
-        if(count>0){
-            throw new FinalException("duplicate");
-        }
         userWalletRepo.save(userWallet);
         FinalResponse finalResponse = new FinalResponse();
         Util.setSuccessMessage(finalResponse);
