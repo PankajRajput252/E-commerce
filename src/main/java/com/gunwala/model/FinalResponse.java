@@ -1,5 +1,7 @@
 package com.gunwala.model;
 
+import jakarta.persistence.Column;
+
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
@@ -37,6 +39,7 @@ public class FinalResponse<E> {
     public List<String> companyList;
     public List<String> regionList;
     private int countSize;
+    private String imageUrl; // <-- store S3 URL here
 
 
 
@@ -292,4 +295,11 @@ public class FinalResponse<E> {
         this.stringMap = stringMap;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

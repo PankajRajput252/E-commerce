@@ -37,4 +37,23 @@ public class ImageController {
         }
         return finalResponse;
     }
+
+    @PostMapping("/uploadUserImage")
+    public FinalResponse uploadUserImage(@RequestParam("file") MultipartFile file,
+                                     @RequestParam(value = "userNodeId", required = false) String userNodeId) {
+        FinalResponse finalResponse = new FinalResponse();
+        try {
+
+            String imageId = imageUploadService.uploadFile(file);
+            // You can save imageUrl to your user/entity table here
+            userRepository.updateProfileImageUrlBasedOnNodeId(imageId, userNodeId);
+            Util.setSuccessMessage(finalResponse);
+            finalResponse.setMessage(imageId);
+            String presignedUrl = imageUploadService.generatePresignedUrl(imageId);
+          finalResponse.setImageUrl(presignedUrl);
+        } catch (Exception e) {
+            finalResponse.setMessage("Upload failed: " + e.getMessage());
+        }
+        return finalResponse;
+    }
 }
