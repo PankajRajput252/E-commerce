@@ -97,4 +97,12 @@ public interface IndividualService {
     FinalResponse generatePickup(String shipmentId);
 
     FinalResponse trackShipment(String shipmentId);
+
+    FinalResponse getSubCategory(String subCategoryPkId, String categoryFkId);
+
+    FinalResponse deleteSubCategory(String subCategoryPkId, String categoryFkId);
+
+    FinalResponse postSubCategory(SubCategory subCategory);
+
+    FinalResponse putSubCategory(SubCategory subCategory);
 }
