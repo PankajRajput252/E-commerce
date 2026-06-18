@@ -371,12 +371,12 @@ public class IndividualController {
     }
 
     @PostMapping("/postSubCategory")
-    public FinalResponse postSubCategory(SubCategory subCategory){
+    public FinalResponse postSubCategory(@RequestBody SubCategory subCategory){
         return individualService.postSubCategory(subCategory);
     }
 
     @PutMapping("/putSubCategory")
-    public FinalResponse putSubCategory(SubCategory subCategory){
+    public FinalResponse putSubCategory(@RequestBody SubCategory subCategory){
         return individualService.putSubCategory(subCategory);
     }
 
