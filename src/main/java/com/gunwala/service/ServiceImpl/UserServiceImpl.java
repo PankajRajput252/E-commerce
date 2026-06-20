@@ -2,6 +2,7 @@ package com.gunwala.service.ServiceImpl;
 
 import com.gunwala.FinalException;
 import com.gunwala.model.*;
+import com.gunwala.model.entitities.gunwala.UserInfo;
 import com.gunwala.repo.RoleRepository;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.service.Service.ImageUploadService;
@@ -286,6 +287,21 @@ public class UserServiceImpl implements UserService {
         userRepository.findById(id)
                 .map(existing -> {
                     existing.setActiveStateCodeFkId(activeStatusCode);
+                    return userRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" User  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateUserProfile(UserInfo userInfo) {
+        FinalResponse finalResponse = new FinalResponse();
+        userRepository.findById(userInfo.getId())
+                .map(existing -> {
+                    existing.setName(userInfo.getUserName());
+                    existing.setMobile(userInfo.getMobile());
+                    existing.setCountry(userInfo.getCountry());
+                    existing.setEmail(userInfo.getEmail());
                     return userRepository.save(existing);
                 }).orElseThrow(() -> new RuntimeException(" User  not found"));
         finalResponse = Util.setSuccessMessage(finalResponse);

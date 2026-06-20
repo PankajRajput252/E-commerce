@@ -4,6 +4,7 @@ import com.gunwala.FinalException;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Role;
 import com.gunwala.model.User;
+import com.gunwala.model.entitities.gunwala.UserInfo;
 
 public interface UserService {
     FinalResponse createUser(User user) throws FinalException;
@@ -23,4 +24,6 @@ public interface UserService {
     FinalResponse deleteUser(Integer id);
 
     FinalResponse updateUserStatus(Integer id, String activeStatusCode);
+
+    FinalResponse updateUserProfile(UserInfo userInfo);
 }

@@ -5,6 +5,7 @@ import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Role;
 import com.gunwala.model.User;
 import com.gunwala.model.Util;
+import com.gunwala.model.entitities.gunwala.UserInfo;
 import com.gunwala.service.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -75,6 +76,9 @@ public class UserController {
     }
 
 
-
+    @PutMapping("/updateUserProfile")
+    public FinalResponse updateUserProfile(@RequestBody UserInfo userInfo){
+        return userService.updateUserProfile(userInfo);
+    }
 
 }
