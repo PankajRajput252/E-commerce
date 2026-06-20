@@ -299,14 +299,17 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public FinalResponse updateUserProfile(UserInfo userInfo) {
         FinalResponse finalResponse = new FinalResponse();
-        userRepository.findById(userInfo.getId())
-                .map(existing -> {
-                    existing.setName(userInfo.getUserName());
-                    existing.setMobile(userInfo.getMobile());
-                    existing.setCountry(userInfo.getCountry());
-                    existing.setEmail(userInfo.getEmail());
-                    return userRepository.save(existing);
-                }).orElseThrow(() -> new RuntimeException(" User  not found"));
+        User userData= userRepository.findByNodeIdAndActiveStateCodeFkId(userInfo.getUserNodeId(),"ACTIVE");
+        if(Util.isDefined(userData)) {
+            userRepository.findById(userData.getUserPkId())
+                    .map(existing -> {
+                        existing.setName(userInfo.getUserName());
+                        existing.setMobile(userInfo.getMobile());
+                        existing.setCountry(userInfo.getCountry());
+                        existing.setEmail(userInfo.getEmail());
+                        return userRepository.save(existing);
+                    }).orElseThrow(() -> new RuntimeException(" User  not found"));
+        }
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
