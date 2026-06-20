@@ -268,6 +268,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FinalResponse deleteUser(Integer id) {
         FinalResponse finalResponse = new FinalResponse();
 //        userRepository.deleteById(id);
@@ -282,6 +283,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FinalResponse updateUserStatus(Integer id, String activeStatusCode) {
         FinalResponse finalResponse = new FinalResponse();
         userRepository.findById(id)
@@ -294,6 +296,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public FinalResponse updateUserProfile(UserInfo userInfo) {
         FinalResponse finalResponse = new FinalResponse();
         userRepository.findById(userInfo.getId())
