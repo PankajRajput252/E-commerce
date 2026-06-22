@@ -105,4 +105,12 @@ public interface IndividualService {
     FinalResponse postSubCategory(SubCategory subCategory);
 
     FinalResponse putSubCategory(SubCategory subCategory);
+
+    FinalResponse getWeaponType(Integer weaponTypePkIdInt, Integer weaponCategoryFkIdInt, int page, int size);
+
+    FinalResponse updateWeaponType(Integer id, WeaponType weaponType);
+
+    FinalResponse deleteWeaponType(Integer id);
+
+    FinalResponse addWeaponType(WeaponType weaponType);
 }

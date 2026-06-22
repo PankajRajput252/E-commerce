@@ -24,11 +24,26 @@ public class Product extends StandardFieldClass {
     @Column(name = "DESCRIPTION")
     private  String description;
 
-    @Column(name = "CATEGORY_ID")
-    private  int categoryId;
+//    @Column(name = "CATEGORY_ID")
+//    private  int categoryId;
+//
+//    @Column(name = "SUB_CATEGORY_ID")
+//    private  int subcategoryId;
 
-    @Column(name = "SUB_CATEGORY_ID")
-    private  int subcategoryId;
+    @Column(name = "WEAPON_CATEGORY_FK_ID")
+    private int weaponCategoryFkId;
+
+    @Column(name = "WEAPON_TYPE_FK_ID")
+    private int weaponTypeFkId;
+
+    @Column(name = "WEAPON_SUB_TYPE_FK_ID")
+    private int weaponSubTypeFkId;
+
+    @Column(name = "CALIBER_FK_ID")
+    private int caliberFkId;
+
+    @Column(name = "LICENSE_REQUIRED")
+    private Boolean licenseRequired;
 
     @Column(name = "PRICE")
     private BigDecimal price;
@@ -99,21 +114,21 @@ public class Product extends StandardFieldClass {
         this.description = description;
     }
 
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public int getSubcategoryId() {
-        return subcategoryId;
-    }
-
-    public void setSubcategoryId(int subcategoryId) {
-        this.subcategoryId = subcategoryId;
-    }
+//    public int getCategoryId() {
+//        return categoryId;
+//    }
+//
+//    public void setCategoryId(int categoryId) {
+//        this.categoryId = categoryId;
+//    }
+//
+//    public int getSubcategoryId() {
+//        return subcategoryId;
+//    }
+//
+//    public void setSubcategoryId(int subcategoryId) {
+//        this.subcategoryId = subcategoryId;
+//    }
 
     public BigDecimal getPrice() {
         return price;
@@ -234,5 +249,45 @@ public class Product extends StandardFieldClass {
 
     public void setIsStoreProduct(boolean isStoreProduct) {
         this.isStoreProduct = isStoreProduct;
+    }
+
+    public int getWeaponCategoryFkId() {
+        return weaponCategoryFkId;
+    }
+
+    public void setWeaponCategoryFkId(int weaponCategoryFkId) {
+        this.weaponCategoryFkId = weaponCategoryFkId;
+    }
+
+    public int getWeaponTypeFkId() {
+        return weaponTypeFkId;
+    }
+
+    public void setWeaponTypeFkId(int weaponTypeFkId) {
+        this.weaponTypeFkId = weaponTypeFkId;
+    }
+
+    public int getWeaponSubTypeFkId() {
+        return weaponSubTypeFkId;
+    }
+
+    public void setWeaponSubTypeFkId(int weaponSubTypeFkId) {
+        this.weaponSubTypeFkId = weaponSubTypeFkId;
+    }
+
+    public int getCaliberFkId() {
+        return caliberFkId;
+    }
+
+    public void setCaliberFkId(int caliberFkId) {
+        this.caliberFkId = caliberFkId;
+    }
+
+    public Boolean getIsLicenseRequired() {
+        return licenseRequired;
+    }
+
+    public void setIsLicenseRequired(Boolean isLicenseRequired) {
+        this.licenseRequired = isLicenseRequired;
     }
 }

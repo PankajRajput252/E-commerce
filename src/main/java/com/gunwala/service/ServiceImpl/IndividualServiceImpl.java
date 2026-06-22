@@ -17,6 +17,7 @@ import com.gunwala.service.Service.IndividualService;
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
 import com.gunwala.shipRocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +58,8 @@ public class IndividualServiceImpl implements IndividualService {
     private ShiprocketServiceProxy shiprocketServiceProxy;
     @Autowired
     private SubCategoryRepo subCategoryRepo;
+    @Autowired
+    private WeaponTypeRepository weaponTypeRepository;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -96,7 +99,7 @@ public class IndividualServiceImpl implements IndividualService {
     private int populateProductViewCount(Integer inputPkId, String inputFkId, String filterBy,Integer categoryId) {
         int count = 0;
         if(Util.isDefined(categoryId)){
-            count = productRepository.countByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId);
+//            count = productRepository.countByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId);
         }
         else if(Util.isDefined(filterBy)) {
             if (Util.isDefined(inputPkId)) {
@@ -118,7 +121,7 @@ public class IndividualServiceImpl implements IndividualService {
 
         List<Product> productList = new ArrayList<>();
         if(Util.isDefined(categoryId)){
-            productList = productRepository.findByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId, pageable);
+//            productList = productRepository.findByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId, pageable);
         }
        else if(Util.isDefined(filterBy)) {
             if (Util.isDefined(inputPkId)) {
@@ -155,7 +158,7 @@ public class IndividualServiceImpl implements IndividualService {
 //                    existing.setPrice(product.getPrice());
 //                    return (Product)this.productRepository.save(existing);
 //                }).orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.updateProduct(productPkId,product.getTitle(),product.getDescription(),product.getPrice(),product.getLocation(),product.getCity(),product.getZipCode(),product.getState(),product.getCountry(),product.getCategoryId(),product.getSubcategoryId());
+        productRepository.updateProduct(productPkId,product.getTitle(),product.getDescription(),product.getPrice(),product.getLocation(),product.getCity(),product.getZipCode(),product.getState(),product.getCountry());
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
@@ -881,5 +884,59 @@ public class IndividualServiceImpl implements IndividualService {
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
+
+    @Override
+    public FinalResponse getWeaponType(Integer weaponTypePkId, Integer weaponCategoryFkId, int page, int size) {
+        FinalResponse response = new FinalResponse();
+        Pageable pageable = PageRequest.of(page, size);
+        List<WeaponType> weaponTypes = new ArrayList<>();
+        if (weaponTypePkId != null) {
+            WeaponType weaponType = weaponTypeRepository.findByWeaponTypePkId(weaponTypePkId);
+            weaponTypes.add(weaponType);
+        } else if (weaponCategoryFkId != null) {
+            weaponTypes = weaponTypeRepository.findByWeaponCategoryFkId(weaponCategoryFkId, pageable);
+
+        } else {
+            weaponTypes = weaponTypeRepository.findAll(pageable).getContent();
+        }
+
+        response.setData(weaponTypes);
+        response.setCount(weaponTypes.size());
+        Util.setSuccessMessage(response);
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse updateWeaponType(Integer id, WeaponType weaponType) {
+        FinalResponse finalResponse = new FinalResponse();
+        this.weaponTypeRepository.findById(id)
+                .map(existing -> {
+                    existing.setWeaponTypeName(weaponType.getWeaponTypeName());
+                    existing.setWeaponCategoryFkId(weaponType.getWeaponCategoryFkId());
+                    return (WeaponType) this.weaponTypeRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" WeaponType ticket  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteWeaponType(Integer id) {
+        weaponTypeRepository.deleteById(id);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse addWeaponType(WeaponType weaponType) {
+        FinalResponse finalResponse = new FinalResponse();
+        weaponTypeRepository.save(weaponType);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
 
 }
