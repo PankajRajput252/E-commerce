@@ -2,6 +2,7 @@ package com.gunwala.shipRocket.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class OrderRequestBody {
 
@@ -24,7 +25,7 @@ public class OrderRequestBody {
 
     private Boolean shipping_is_billing;
 
-    private List<OrderItems> order_items;
+    private List<Map<String, Object>> order_items;
 
     private String payment_method;
 
@@ -32,13 +33,15 @@ public class OrderRequestBody {
     private Integer giftwrap_charges;
     private Integer transaction_charges;
     private Integer total_discount;
-    private Integer sub_total;
+    private Double sub_total;
 
     private Integer length;
     private Integer breadth;
     private Integer height;
 
     private Double weight;
+
+    private String pickupLocation;
 
     public String getOrder_id() {
         return order_id;
@@ -168,11 +171,11 @@ public class OrderRequestBody {
         this.shipping_is_billing = shipping_is_billing;
     }
 
-    public List<OrderItems> getOrder_items() {
+    public List<Map<String, Object>> getOrder_items() {
         return order_items;
     }
 
-    public void setOrder_items(List<OrderItems> order_items) {
+    public void setOrder_items(List<Map<String, Object>> order_items) {
         this.order_items = order_items;
     }
 
@@ -216,11 +219,11 @@ public class OrderRequestBody {
         this.total_discount = total_discount;
     }
 
-    public Integer getSub_total() {
+    public Double getSub_total() {
         return sub_total;
     }
 
-    public void setSub_total(Integer sub_total) {
+    public void setSub_total(Double sub_total) {
         this.sub_total = sub_total;
     }
 
@@ -254,5 +257,13 @@ public class OrderRequestBody {
 
     public void setWeight(Double weight) {
         this.weight = weight;
+    }
+
+    public String getPickupLocation() {
+        return pickupLocation;
+    }
+
+    public void setPickupLocation(String pickupLocation) {
+        this.pickupLocation = pickupLocation;
     }
 }

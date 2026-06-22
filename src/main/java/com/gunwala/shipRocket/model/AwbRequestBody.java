@@ -1,22 +1,22 @@
 package com.gunwala.shipRocket.model;
 
 public class AwbRequestBody {
-    String shipment_id;
-    String courier_id;
+    String shipmentId;
+    String courierId;
 
-    public String getShipment_id() {
-        return shipment_id;
+    public String getShipmentId() {
+        return shipmentId;
     }
 
-    public void setShipment_id(String shipment_id) {
-        this.shipment_id = shipment_id;
+    public void setShipmentId(String shipmentId) {
+        this.shipmentId = shipmentId;
     }
 
-    public String getCourier_id() {
-        return courier_id;
+    public String getCourierId() {
+        return courierId;
     }
 
-    public void setCourier_id(String courier_id) {
-        this.courier_id = courier_id;
+    public void setCourierId(String courierId) {
+        this.courierId = courierId;
     }
 }
