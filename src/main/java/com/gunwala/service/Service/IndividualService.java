@@ -113,4 +113,28 @@ public interface IndividualService {
     FinalResponse deleteWeaponType(Integer id);
 
     FinalResponse addWeaponType(WeaponType weaponType);
+
+    FinalResponse getCaliberMaster(String caliberPkId, String weaponTypeFkId);
+
+    FinalResponse postCaliberMaster(CaliberMaster caliberMaster);
+
+    FinalResponse deleteCaliberMaster(String caliberPkId, String weaponTypeFkId);
+
+    FinalResponse updateCaliberMaster(CaliberMaster caliberMaster);
+
+    FinalResponse getWeaponCategory(String weaponCategoryPkId);
+
+    FinalResponse deleteWeaponCategory(String weaponCategoryPkId);
+
+    FinalResponse postWeaponCategory(WeaponCategory weaponCategory);
+
+    FinalResponse updateWeaponCategory(WeaponCategory weaponCategory);
+
+    FinalResponse getWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId);
+
+    FinalResponse postWeaponSubType(WeaponSubType weaponSubType);
+
+    FinalResponse deleteWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId);
+
+    FinalResponse updateWeaponSubType(WeaponSubType weaponSubType);
 }

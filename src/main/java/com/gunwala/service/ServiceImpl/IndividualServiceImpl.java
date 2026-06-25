@@ -60,6 +60,12 @@ public class IndividualServiceImpl implements IndividualService {
     private SubCategoryRepo subCategoryRepo;
     @Autowired
     private WeaponTypeRepository weaponTypeRepository;
+    @Autowired
+    private CaliberMasterRepo caliberMasterRepo;
+    @Autowired
+    private WeaponCategoryRepo weaponCategoryRepo;
+    @Autowired
+    private WeaponSubTypeRepo weaponSubTypeRepo;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -935,6 +941,140 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse finalResponse = new FinalResponse();
         weaponTypeRepository.save(weaponType);
         Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getCaliberMaster(String caliberPkId, String weaponTypeFkId) {
+        FinalResponse<CaliberMaster> finalResponse=new FinalResponse();
+        if(Util.isDefined(caliberPkId)){
+            Integer caliberPkIdInt=Integer.parseInt(caliberPkId);
+            finalResponse.setData(caliberMasterRepo.findByCaliberPkId(caliberPkIdInt));
+        } else if (Util.isDefined(weaponTypeFkId)) {
+            finalResponse.setData(caliberMasterRepo.findByWeaponTypeFkId(Integer.parseInt(weaponTypeFkId)));
+        }else {
+            finalResponse.setData(caliberMasterRepo.findAll());
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse postCaliberMaster(CaliberMaster caliberMaster) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(caliberMaster)){
+            caliberMasterRepo.save(caliberMaster);
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteCaliberMaster(String caliberPkId, String weaponTypeFkId) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(caliberPkId)){
+            Integer caliberPkIdInt=Integer.parseInt(caliberPkId);
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+            caliberMasterRepo.deleteById(caliberPkIdInt);
+        } else if (Util.isDefined(weaponTypeFkId)) {
+            caliberMasterRepo.deleteByWeaponTypeFkId(Integer.parseInt(weaponTypeFkId));
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateCaliberMaster(CaliberMaster caliberMaster) {
+        FinalResponse finalResponse=new FinalResponse();
+        caliberMasterRepo.updateCaliberMaster(caliberMaster.getCaliberPkId(),caliberMaster.getWeaponTypeFkId(),caliberMaster.getCaliberName());
+        finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getWeaponCategory(String weaponCategoryPkId) {
+        FinalResponse<WeaponCategory> finalResponse=new FinalResponse<>();
+        if(Util.isDefined(weaponCategoryPkId)){
+            finalResponse=weaponCategoryRepo.findByWeaponCategoryPkId(Integer.parseInt(weaponCategoryPkId));
+        }else{
+            finalResponse.setData(weaponCategoryRepo.findAll());
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteWeaponCategory(String weaponCategoryPkId) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(weaponCategoryPkId)){
+            finalResponse=weaponCategoryRepo.deleteByWeaponCategoryPkId(Integer.parseInt(weaponCategoryPkId));
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse postWeaponCategory(WeaponCategory weaponCategory) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(weaponCategory)){
+            weaponCategoryRepo.save(weaponCategory);
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateWeaponCategory(WeaponCategory weaponCategory) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(weaponCategory)){
+            weaponCategoryRepo.updateWeaponCategory(weaponCategory.getWeaponCategoryName(),weaponCategory.getWeaponCategoryPkId());
+        }
+        finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId) {
+        FinalResponse <WeaponSubType> finalResponse=new FinalResponse<>();
+        if(Util.isDefined(weaponSubTypePkId)){
+            Integer weaponSubTypePkIdInt=Integer.parseInt(weaponSubTypePkId);
+            finalResponse.setData(weaponSubTypeRepo.findByweaponSubTypePkId(weaponSubTypePkIdInt));
+        } else if (Util.isDefined(weaponTypeFkId)) {
+            finalResponse.setData(weaponSubTypeRepo.findByWeaponTypeFkId(Integer.parseInt(weaponTypeFkId)));
+        }else {
+            finalResponse.setData(weaponSubTypeRepo.findAll());
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse postWeaponSubType(WeaponSubType weaponSubType) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(weaponSubType)){
+            weaponSubTypeRepo.save(weaponSubType);
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse deleteWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId) {
+        FinalResponse finalResponse=new FinalResponse();
+        if(Util.isDefined(weaponSubTypePkId)){
+            finalResponse=weaponSubTypeRepo.deleteByWeaponSubTypePkId(Integer.parseInt(weaponSubTypePkId));
+            finalResponse.setResponse(Util.setSuccessMessage(finalResponse));
+        }
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse updateWeaponSubType(WeaponSubType weaponSubType) {
+        FinalResponse finalResponse = new FinalResponse();
+        this.weaponSubTypeRepo.findById(weaponSubType.getWeaponSubTypePkId())
+                .map(existing -> {
+                    existing.setWeaponSubTypeName(weaponSubType.getWeaponSubTypeName());
+
+                    return (WeaponSubType) this.weaponSubTypeRepo.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" weaponSubType ticket  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
 

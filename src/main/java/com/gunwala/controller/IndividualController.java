@@ -420,5 +420,85 @@ public class IndividualController {
 
 
 
+    @GetMapping("/getCaliberMaster")
+    public FinalResponse getCaliberMaster(
+            @RequestParam(value = "caliberPkId" ,required = false) String caliberPkId,
+            @RequestParam(value = "weaponTypeFkId", required = false) String weaponTypeFkId
+            ){
+        return individualService.getCaliberMaster(caliberPkId,weaponTypeFkId);
+    }
+
+    @PostMapping("/postCaliberMaster")
+    public FinalResponse postCaliberMaster(@RequestBody CaliberMaster caliberMaster){
+        return individualService.postCaliberMaster(caliberMaster);
+    }
+
+    @DeleteMapping("/deleteCaliberMaster")
+    public FinalResponse deleteCaliberMaster(
+            @RequestParam(value = "caliberPkId" ,required = false) String caliberPkId,
+            @RequestParam(value = "weaponTypeFkId", required = false) String weaponTypeFkId
+    ){
+        return individualService.deleteCaliberMaster(caliberPkId,weaponTypeFkId);
+    }
+
+    @PutMapping("/updateCaliberMaster")
+    public FinalResponse updateCaliberMaster(@RequestBody CaliberMaster caliberMaster){
+        return individualService.updateCaliberMaster(caliberMaster);
+    }
+
+
+    @GetMapping("/getWeaponCategory")
+    public FinalResponse getWeaponCategory(
+            @RequestParam(value = "weaponCategoryPkId" ,required = false) String weaponCategoryPkId){
+        return individualService.getWeaponCategory(weaponCategoryPkId);
+    }
+
+    @PostMapping("/postWeaponCategory")
+    public FinalResponse postWeaponCategory(@RequestBody WeaponCategory weaponCategory){
+        return individualService.postWeaponCategory(weaponCategory);
+    }
+
+    @DeleteMapping("/deleteWeaponCategory")
+    public FinalResponse deleteWeaponCategory(@RequestParam(value = "weaponCategoryPkId" ,required = false) String weaponCategoryPkId){
+        return individualService.deleteWeaponCategory(weaponCategoryPkId);
+    }
+
+    @PutMapping("/updateWeaponCategory")
+    public FinalResponse updateWeaponCategory(@RequestBody WeaponCategory weaponCategory){
+        return individualService.updateWeaponCategory(weaponCategory);
+    }
+
+
+
+    @GetMapping("/getWeaponSubType")
+    public FinalResponse getWeaponSubType(
+            @RequestParam(value = "weaponSubTypePkId" ,required = false) String weaponSubTypePkId,
+            @RequestParam(value = "weaponTypeFkId" ,required = false) String weaponTypeFkId
+            ){
+        return individualService.getWeaponSubType(weaponSubTypePkId,weaponTypeFkId);
+    }
+
+    @PostMapping("/postWeaponSubType")
+    public FinalResponse postWeaponSubType(@RequestBody WeaponSubType weaponSubType){
+        return individualService.postWeaponSubType(weaponSubType);
+    }
+
+    @DeleteMapping("/deleteWeaponSubType")
+    public FinalResponse deleteWeaponSubType(@RequestParam(value = "weaponSubTypePkId" ,required = false) String weaponSubTypePkId,
+                                             @RequestParam(value = "weaponTypeFkId" ,required = false) String weaponTypeFkId
+    ){
+        return individualService.deleteWeaponSubType(weaponSubTypePkId,weaponTypeFkId);
+    }
+
+    @PutMapping("/updateWeaponSubType")
+    public FinalResponse updateWeaponSubType(@RequestBody WeaponSubType weaponSubType){
+        return individualService.updateWeaponSubType(weaponSubType);
+    }
+
+
+
+
+
+
 
 }
