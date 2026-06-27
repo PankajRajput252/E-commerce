@@ -36,7 +36,8 @@ public class IndividualController {
             @RequestParam(value = "size", defaultValue = "25") int size,
             @RequestParam(value = "filterBy", required = false) String filterBy,
             @RequestParam(value = "searchValue", required = false) String searchValue,
-            @RequestParam(value = "categoryId", required = false) String categoryId
+            @RequestParam(value = "categoryId", required = false) String categoryId,
+            @RequestParam(value = "isStoreProduct", required = false) boolean isStoreProduct
     ) throws FinalException {
         Integer inputPkIdInt = null;
         Integer inputFkIdInt = null;
@@ -47,7 +48,7 @@ public class IndividualController {
         if (Util.isDefined(categoryId)) {
             categoryIdInt = Util.convertStringToInteger(categoryId);
         }
-        return individualService.getProduct(inputPkIdInt, inputFkId, page, size, filterBy, searchValue,categoryIdInt);
+        return individualService.getProduct(inputPkIdInt, inputFkId, page, size, filterBy, searchValue,categoryIdInt,isStoreProduct);
     }
 
 
@@ -420,5 +421,38 @@ public class IndividualController {
 
 
 
+    @GetMapping("/getWeaponCategory")
+    public FinalResponse getWeaponCategory(
+            @RequestParam(value = "weaponCategoryPkId", required = false) String weaponCategoryPkId,
+            @RequestParam(value = "weaponCategoryFkId", required = false) String weaponCategoryFkId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "25") int size
+    ) {
+        Integer weaponCategoryPkIdInt=null;
+        if(Util.isDefined(weaponCategoryPkId)){
+            weaponCategoryPkIdInt=Util.convertStringToInteger(weaponCategoryPkId);
+        }
+        return individualService.getWeaponCategory(weaponCategoryPkIdInt, page, size);
+    }
+
+    @PostMapping("/addWeaponCategory")
+    public FinalResponse addWeaponCategory(@RequestBody WeaponCategory weaponCategory) {
+        return individualService.addWeaponCategory(weaponCategory);
+    }
+
+    @PutMapping("/updateWeaponCategory/{id}")
+    public FinalResponse updateWeaponCategory(
+            @PathVariable Integer id,
+            @RequestBody WeaponCategory weaponCategory) {
+
+        return individualService.updateWeaponCategory(id, weaponCategory);
+    }
+
+    @DeleteMapping("/deleteWeaponCategory/{id}")
+    public FinalResponse deleteWeaponCategory(
+            @PathVariable Integer id) {
+
+        return individualService.deleteWeaponCategory(id);
+    }
 
 }

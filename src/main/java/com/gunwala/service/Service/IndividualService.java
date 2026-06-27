@@ -10,7 +10,7 @@ import com.gunwala.shipRocket.model.OrderRequestBody;
 public interface IndividualService {
     FinalResponse addProduct(Product product);
 
-    FinalResponse getProduct(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId);
+    FinalResponse getProduct(Integer inputPkIdInt, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId,boolean isStoreProduct);
 
     FinalResponse deleteProduct(Integer id);
 
@@ -113,4 +113,12 @@ public interface IndividualService {
     FinalResponse deleteWeaponType(Integer id);
 
     FinalResponse addWeaponType(WeaponType weaponType);
+
+    FinalResponse getWeaponCategory(Integer weaponCategoryPkIdInt, int page, int size);
+
+    FinalResponse addWeaponCategory(WeaponCategory weaponCategory);
+
+    FinalResponse updateWeaponCategory(Integer id, WeaponCategory weaponCategory);
+
+    FinalResponse deleteWeaponCategory(Integer id);
 }

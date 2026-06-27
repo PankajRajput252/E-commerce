@@ -60,6 +60,8 @@ public class IndividualServiceImpl implements IndividualService {
     private SubCategoryRepo subCategoryRepo;
     @Autowired
     private WeaponTypeRepository weaponTypeRepository;
+    @Autowired
+    private WeaponCategoryRepository weaponCategoryRepository;
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -85,10 +87,10 @@ public class IndividualServiceImpl implements IndividualService {
     }
 
     @Override
-    public FinalResponse getProduct(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId) {
+    public FinalResponse getProduct(Integer inputPkId, String inputFkId, int page, int size, String filterBy, String searchValue,Integer categoryId,boolean isStoreProduct) {
         FinalResponse<Product> finalResponse = new FinalResponse<>();
         Pageable pageable = Util.getPageable(size, page);
-        List<Product> productList = populateProductView(inputPkId,inputFkId, filterBy,searchValue, pageable,categoryId);
+        List<Product> productList = populateProductView(inputPkId,inputFkId, filterBy,searchValue, pageable,categoryId,isStoreProduct);
         int count = populateProductViewCount(inputPkId, inputFkId, filterBy,categoryId);
         finalResponse.setData(productList);
         finalResponse.setCount( count);
@@ -117,10 +119,13 @@ public class IndividualServiceImpl implements IndividualService {
         return count;
     }
 
-    private List<Product> populateProductView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable,Integer categoryId) {
+    private List<Product> populateProductView(Integer inputPkId, String inputFkId, String filterBy, String searchValue, Pageable pageable,Integer categoryId,boolean isStoreProduct) {
 
         List<Product> productList = new ArrayList<>();
-        if(Util.isDefined(categoryId)){
+        if(isStoreProduct){
+            productList = productRepository.findByActiveStateCodeFkIdAndIsStoreProduct(filterBy,isStoreProduct, pageable);
+        }
+      else  if(Util.isDefined(categoryId)){
 //            productList = productRepository.findByActiveStateCodeFkIdAndCategoryId(filterBy, categoryId, pageable);
         }
        else if(Util.isDefined(filterBy)) {
@@ -934,6 +939,55 @@ public class IndividualServiceImpl implements IndividualService {
     public FinalResponse addWeaponType(WeaponType weaponType) {
         FinalResponse finalResponse = new FinalResponse();
         weaponTypeRepository.save(weaponType);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getWeaponCategory(Integer weaponCategoryPkId, int page, int size) {
+        FinalResponse response = new FinalResponse();
+        Pageable pageable = PageRequest.of(page, size);
+        List<WeaponCategory> weaponCategories = new ArrayList<>();
+        if (weaponCategoryPkId != null) {
+            WeaponCategory weaponCategory = weaponCategoryRepository.findByWeaponCategoryPkId(weaponCategoryPkId);
+            weaponCategories.add(weaponCategory);
+        } else {
+            weaponCategories = weaponCategoryRepository.findAll(pageable).getContent();
+        }
+
+        response.setData(weaponCategories);
+        response.setCount(weaponCategories.size());
+        Util.setSuccessMessage(response);
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse updateWeaponCategory(Integer id, WeaponCategory weaponCategory) {
+        FinalResponse finalResponse = new FinalResponse();
+        this.weaponCategoryRepository.findById(id)
+                .map(existing -> {
+                    existing.setWeaponCategoryName(weaponCategory.getWeaponCategoryName());
+                    return (WeaponCategory) this.weaponCategoryRepository.save(existing);
+                }).orElseThrow(() -> new RuntimeException(" WeaponCategory ticket  not found"));
+        finalResponse = Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse deleteWeaponCategory(Integer id) {
+        weaponCategoryRepository.deleteById(id);
+        FinalResponse finalResponse = new FinalResponse();
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    @Transactional
+    public FinalResponse addWeaponCategory(WeaponCategory weaponCategory) {
+        FinalResponse finalResponse = new FinalResponse();
+        weaponCategoryRepository.save(weaponCategory);
         Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
