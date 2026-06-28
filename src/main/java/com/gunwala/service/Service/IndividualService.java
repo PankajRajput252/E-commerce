@@ -114,6 +114,7 @@ public interface IndividualService {
 
     FinalResponse addWeaponType(WeaponType weaponType);
 
+
     FinalResponse getWeaponCategory(Integer weaponCategoryPkIdInt, int page, int size);
 
     FinalResponse addWeaponCategory(WeaponCategory weaponCategory);
@@ -121,4 +122,22 @@ public interface IndividualService {
     FinalResponse updateWeaponCategory(Integer id, WeaponCategory weaponCategory);
 
     FinalResponse deleteWeaponCategory(Integer id);
+
+    FinalResponse getCaliberMaster(String caliberPkId, String weaponTypeFkId);
+
+    FinalResponse postCaliberMaster(CaliberMaster caliberMaster);
+
+    FinalResponse deleteCaliberMaster(String caliberPkId, String weaponTypeFkId);
+
+    FinalResponse updateCaliberMaster(CaliberMaster caliberMaster);
+
+
+    FinalResponse getWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId);
+
+    FinalResponse postWeaponSubType(WeaponSubType weaponSubType);
+
+    FinalResponse deleteWeaponSubType(String weaponSubTypePkId, String weaponTypeFkId);
+
+    FinalResponse updateWeaponSubType(WeaponSubType weaponSubType);
+
 }
