@@ -22,6 +22,11 @@ public class IndividualController {
     @Autowired
     private IndividualService individualService;
 
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
+    }
+
     @PostMapping("/addProduct")
     public FinalResponse addProduct(@RequestBody Product product) throws FinalException {
         return this.individualService.addProduct(product);
