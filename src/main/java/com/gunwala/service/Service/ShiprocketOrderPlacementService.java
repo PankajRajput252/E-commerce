@@ -1,13 +1,18 @@
 package com.gunwala.service.Service;
 
 import com.gunwala.dto.ShopOrderResponse;
-import com.gunwala.entity.*;
+import com.gunwala.entity.OrderStatus;
+import com.gunwala.entity.PaymentSubmission;
+import com.gunwala.entity.ShippingStatus;
+import com.gunwala.entity.ShopOrder;
+import com.gunwala.entity.ShopOrderItem;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import com.gunwala.repository.ShopOrderRepository;
 import com.gunwala.service.ServiceImpl.ShiprocketShipmentService;
 import com.gunwala.shipRocket.model.*;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -144,11 +149,7 @@ public class ShiprocketOrderPlacementService {
 
             // ---- Step 3: request pickup ----
             if (assignAwb && requestPickup && order.getShippingStatus() != ShippingStatus.PICKUP_SCHEDULED) {
-                PickupResponse pickup = shiprocket.generatePickup(String.valueOf(order.getShiprocketShipmentId()));
-                if (pickup == null || pickup.getPickup_status() == null || pickup.getPickup_status() != 1) {
-                    throw new IllegalStateException("Shiprocket did not accept the pickup request");
-                }
-                String scheduled = pickup.getResponse() != null ? pickup.getResponse().getPickup_scheduled_date() : null;
+                String scheduled = requestPickup(order.getShiprocketShipmentId());
                 order = save(orderReference, o -> {
                     o.setShippingStatus(ShippingStatus.PICKUP_SCHEDULED);
                     if (StringUtils.hasText(scheduled)) o.setPickupScheduledDate(scheduled);
@@ -170,6 +171,28 @@ public class ShiprocketOrderPlacementService {
                 o.setShippingStatus(ShippingStatus.FAILED);
                 o.setShippingError(reason);
             }));
+        }
+    }
+
+    /**
+     * Requests pickup and returns the scheduled date (may be null).
+     * Many Shiprocket accounts schedule the pickup automatically when the AWB is assigned; Shiprocket then
+     * answers 400 "Already in Pickup Queue", which means the pickup IS scheduled, so it counts as success.
+     */
+    private String requestPickup(Long shipmentId) {
+        try {
+            PickupResponse pickup = shiprocket.generatePickup(String.valueOf(shipmentId));
+            if (pickup == null || pickup.getPickup_status() == null || pickup.getPickup_status() != 1) {
+                throw new IllegalStateException("Shiprocket did not accept the pickup request");
+            }
+            return pickup.getResponse() != null ? pickup.getResponse().getPickup_scheduled_date() : null;
+        } catch (FeignException e) {
+            String body = e.contentUTF8();
+            if (body != null && body.toLowerCase().contains("already in pickup queue")) {
+                log.info("Shipment {} was already in Shiprocket's pickup queue (auto-scheduled with the AWB)", shipmentId);
+                return null;
+            }
+            throw e;
         }
     }
 
