@@ -37,6 +37,7 @@ public class PaymentSubmissionService {
     private final PaymentMethodRepository methodRepository;
     private final FileStorageService storage;
     private final ApplicationEventPublisher events;
+    private final ShopOrderService shopOrderService;
 
     // ============================================================ END USER
 
@@ -50,6 +51,14 @@ public class PaymentSubmissionService {
             throw new ConflictException("A payment with transaction reference " + reference + " has already been submitted");
         }
 
+        String orderReference = StringUtils.hasText(request.getOrderReference()) ? request.getOrderReference().trim() : null;
+        if (orderReference != null) {
+            shopOrderService.validatePayable(orderReference, userId, request.getAmount());
+            if (submissionRepository.existsByOrderReferenceAndStatus(orderReference, PaymentStatus.PENDING)) {
+                throw new ConflictException("A payment for order " + orderReference + " is already waiting for verification");
+            }
+        }
+
         StoredFile file = storage.storeReceipt(receipt);
         deleteFileIfTransactionRollsBack(file.path());
 
@@ -60,6 +69,7 @@ public class PaymentSubmissionService {
         s.setTransactionReference(reference);
         s.setPaymentDate(request.getPaymentDate());
         s.setUserRemarks(StringUtils.hasText(request.getRemarks()) ? request.getRemarks().trim() : null);
+        s.setOrderReference(orderReference);
         s.setReceiptPath(file.path());
         s.setReceiptContentType(file.contentType());
         s.setReceiptOriginalName(file.originalName());
@@ -115,6 +125,12 @@ public class PaymentSubmissionService {
         s.setRejectionReason(null);
         s.setReviewedBy(adminUsername);
         s.setReviewedAt(Instant.now());
+
+        // Same transaction: the order becomes PAID together with the approval.
+        // After commit, ShiprocketAutoShipListener places the Shiprocket order in the background.
+        if (StringUtils.hasText(s.getOrderReference())) {
+            shopOrderService.markPaid(s.getOrderReference(), s.getId());
+        }
 
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), s.getUserId(), PaymentStatus.APPROVED, null));
         return PaymentSubmissionResponse.from(s, true);

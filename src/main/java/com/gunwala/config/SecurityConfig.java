@@ -4,6 +4,7 @@ import com.gunwala.security.CustomUserDetailService;
 import com.gunwala.security.JwtAuthenticationEntryPoint;
 import com.gunwala.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -37,22 +40,31 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // Comma-separated list of frontends allowed to call this API
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/deposit/webhook")
-                        .disable()
-                )
+                .csrf(csrf -> csrf.disable()) // stateless JWT API, CSRF not needed
                 .authorizeHttpRequests(auth -> auth
+                        // CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
+
+                        // Public endpoints
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/deposit/webhook").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
+                        .requestMatchers("/api/deposit/webhook").permitAll()
+
+                        // Admin endpoints: always require login, even for GET
+                        .requestMatchers("/api/admin/**").authenticated()
+
+                        // Other GETs stay public (product listings etc.)
                         .requestMatchers(HttpMethod.GET).permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -66,7 +78,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -74,7 +85,6 @@ public class SecurityConfig {
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -87,31 +97,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<CorsFilter> coresFilter() {  // ✅ added generic type
+    public FilterRegistrationBean<CorsFilter> coresFilter() {
+
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(allowedOrigins);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.addAllowedOriginPattern("*");
-        corsConfiguration.addAllowedOrigin("http://localhost:5173");
-        corsConfiguration.addAllowedOrigin("http://stylo-coin-frontend.s3-website.ap-south-1.amazonaws.com");
-        corsConfiguration.addAllowedOrigin("https://stylo-coin-frontend.s3-website.ap-south-1.amazonaws.com");
-        corsConfiguration.addAllowedOrigin("https://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com");
-        corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.addAllowedHeader("Authorization");
-        corsConfiguration.addAllowedHeader("Content-Type");
-        corsConfiguration.addAllowedHeader("Accept");
-        corsConfiguration.addAllowedHeader("x-nowpayments-sig");
-        corsConfiguration.addAllowedHeader("user-agent");
-        corsConfiguration.addAllowedMethod("GET");
-        corsConfiguration.addAllowedMethod("POST");
-        corsConfiguration.addAllowedMethod("PUT");
-        corsConfiguration.addAllowedMethod("DELETE");
-        corsConfiguration.addAllowedMethod("OPTIONS");
-        corsConfiguration.setMaxAge(3600L);
-
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        source.registerCorsConfiguration("/**", config);
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(-110);

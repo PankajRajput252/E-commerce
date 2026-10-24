@@ -1,14 +1,22 @@
-
-
 package com.gunwala.service.ServiceImpl;
+
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
 import com.gunwala.shipRocket.model.*;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
+import java.util.function.Function;
 
+/**
+ * Thin wrapper around the Shiprocket API: adds the auth token and retries once with a fresh token on 401.
+ * Used by the Razorpay flow (OrderController) and by the manual-payment auto-ship flow.
+ */
+@Slf4j
 @Service
 public class ShiprocketShipmentService {
 
@@ -18,123 +26,87 @@ public class ShiprocketShipmentService {
     @Autowired
     private ShiprocketTokenManager tokenManager;
 
+    /** Must match a pickup address nickname in Shiprocket → Settings → Pickup Addresses. */
     @Value("${shiprocket.pickup-location}")
     private String pickupLocation;
 
-    /**
-     * STEP 1: Create order in Shiprocket after Razorpay payment success.
-     * orderRequestBody must already have all order/item/customer fields set
-     * by the caller (OrderController) before calling this.
-     */
+    /** STEP 1: create the order in Shiprocket. Returns Shiprocket's order_id and shipment_id. */
     public OrderResponse createOrder(OrderRequestBody orderRequestBody) {
-        try {
-            // Make sure pickup_location matches your Shiprocket dashboard setting
-            orderRequestBody.setPickupLocation(pickupLocation); // ← adjust setter name to your DTO
-
-            Map<String, String> headers = tokenManager.authHeaders();
-            OrderResponse response = shiprocketServiceProxy.createShiprocketOrderResponse(headers, orderRequestBody);
-
-            System.out.println("✅ Shiprocket order created: " + response); // adjust getter for log
-            return response;
-
-        } catch (Exception e) {
-            // Token might have expired mid-session — retry once with fresh token
-            if (isAuthError(e)) {
-                tokenManager.invalidateToken();
-                Map<String, String> freshHeaders = tokenManager.authHeaders();
-                return shiprocketServiceProxy.createShiprocketOrderResponse(freshHeaders, orderRequestBody);
-            }
-            throw new RuntimeException("Failed to create Shiprocket order: " + e.getMessage(), e);
+        if (!StringUtils.hasText(orderRequestBody.getPickup_location())) {
+            orderRequestBody.setPickup_location(pickupLocation);
         }
+        OrderResponse response = withToken(h -> shiprocketServiceProxy.createShiprocketOrderResponse(h, orderRequestBody));
+        log.info("Shiprocket order created for {}: shiprocketOrderId={}, shipmentId={}, status={}",
+                orderRequestBody.getOrder_id(),
+                response == null ? null : response.getOrderId(),
+                response == null ? null : response.getShipmentId(),
+                response == null ? null : response.getStatus());
+        return response;
     }
 
     /**
-     * STEP 2: Assign AWB (courier + tracking number) to a shipment.
-     * Call this right after createOrder() succeeds.
+     * STEP 2: assign a courier and generate the AWB (tracking number).
+     * Pass a blank courierId to let Shiprocket pick the recommended courier. Deducts from the Shiprocket wallet.
      */
     public AwbResponseAssaign generateAwb(String shipmentId, String courierId) {
-        try {
-            AwbRequestBody body = new AwbRequestBody();
-            body.setShipmentId(shipmentId);   // ← adjust setter names to your DTO
-            body.setCourierId(courierId);     // pass "" or null to let Shiprocket auto-assign
-
-            Map<String, String> headers = tokenManager.authHeaders();
-            return shiprocketServiceProxy.generateAwb(headers, body);
-
-        } catch (Exception e) {
-            if (isAuthError(e)) {
-                tokenManager.invalidateToken();
-                AwbRequestBody body = new AwbRequestBody();
-                body.setShipmentId(shipmentId);
-                body.setCourierId(courierId);
-                Map<String, String> freshHeaders = tokenManager.authHeaders();
-                return shiprocketServiceProxy.generateAwb(freshHeaders, body);
-            }
-            throw new RuntimeException("Failed to generate AWB: " + e.getMessage(), e);
-        }
+        AwbRequestBody body = new AwbRequestBody();
+        body.setShipmentId(shipmentId);
+        body.setCourierId(StringUtils.hasText(courierId) ? courierId : null);
+        return withToken(h -> shiprocketServiceProxy.generateAwb(h, body));
     }
 
-    /**
-     * STEP 3: Request pickup from courier for a given shipment.
-     */
+    /** STEP 3: ask the courier to pick the parcel up. */
     public PickupResponse generatePickup(String shipmentId) {
-        try {
-            Map<String, String> headers = tokenManager.authHeaders();
-            return shiprocketServiceProxy.generatePickup(headers, shipmentId);
-        } catch (Exception e) {
-            if (isAuthError(e)) {
-                tokenManager.invalidateToken();
-                Map<String, String> freshHeaders = tokenManager.authHeaders();
-                return shiprocketServiceProxy.generatePickup(freshHeaders, shipmentId);
-            }
-            throw new RuntimeException("Failed to generate pickup: " + e.getMessage(), e);
-        }
+        PickupRequestBody body = new PickupRequestBody(Long.valueOf(shipmentId));
+        return withToken(h -> shiprocketServiceProxy.generatePickup(h, body));
     }
 
-    /**
-     * Track shipment status by Shiprocket shipment ID.
-     */
+    /** Track a shipment by Shiprocket shipment id. */
     public TrackingReaponse trackShipment(String shipmentId) {
-        try {
-            Map<String, String> headers = tokenManager.authHeaders();
-            return shiprocketServiceProxy.trackShipment(shipmentId, headers);
-        } catch (Exception e) {
-            if (isAuthError(e)) {
-                tokenManager.invalidateToken();
-                Map<String, String> freshHeaders = tokenManager.authHeaders();
-                return shiprocketServiceProxy.trackShipment(shipmentId, freshHeaders);
-            }
-            throw new RuntimeException("Failed to track shipment: " + e.getMessage(), e);
-        }
+        return withToken(h -> shiprocketServiceProxy.trackShipment(shipmentId, h));
     }
 
     /**
-     * Full automated flow — call this ONE method after Razorpay payment success.
-     * It creates the order, assigns AWB, and schedules pickup in sequence.
+     * Razorpay flow: create the order, then try AWB + pickup. The order counts as created even if
+     * AWB/pickup fail; those can be retried from /api/shiprocket/generate-awb and /generate-pickup.
      */
     public OrderResponse createOrderAndShip(OrderRequestBody orderRequestBody) {
         OrderResponse orderResponse = createOrder(orderRequestBody);
-
-        // ── Extract shipment_id from response — adjust getter to your DTO ────
-        String shipmentId = String.valueOf(orderResponse.getShipmentId());
-
-        if (shipmentId != null && !shipmentId.equals("null")) {
+        Long shipmentId = orderResponse == null ? null : orderResponse.getShipmentId();
+        if (shipmentId != null) {
             try {
-                // "" / null courierId = let Shiprocket auto-pick best courier
-                generateAwb(shipmentId, "");
-                generatePickup(shipmentId);
+                generateAwb(String.valueOf(shipmentId), null);
+                generatePickup(String.valueOf(shipmentId));
             } catch (Exception e) {
-                // Order was created successfully even if AWB/pickup fails —
-                // log it so admin can retry manually
-                System.err.println("⚠️ Order created but AWB/pickup failed: " + e.getMessage());
+                log.warn("Shiprocket order {} created but AWB/pickup failed: {}", orderRequestBody.getOrder_id(), describe(e));
             }
         }
-
         return orderResponse;
     }
 
-    private boolean isAuthError(Exception e) {
-        String msg = e.getMessage();
-        return msg != null && (msg.contains("401") || msg.toLowerCase().contains("unauthorized"));
+    /** Calls Shiprocket with a token; on 401 refreshes the token and tries once more. */
+    private <T> T withToken(Function<Map<String, String>, T> call) {
+        try {
+            return call.apply(tokenManager.authHeaders());
+        } catch (FeignException.Unauthorized e) {
+            tokenManager.invalidateToken();
+            return call.apply(tokenManager.authHeaders());
+        }
+    }
+
+    /** Short, admin-readable description of a Shiprocket error (status + response body). */
+    public static String describe(Throwable e) {
+        if (e instanceof FeignException fe) {
+            String body = fe.contentUTF8();
+            String detail = StringUtils.hasText(body) ? body : fe.getMessage();
+            return "Shiprocket HTTP " + fe.status() + ": " + abbreviate(detail, 800);
+        }
+        return abbreviate(e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage(), 800);
+    }
+
+    private static String abbreviate(String s, int max) {
+        if (s == null) return null;
+        String oneLine = s.replaceAll("\\s+", " ").trim();
+        return oneLine.length() <= max ? oneLine : oneLine.substring(0, max) + "…";
     }
 }

@@ -33,4 +33,9 @@ public class PaymentSubmissionRequest {
 
     @Size(max = 500)
     private String remarks;
+
+    /** Optional: the shop order this payment is for. */
+    @Size(max = 50)
+    @Pattern(regexp = "^[A-Za-z0-9_-]*$", message = "may contain only letters, digits, hyphens and underscores")
+    private String orderReference;
 }

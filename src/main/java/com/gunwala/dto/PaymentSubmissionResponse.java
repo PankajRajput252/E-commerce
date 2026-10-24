@@ -20,6 +20,7 @@ public record PaymentSubmissionResponse(
         String transactionReference,
         LocalDate paymentDate,
         String remarks,
+        String orderReference,
         String receiptUrl,
         String receiptFileName,
         PaymentStatus status,
@@ -36,7 +37,7 @@ public record PaymentSubmissionResponse(
                 s.getPaymentMethod().getId(),
                 s.getPaymentMethod().getType(),
                 s.getPaymentMethod().getDisplayName(),
-                s.getAmount(), s.getTransactionReference(), s.getPaymentDate(), s.getUserRemarks(),
+                s.getAmount(), s.getTransactionReference(), s.getPaymentDate(), s.getUserRemarks(), s.getOrderReference(),
                 receiptUrl, s.getReceiptOriginalName(),
                 s.getStatus(), s.getRejectionReason(),
                 adminView ? s.getReviewedBy() : null,   // don't expose admin usernames to end users

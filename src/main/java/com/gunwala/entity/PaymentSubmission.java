@@ -50,6 +50,10 @@ public class PaymentSubmission {
     @Column(length = 500)
     private String userRemarks;
 
+    /** The shop order this payment is for (ShopOrder.orderReference), if any. */
+    @Column(name = "order_reference", length = 50)
+    private String orderReference;
+
     // ---- Receipt file ----
     @Column(nullable = false, length = 255)
     private String receiptPath;

@@ -42,6 +42,9 @@ public class ShiprocketTokenManager {
         request.setPassword(password);
 
         ShipRocketTokenResponse response = shiprocketServiceProxy.generateOrderTokenResponse(request);
+        if (response == null || response.getToken() == null || response.getToken().isBlank()) {
+            throw new IllegalStateException("Shiprocket login returned no token - check shiprocket.email / shiprocket.password (use a Shiprocket API user)");
+        }
 
         // ── Adjust getter name to match your DTO ──────────────────────────────
         cachedToken = response.getToken();

@@ -356,10 +356,10 @@ public class IndividualController {
         return individualService.generateAwb(awbRequestBody);
     }
 
-    @PostMapping("/generatePickup")
-    public FinalResponse generatePickup(@RequestParam (value = "shipment_id") String shipment_id){
-        return individualService.generatePickup(shipment_id);
-    }
+//    @PostMapping("/generatePickup")
+//    public FinalResponse generatePickup(@RequestParam (value = "shipment_id") String shipment_id){
+//        return individualService.generatePickup(shipment_id);
+//    }
 
     @GetMapping("/trackShipment/{shipment_id}")
     public FinalResponse trackShipment(@PathVariable String shipment_id){

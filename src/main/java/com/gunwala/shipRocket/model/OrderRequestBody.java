@@ -1,9 +1,12 @@
 package com.gunwala.shipRocket.model;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderRequestBody {
 
     private String order_id;
@@ -41,6 +44,8 @@ public class OrderRequestBody {
 
     private Double weight;
 
+    /** Not sent to Shiprocket; kept for old callers. Setting it also sets pickup_location. */
+    @JsonIgnore
     private String pickupLocation;
 
     public String getOrder_id() {
@@ -259,11 +264,13 @@ public class OrderRequestBody {
         this.weight = weight;
     }
 
+    @JsonIgnore
     public String getPickupLocation() {
         return pickupLocation;
     }
 
     public void setPickupLocation(String pickupLocation) {
         this.pickupLocation = pickupLocation;
+        this.pickup_location = pickupLocation;
     }
 }

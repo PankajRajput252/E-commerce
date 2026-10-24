@@ -789,7 +789,7 @@ public class IndividualServiceImpl implements IndividualService {
         FinalResponse finalResponse = new FinalResponse();
         ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
         shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
-        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
+        shiprocketTokenRequest.setPassword("KNKB9Ik*r!#Gw!mpoygp%P^7O#UOM*e0");
         ShipRocketTokenResponse shipRocketTokenResponse=shiprocketServiceProxy.generateOrderTokenResponse(shiprocketTokenRequest);
         finalResponse.setResponse(shipRocketTokenResponse);
         return finalResponse;
@@ -797,7 +797,7 @@ public class IndividualServiceImpl implements IndividualService {
     private Map<String, String> fetchHeaders() {
         ShiprocketTokenRequest shiprocketTokenRequest = new ShiprocketTokenRequest();
         shiprocketTokenRequest.setEmail("singhpankajrajput252@gmail.com");
-        shiprocketTokenRequest.setPassword("$e!01d^7!QRgRj$1Z*Ut3rG88fJx^Q01");
+        shiprocketTokenRequest.setPassword("KNKB9Ik*r!#Gw!mpoygp%P^7O#UOM*e0");
         ShipRocketTokenResponse shipRocketTokenResponse=shiprocketServiceProxy.generateOrderTokenResponse(shiprocketTokenRequest);
 
         Map<String, String> headers = new HashMap();
@@ -826,14 +826,14 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
-    @Override
-    public FinalResponse generatePickup(String shipmentId) {
-        FinalResponse finalResponse = new FinalResponse();
-        Map <String,String> headers=fetchHeaders();
-        PickupResponse pickupResponse = shiprocketServiceProxy.generatePickup(headers,shipmentId);
-        finalResponse.setResponse(pickupResponse);
-        return finalResponse;
-    }
+//    @Override
+//    public FinalResponse generatePickup(String shipmentId) {
+//        FinalResponse finalResponse = new FinalResponse();
+//        Map <String,String> headers=fetchHeaders();
+//        PickupResponse pickupResponse = shiprocketServiceProxy.generatePickup(headers,shipmentId);
+//        finalResponse.setResponse(pickupResponse);
+//        return finalResponse;
+//    }
 
     @Override
     public FinalResponse trackShipment(String shipmentId) {

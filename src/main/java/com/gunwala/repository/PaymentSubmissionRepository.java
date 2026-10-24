@@ -27,4 +27,9 @@ public interface PaymentSubmissionRepository extends JpaRepository<PaymentSubmis
 
     /** Blocks the same UTR being submitted twice (a rejected one may be submitted again). */
     boolean existsByTransactionReferenceAndStatusNot(String transactionReference, PaymentStatus status);
+
+    /** Stops a second payment for the same order while one is still waiting for review. */
+    boolean existsByOrderReferenceAndStatus(String orderReference, PaymentStatus status);
+
+    boolean existsByOrderReference(String orderReference);
 }

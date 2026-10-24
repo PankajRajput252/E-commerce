@@ -94,7 +94,7 @@ public interface IndividualService {
 
     FinalResponse generateAwb(AwbRequestBody awbRequestBody);
 
-    FinalResponse generatePickup(String shipmentId);
+//    FinalResponse generatePickup(String shipmentId);
 
     FinalResponse trackShipment(String shipmentId);
 
