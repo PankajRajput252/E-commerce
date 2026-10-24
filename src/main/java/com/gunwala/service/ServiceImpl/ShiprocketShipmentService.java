@@ -1,5 +1,7 @@
 package com.gunwala.service.ServiceImpl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
 import com.gunwala.shipRocket.model.*;
 import feign.FeignException;
@@ -26,22 +28,54 @@ public class ShiprocketShipmentService {
     @Autowired
     private ShiprocketTokenManager tokenManager;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /** Must match a pickup address nickname in Shiprocket → Settings → Pickup Addresses. */
     @Value("${shiprocket.pickup-location}")
     private String pickupLocation;
 
-    /** STEP 1: create the order in Shiprocket. Returns Shiprocket's order_id and shipment_id. */
+    /**
+     * STEP 1: create the order in Shiprocket. Returns Shiprocket's order_id and shipment_id.
+     * Shiprocket sometimes reports errors with HTTP 200 (e.g. a wrong pickup location), so the raw reply
+     * is read and, if it has no order/shipment id, its message is thrown so the admin can see it.
+     */
     public OrderResponse createOrder(OrderRequestBody orderRequestBody) {
         if (!StringUtils.hasText(orderRequestBody.getPickup_location())) {
             orderRequestBody.setPickup_location(pickupLocation);
         }
-        OrderResponse response = withToken(h -> shiprocketServiceProxy.createShiprocketOrderResponse(h, orderRequestBody));
-        log.info("Shiprocket order created for {}: shiprocketOrderId={}, shipmentId={}, status={}",
-                orderRequestBody.getOrder_id(),
-                response == null ? null : response.getOrderId(),
-                response == null ? null : response.getShipmentId(),
-                response == null ? null : response.getStatus());
+        String raw = withToken(h -> shiprocketServiceProxy.createShiprocketOrderRaw(h, orderRequestBody));
+        log.info("Shiprocket create-order reply for {} (pickup_location='{}'): {}",
+                orderRequestBody.getOrder_id(), orderRequestBody.getPickup_location(), abbreviate(raw, 2000));
+
+        OrderResponse response;
+        try {
+            response = objectMapper.readValue(raw, OrderResponse.class);
+        } catch (Exception e) {
+            throw new IllegalStateException("Unexpected reply from Shiprocket: " + abbreviate(raw, 600));
+        }
+        if (response == null || response.getOrderId() == null || response.getShipmentId() == null) {
+            throw new IllegalStateException("Shiprocket did not create the order: " + shiprocketMessage(raw)
+                    + " [pickup_location used: '" + orderRequestBody.getPickup_location() + "']");
+        }
         return response;
+    }
+
+    /** Pulls "message" and "errors" out of a Shiprocket reply; falls back to the raw text. */
+    private String shiprocketMessage(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return "empty reply";
+        }
+        try {
+            JsonNode node = objectMapper.readTree(raw);
+            StringBuilder sb = new StringBuilder();
+            if (node.hasNonNull("message")) sb.append(node.get("message").asText());
+            if (node.hasNonNull("errors")) sb.append(sb.length() > 0 ? " – " : "").append(node.get("errors").toString());
+            if (node.hasNonNull("status_code")) sb.append(" (status_code ").append(node.get("status_code").asText()).append(")");
+            return sb.length() > 0 ? abbreviate(sb.toString(), 700) : abbreviate(raw, 700);
+        } catch (Exception e) {
+            return abbreviate(raw, 700);
+        }
     }
 
     /**

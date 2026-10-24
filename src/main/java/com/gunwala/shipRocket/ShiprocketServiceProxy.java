@@ -21,6 +21,11 @@ public interface ShiprocketServiceProxy {
     OrderResponse createShiprocketOrderResponse(@RequestHeader Map<String, String> headerMap,
                                                 @RequestBody OrderRequestBody orderRequestBody);
 
+    /** Same call, but returns Shiprocket's raw JSON so errors sent with HTTP 200 aren't lost. */
+    @PostMapping("/orders/create/adhoc")
+    String createShiprocketOrderRaw(@RequestHeader Map<String, String> headerMap,
+                                    @RequestBody OrderRequestBody orderRequestBody);
+
     @GetMapping("/courier/track/shipment/{shipment_id}")
     TrackingReaponse trackShipment(@PathVariable("shipment_id") String shipmentId,
                                    @RequestHeader Map<String, String> headerMap);
