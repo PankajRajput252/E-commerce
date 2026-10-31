@@ -17,6 +17,8 @@ import com.gunwala.storage.FileStorageService;
 import com.gunwala.storage.StoredFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import com.gunwala.exception.DuplicateTransactionReferenceException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,9 +49,7 @@ public class PaymentSubmissionService {
                 .orElseThrow(() -> new BadRequestException("Selected payment method is not available"));
 
         String reference = request.getTransactionReference().trim().toUpperCase();
-        if (submissionRepository.existsByTransactionReferenceAndStatusNot(reference, PaymentStatus.REJECTED)) {
-            throw new ConflictException("A payment with transaction reference " + reference + " has already been submitted");
-        }
+        ensureReferenceNotUsed(reference, userId);
 
         String orderReference = StringUtils.hasText(request.getOrderReference()) ? request.getOrderReference().trim() : null;
         if (orderReference != null) {
@@ -67,6 +67,7 @@ public class PaymentSubmissionService {
         s.setPaymentMethod(method);
         s.setAmount(request.getAmount());
         s.setTransactionReference(reference);
+        s.setActiveReference(reference);
         s.setPaymentDate(request.getPaymentDate());
         s.setUserRemarks(StringUtils.hasText(request.getRemarks()) ? request.getRemarks().trim() : null);
         s.setOrderReference(orderReference);
@@ -74,10 +75,49 @@ public class PaymentSubmissionService {
         s.setReceiptContentType(file.contentType());
         s.setReceiptOriginalName(file.originalName());
         s.setStatus(PaymentStatus.PENDING);
-        submissionRepository.save(s);
+        try {
+            submissionRepository.saveAndFlush(s);
+        } catch (DataIntegrityViolationException ex) {
+            // Two requests with the same reference got past the check at once (e.g. double-tap on Submit)
+            if (isActiveReferenceViolation(ex)) {
+                throw new DuplicateTransactionReferenceException(
+                        "A payment with transaction reference " + reference + " has already been submitted. "
+                                + "Please check your payment history before submitting again.",
+                        reference, null);
+            }
+            throw ex;
+        }
 
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), userId, PaymentStatus.PENDING, null));
         return PaymentSubmissionResponse.from(s, false);
+    }
+
+    /**
+     * Rejects a reference already attached to a PENDING or APPROVED payment.
+     * Tailored message for the user's own payment; nothing about someone else's payment is revealed.
+     */
+    private void ensureReferenceNotUsed(String reference, String userId) {
+        submissionRepository.findFirstByTransactionReferenceAndStatusNotOrderByCreatedAtDesc(reference, PaymentStatus.REJECTED)
+                .ifPresent(existing -> {
+                    if (userId.equals(existing.getUserId())) {
+                        String state = existing.getStatus() == PaymentStatus.APPROVED
+                                ? "it has already been approved"
+                                : "it is currently under review";
+                        throw new DuplicateTransactionReferenceException(
+                                "You have already submitted a payment with transaction reference " + reference
+                                        + " and " + state + ". Please do not submit the same payment twice.",
+                                reference, existing.getId());
+                    }
+                    throw new DuplicateTransactionReferenceException(
+                            "Transaction reference " + reference + " has already been used for another payment. "
+                                    + "Please check the reference number from your bank or UPI app and try again.",
+                            reference, null);
+                });
+    }
+
+    private boolean isActiveReferenceViolation(DataIntegrityViolationException ex) {
+        String msg = ex.getMostSpecificCause().getMessage();
+        return msg != null && msg.contains(PaymentSubmission.UK_ACTIVE_REFERENCE);
     }
 
     @Transactional(readOnly = true)
@@ -144,6 +184,7 @@ public class PaymentSubmissionService {
         PaymentSubmission s = getOrThrow(id);
         ensurePending(s);
         s.setStatus(PaymentStatus.REJECTED);
+        s.setActiveReference(null);   // frees the reference so the user can submit it again
         s.setRejectionReason(reason.trim());
         s.setReviewedBy(adminUsername);
         s.setReviewedAt(Instant.now());

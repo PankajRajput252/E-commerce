@@ -2,6 +2,7 @@ package com.gunwala;
 
 import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
+import com.gunwala.exception.DuplicateTransactionReferenceException;
 import com.gunwala.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -73,6 +74,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflict(ConflictException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    /**
+     * Same reference number submitted twice. 409 with a machine-readable code and a field error
+     * (same "errors" shape as validation failures) so the UI can show it under the Reference No field.
+     */
+    @ExceptionHandler(DuplicateTransactionReferenceException.class)
+    public ProblemDetail handleDuplicateReference(DuplicateTransactionReferenceException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        pd.setTitle("Duplicate transaction reference");
+        pd.setProperty("code", DuplicateTransactionReferenceException.CODE);
+        pd.setProperty("errors", Map.of("transactionReference", ex.getMessage()));
+        if (ex.getExistingPaymentId() != null) {
+            pd.setProperty("existingPaymentId", ex.getExistingPaymentId());
+        }
+        return pd;
     }
 
     /** Covers @Valid on @RequestBody and @ModelAttribute (MethodArgumentNotValidException extends BindException). */

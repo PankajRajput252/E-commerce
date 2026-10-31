@@ -20,11 +20,15 @@ import java.time.LocalDate;
         @Index(name = "idx_ps_user", columnList = "user_id"),
         @Index(name = "idx_ps_status", columnList = "status"),
         @Index(name = "idx_ps_txn_ref", columnList = "transaction_reference")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = PaymentSubmission.UK_ACTIVE_REFERENCE, columnNames = "active_reference")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 public class PaymentSubmission {
+
+    public static final String UK_ACTIVE_REFERENCE = "uk_ps_active_reference";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +47,14 @@ public class PaymentSubmission {
     /** UTR / UPI reference / bank transaction id entered by the user. */
     @Column(name = "transaction_reference", nullable = false, length = 50)
     private String transactionReference;
+
+    /**
+     * Same as transactionReference while PENDING or APPROVED, NULL once REJECTED.
+     * The unique index on it stops the same reference being saved twice (e.g. double-tapped submit).
+     * NULLs don't collide, so a rejected reference can be submitted again.
+     */
+    @Column(name = "active_reference", length = 50)
+    private String activeReference;
 
     @Column(nullable = false)
     private LocalDate paymentDate;
