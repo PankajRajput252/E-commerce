@@ -3,6 +3,7 @@ package com.gunwala.service.ServiceImpl;
 import com.gunwala.authbridge.AuthbridgeSeviceProxy;
 import com.gunwala.authbridge.model.AuthbridgeReportDetail;
 import com.gunwala.authbridge.model.TokenResponse;
+import com.gunwala.entity.EmailOtp;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.Util;
 import com.gunwala.model.entitities.admin.SubscriptionDefinition;
@@ -12,6 +13,7 @@ import com.gunwala.repo.UserRepository;
 import com.gunwala.repo.admin.SubscriptionDefinitionRepo;
 import com.gunwala.repo.enduser.SupportTicketRepository;
 import com.gunwala.repo.gunwala.*;
+import com.gunwala.repository.EmailOtpRepository;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
@@ -19,8 +21,13 @@ import com.gunwala.shipRocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 import java.time.LocalDateTime;
@@ -68,6 +75,11 @@ public class IndividualServiceImpl implements IndividualService {
     private WeaponCategoryRepo weaponCategoryRepo;
     @Autowired
     private WeaponSubTypeRepo weaponSubTypeRepo;
+    @Autowired
+    private EmailOtpRepository emailOtpRepository;
+    @Autowired
+    private JavaMailSender mailSender;
+
 
 
     @Override
@@ -1093,5 +1105,41 @@ public class IndividualServiceImpl implements IndividualService {
         return finalResponse;
     }
 
+    @Override
+    public String generateAndSave(String email,String userNodeId) {
+        String otp = Util.generateOtp();
+        EmailOtp entity = new EmailOtp();
+        entity.setEmail(email);
+        entity.setOtp(otp);
+        entity.setUserNodeId(userNodeId);
+        entity.setCreatedDatetime(String.valueOf(LocalDateTime.now()));
+        entity.setExpiryTime(System.currentTimeMillis() + 2 * 60 * 1000);
+        emailOtpRepository.save(entity);
+        return otp;
+    }
 
+
+    @Override
+    public FinalResponse sendOtp(String email, String otp) {
+        FinalResponse finalResponse=new FinalResponse();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Your OTP for Verification");
+        message.setText("Your OTP is: " + otp + "\n\nValid for 2 minutes.");
+
+        mailSender.send(message);
+        finalResponse.setMessage("OTP sent to email");
+        finalResponse.setId(otp);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
+
+    @Override
+    public FinalResponse getOtpForVerification(String userNodeId){
+        FinalResponse finalResponse=new FinalResponse();
+        EmailOtp emailOtp= emailOtpRepository.findTopByUserNodeIdOrderByCreatedDatetimeDesc(userNodeId);
+        finalResponse.setResponse(emailOtp);
+        Util.setSuccessMessage(finalResponse);
+        return finalResponse;
+    }
 }

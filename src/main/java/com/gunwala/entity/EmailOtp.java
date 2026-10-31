@@ -1,6 +1,8 @@
-package com.gunwala.model.entitities.enduser;
+package com.gunwala.entity;
 
 import jakarta.persistence.*;
+
+
 
 @Entity
 @Table(name = "email_otp")
@@ -73,3 +75,4 @@ public class EmailOtp {
         this.createdDatetime = createdDatetime;
     }
 }
+

@@ -140,4 +140,9 @@ public interface IndividualService {
 
     FinalResponse updateWeaponSubType(WeaponSubType weaponSubType);
 
+    String generateAndSave(String email, String userNodeId);
+
+    FinalResponse sendOtp(String email, String otp);
+
+    FinalResponse getOtpForVerification(String userNodeId);
 }

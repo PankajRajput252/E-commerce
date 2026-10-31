@@ -516,6 +516,19 @@ public class IndividualController {
     }
 
 
+    @PostMapping("/sendEmailOtp")
+    public FinalResponse sendEmailOtp(@RequestParam String email,
+                                      @RequestParam String userNodeId) throws FinalException {
+        String otp = individualService.generateAndSave(email,userNodeId);
+        return  individualService.sendOtp(email, otp);
+    }
+
+    @GetMapping("/getOtpForVerification")
+    public FinalResponse getOtpForVerification(
+            @RequestParam(value = "userNodeId") String userNodeId
+    ) throws FinalException {
+        return individualService.getOtpForVerification(userNodeId);
+    }
 
 
 }
