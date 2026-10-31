@@ -4,6 +4,7 @@ import com.gunwala.dto.PageResponse;
 import com.gunwala.dto.PaymentSubmissionResponse;
 import com.gunwala.dto.RejectPaymentRequest;
 import com.gunwala.entity.PaymentStatus;
+import com.gunwala.model.ProductId;
 import com.gunwala.service.Service.PaymentSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 /** Admin reviews submitted payments and approves or rejects them. */
 @RestController
@@ -51,6 +53,6 @@ public class AdminPaymentReviewController {
     public PaymentSubmissionResponse reject(@PathVariable Long id,
                                             @Valid @RequestBody RejectPaymentRequest request,
                                             Principal admin) {
-        return service.reject(id, admin.getName(), request.reason());
+        return service.reject(id, admin.getName(), request.reason(),request.productIds());
     }
 }

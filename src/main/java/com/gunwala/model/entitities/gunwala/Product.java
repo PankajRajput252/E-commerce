@@ -87,6 +87,10 @@ public class Product extends StandardFieldClass {
     @Column(name = "IS_STORE_PRODUCT")
     private boolean isStoreProduct;
 
+    @Column(name = "PRODUCT_QUANTITY")
+    private Integer productQuantity;
+
+
     @Transient
     private List<ProductImage> productImageList;
 
@@ -289,5 +293,13 @@ public class Product extends StandardFieldClass {
 
     public void setIsLicenseRequired(Boolean isLicenseRequired) {
         this.licenseRequired = isLicenseRequired;
+    }
+
+    public Integer getProductQuantity() {
+        return productQuantity;
+    }
+
+    public void setProductQuantity(Integer productQuantity) {
+        this.productQuantity = productQuantity;
     }
 }

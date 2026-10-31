@@ -1,5 +1,6 @@
 package com.gunwala.dto;
 
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;

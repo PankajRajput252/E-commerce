@@ -1,5 +1,6 @@
 package com.gunwala.controller;
 
+import com.gunwala.FinalException;
 import com.gunwala.model.FinalResponse;
 import com.gunwala.model.JwtAuthRequest;
 import com.gunwala.model.User;
@@ -7,6 +8,7 @@ import com.gunwala.model.Util;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.security.JwtAuthResponse;
 import com.gunwala.security.JwtTokenHelper;
+import com.gunwala.service.Service.IndividualService;
 import com.gunwala.service.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +35,7 @@ public class AuthController {
     @Autowired
     private UserService userService;
     @Autowired
-    private UserRepository userRepository;
+    private IndividualService individualService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> createToken(@RequestBody JwtAuthRequest request)
@@ -80,6 +82,20 @@ public class AuthController {
     public FinalResponse registerUser(@RequestBody User user)
     {
       return this.userService.createRegistration(user);
+    }
+
+    @PostMapping("/sendEmailOtp")
+    public FinalResponse sendEmailOtp(@RequestParam String email,
+                                      @RequestParam String userNodeId) throws FinalException {
+        String otp = individualService.generateAndSave(email,userNodeId);
+        return  individualService.sendOtp(email, otp);
+    }
+
+    @GetMapping("/getOtpForVerification")
+    public FinalResponse getOtpForVerification(
+            @RequestParam(value = "userNodeId") String userNodeId
+    ) throws FinalException {
+        return individualService.getOtpForVerification(userNodeId);
     }
 
 

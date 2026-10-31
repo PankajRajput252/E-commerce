@@ -2,6 +2,7 @@ package com.gunwala.controller;
 
 import com.gunwala.dto.PaymentSubmissionRequest;
 import com.gunwala.dto.PaymentSubmissionResponse;
+import com.gunwala.model.ProductId;
 import com.gunwala.service.Service.PaymentSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,10 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public PaymentSubmissionResponse submit(@Valid @ModelAttribute PaymentSubmissionRequest request,
                                             @RequestPart("receipt") MultipartFile receipt,
+                                            @RequestParam("productIds") List<Integer> productIds,
                                             Principal user) {
-        return service.submit(user.getName(), request, receipt);
+        List<ProductId> ids = productIds.stream().map(id -> new ProductId(id)).toList();
+        return service.submit(user.getName(), request, receipt, ids);
     }
 
     @GetMapping

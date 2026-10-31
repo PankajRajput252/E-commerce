@@ -31,4 +31,9 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
     void updateProduct(Integer productPkId1, String title1, String description1, BigDecimal price1, String location1, String city1, String zipCode1, String state1, String country1);
 
     List<Product> findByActiveStateCodeFkIdAndIsStoreProduct(String filterBy, boolean isStoreProduct, Pageable pageable);
+
+    @Modifying
+    @Query(value = "UPDATE products SET PRODUCT_QUANTITY = :count WHERE product_pk_id = :productPkId1", nativeQuery = true)
+    void updateProductCount(Integer productPkId1,  Integer count);
+
 }

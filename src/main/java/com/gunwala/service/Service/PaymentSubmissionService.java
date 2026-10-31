@@ -10,6 +10,10 @@ import com.gunwala.event.PaymentStatusChangedEvent;
 import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
+import com.gunwala.model.ProductId;
+import com.gunwala.model.Util;
+import com.gunwala.model.entitities.gunwala.Product;
+import com.gunwala.repo.gunwala.ProductRepository;
 import com.gunwala.repository.PaymentMethodRepository;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import com.gunwala.storage.FileDownload;
@@ -40,11 +44,12 @@ public class PaymentSubmissionService {
     private final FileStorageService storage;
     private final ApplicationEventPublisher events;
     private final ShopOrderService shopOrderService;
+    private final ProductRepository productRepository;
 
     // ============================================================ END USER
 
     @Transactional
-    public PaymentSubmissionResponse submit(String userId, PaymentSubmissionRequest request, MultipartFile receipt) {
+    public PaymentSubmissionResponse submit(String userId, PaymentSubmissionRequest request, MultipartFile receipt,List<ProductId> productIds) {
         PaymentMethod method = methodRepository.findByIdAndActiveTrue(request.getPaymentMethodId())
                 .orElseThrow(() -> new BadRequestException("Selected payment method is not available"));
 
@@ -87,7 +92,14 @@ public class PaymentSubmissionService {
             }
             throw ex;
         }
-
+        for(ProductId productId:productIds) {
+            Product product = productRepository.findByProductPkIdAndActiveStateCodeFkId(productId.getProductId(), "ACTIVE");
+            if (Util.isDefined(product.getProductQuantity())) {
+                if (product.getProductQuantity() > 0) {
+                    productRepository.updateProductCount(product.getProductPkId(), product.getProductQuantity() - 1);
+                }
+            }
+        }
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), userId, PaymentStatus.PENDING, null));
         return PaymentSubmissionResponse.from(s, false);
     }
@@ -177,7 +189,7 @@ public class PaymentSubmissionService {
     }
 
     @Transactional
-    public PaymentSubmissionResponse reject(Long id, String adminUsername, String reason) {
+    public PaymentSubmissionResponse reject(Long id, String adminUsername, String reason,List<ProductId>ProductIds) {
         if (!StringUtils.hasText(reason)) {
             throw new BadRequestException("Rejection reason is required");
         }
@@ -188,7 +200,12 @@ public class PaymentSubmissionService {
         s.setRejectionReason(reason.trim());
         s.setReviewedBy(adminUsername);
         s.setReviewedAt(Instant.now());
-
+        for( ProductId productId:ProductIds) {
+            Product product = productRepository.findByProductPkIdAndActiveStateCodeFkId(productId.getProductId(), "ACTIVE");
+            if (Util.isDefined(product.getProductQuantity())) {
+                    productRepository.updateProductCount(product.getProductPkId(), product.getProductQuantity() + 1);
+            }
+        }
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), s.getUserId(), PaymentStatus.REJECTED, s.getRejectionReason()));
         return PaymentSubmissionResponse.from(s, true);
     }
