@@ -38,9 +38,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> createToken(@RequestBody JwtAuthRequest request)
     {
-        User userData=userRepository.findByNodeIdAndActiveStateCodeFkId(request.getUsername(),"ACTIVE");
-        if(Util.isDefined(userData)){
-            request.setUsername(userData.getEmail());
+//        User userData=userRepository.findByNodeIdAndActiveStateCodeFkId(request.getUsername(),"ACTIVE");
+        if(Util.isDefined(request.getUsername())){
+            request.setUsername(request.getUsername());
         }
         else{
             JwtAuthResponse response = new JwtAuthResponse();

@@ -241,7 +241,16 @@ public class UserServiceImpl implements UserService {
         user.setEffectiveDateTime(vLastModifiedDateTime);
         Util.setCommonDefaultAttributes(user);
         // generating nodeId and validating
-
+        int count = userRepository.countByEmailAndActiveStateCodeFkId(user.getEmail(),  "ACTIVE");
+        if (count>0) {
+            Util.setMessage(finalResponse, "100", "Error: This User Email already exists.");
+            return finalResponse;
+        }
+        count = userRepository.countByMobileAndActiveStateCodeFkId(user.getEmail(),  "ACTIVE");
+        if (count>0) {
+            Util.setMessage(finalResponse, "100", "Error: This User Phone already exists.");
+            return finalResponse;
+        }
         String nodeId;
         do {
            nodeId=Util.generateNodeId();
