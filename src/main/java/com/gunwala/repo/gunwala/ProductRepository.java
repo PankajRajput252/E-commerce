@@ -27,8 +27,8 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
 //    int countByActiveStateCodeFkIdAndCategoryId(String activeStateCodeFkId, Integer attr0);
 
     @Modifying
-    @Query(value = "UPDATE products SET title = :title1,description = :description1,price = :price1,location = :location1,city = :city1,zip_code = :zipCode1,state = :state1,country = :country1 ,productQuantity:productQuantity1 WHERE product_pk_id = :productPkId1", nativeQuery = true)
-    void updateProduct(Integer productPkId1, String title1, String description1, BigDecimal price1, String location1, String city1, String zipCode1, String state1, String country1, Integer productQuantity1);
+    @Query(value = "UPDATE products SET title = :title1,description = :description1,price = :price1,location = :location1,city = :city1,zip_code = :zipCode1,state = :state1,country = :country1 ,PRODUCT_QUANTITY=:productQuantity1, CATEGORY_ID = :categoryId1, SUB_CATEGORY_ID = :subcategoryId1 WHERE product_pk_id = :productPkId1", nativeQuery = true)
+    void updateProduct(Integer productPkId1, String title1, String description1, BigDecimal price1, String location1, String city1, String zipCode1, String state1, String country1, Integer productQuantity1, Integer categoryId1, Integer subcategoryId1);
 
     List<Product> findByActiveStateCodeFkIdAndIsStoreProduct(String filterBy, boolean isStoreProduct, Pageable pageable);
 

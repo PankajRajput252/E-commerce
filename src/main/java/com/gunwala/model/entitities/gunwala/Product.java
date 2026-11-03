@@ -24,11 +24,13 @@ public class Product extends StandardFieldClass {
     @Column(name = "DESCRIPTION")
     private  String description;
 
-//    @Column(name = "CATEGORY_ID")
-//    private  int categoryId;
-//
-//    @Column(name = "SUB_CATEGORY_ID")
-//    private  int subcategoryId;
+    // Store taxonomy picked on the admin Sell page (see frontend shootingCategories.ts).
+    // Integer, not int, so older rows with NULL in these columns still load.
+    @Column(name = "CATEGORY_ID")
+    private Integer categoryId;
+
+    @Column(name = "SUB_CATEGORY_ID")
+    private Integer subcategoryId;
 
     @Column(name = "WEAPON_CATEGORY_FK_ID")
     private int weaponCategoryFkId;
@@ -118,21 +120,21 @@ public class Product extends StandardFieldClass {
         this.description = description;
     }
 
-//    public int getCategoryId() {
-//        return categoryId;
-//    }
-//
-//    public void setCategoryId(int categoryId) {
-//        this.categoryId = categoryId;
-//    }
-//
-//    public int getSubcategoryId() {
-//        return subcategoryId;
-//    }
-//
-//    public void setSubcategoryId(int subcategoryId) {
-//        this.subcategoryId = subcategoryId;
-//    }
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Integer getSubcategoryId() {
+        return subcategoryId;
+    }
+
+    public void setSubcategoryId(Integer subcategoryId) {
+        this.subcategoryId = subcategoryId;
+    }
 
     public BigDecimal getPrice() {
         return price;
