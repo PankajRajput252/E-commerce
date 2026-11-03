@@ -182,7 +182,7 @@ public class IndividualServiceImpl implements IndividualService {
 //                    existing.setPrice(product.getPrice());
 //                    return (Product)this.productRepository.save(existing);
 //                }).orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.updateProduct(productPkId,product.getTitle(),product.getDescription(),product.getPrice(),product.getLocation(),product.getCity(),product.getZipCode(),product.getState(),product.getCountry());
+        productRepository.updateProduct(productPkId,product.getTitle(),product.getDescription(),product.getPrice(),product.getLocation(),product.getCity(),product.getZipCode(),product.getState(),product.getCountry(),product.getProductQuantity());
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
     }
