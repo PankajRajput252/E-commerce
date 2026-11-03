@@ -1125,7 +1125,22 @@ public class IndividualServiceImpl implements IndividualService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Your OTP for Verification");
-        message.setText("Your OTP is: " + otp + "\n\nValid for 2 minutes.");
+        message.setText(
+                "Dear Customer,\n\n" +
+                        "Thank you for choosing Bandookwale!\n\n" +
+                        "Your One-Time Password (OTP) for verification is:\n\n" +
+                        "Your OTP: " + otp + "\n\n" +
+                        "This OTP is valid for 2 minutes and can be used only once.\n\n" +
+                        "For your security:\n" +
+                        "- Please do not share this OTP with anyone.\n" +
+                        "- Our team will never ask you to disclose your OTP.\n" +
+                        "- If you did not request this OTP, please ignore this email.\n\n" +
+                        "Thank you for choosing Bandookwale.\n\n" +
+                        "Best Regards,\n" +
+                        "Team Bandookwale\n" +
+                        "Customer Support Team\n" +
+                        "Bandookwale Company"
+        );
 
         mailSender.send(message);
         finalResponse.setMessage("OTP sent to email");
