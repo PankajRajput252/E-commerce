@@ -32,8 +32,13 @@ public class ShopOrderItem {
     @Column(nullable = false)
     private int units;
 
+    /** Charged price per unit (after any sale discount). */
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
+
+    /** List price per unit when a sale discount lowered it; null when no sale applied. */
+    @Column(precision = 12, scale = 2)
+    private BigDecimal originalUnitPrice;
 
     @Column(nullable = false)
     private boolean licenceRequired;

@@ -16,6 +16,7 @@ import com.gunwala.repo.gunwala.*;
 import com.gunwala.repository.EmailOtpRepository;
 import com.gunwala.service.Service.ImageUploadService;
 import com.gunwala.service.Service.IndividualService;
+import com.gunwala.service.Service.PromotionPricingService;
 import com.gunwala.shipRocket.ShiprocketServiceProxy;
 import com.gunwala.shipRocket.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class IndividualServiceImpl implements IndividualService {
+
+    @Autowired
+    private PromotionPricingService promotionPricingService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -171,6 +175,8 @@ public class IndividualServiceImpl implements IndividualService {
             product.setProductImageList(productImageList);
             return product;
         })).collect(Collectors.toList());
+        // Sale discounts set by the admin → salePrice / discountLabel on each product
+        promotionPricingService.applySalePrices(productList);
         return productList;
     }
 
@@ -183,8 +189,40 @@ public class IndividualServiceImpl implements IndividualService {
 //                    return (Product)this.productRepository.save(existing);
 //                }).orElseThrow(() -> new RuntimeException("Product not found"));
         productRepository.updateProduct(productPkId,product.getTitle(),product.getDescription(),product.getPrice(),product.getLocation(),product.getCity(),product.getZipCode(),product.getState(),product.getCountry(),product.getProductQuantity(),product.getCategoryId(),product.getSubcategoryId());
+        syncProductImages(productPkId, product.getProductImageList());
         finalResponse = Util.setSuccessMessage(finalResponse);
         return finalResponse;
+    }
+
+    /**
+     * Edit form sends the product's full image list (S3 keys, in display order). Make the product_image rows match:
+     * drop images the seller removed, link newly uploaded ones. Without this, edits kept showing the old images.
+     * A missing or empty list leaves the images unchanged, so a failed load on the edit page can't wipe them.
+     */
+    private void syncProductImages(Integer productPkId, List<ProductImage> requested) {
+        if (requested == null) return;
+        LinkedHashSet<String> wanted = requested.stream()
+                .map(ProductImage::getProductImageId)
+                .filter(id -> id != null && !id.isBlank())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (wanted.isEmpty()) return;
+
+        List<ProductImage> existing =
+                productImageRepository.findByActiveStateCodeFkIdAndProductFkId("ACTIVE", productPkId, null);
+        Set<String> kept = new HashSet<>();
+        for (ProductImage img : existing) {
+            // remove images no longer in the list (and duplicate rows for the same key)
+            if (!wanted.contains(img.getProductImageId()) || !kept.add(img.getProductImageId())) {
+                productImageRepository.delete(img);
+            }
+        }
+        for (String id : wanted) {
+            if (kept.contains(id)) continue;
+            ProductImage img = new ProductImage();
+            img.setProductImageId(id);
+            img.setProductFkId(productPkId);
+            addProductImage(img);
+        }
     }
 
 

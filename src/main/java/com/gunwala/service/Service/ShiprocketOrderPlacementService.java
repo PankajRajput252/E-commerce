@@ -295,7 +295,9 @@ public class ShiprocketOrderPlacementService {
         b.setShipping_charges(0);
         b.setGiftwrap_charges(0);
         b.setTransaction_charges(0);
-        b.setTotal_discount(0);
+        // Voucher amount (whole rupees — Shiprocket's field is an integer); line prices already include sale discounts
+        b.setTotal_discount(o.getVoucherDiscount() == null ? 0
+                : o.getVoucherDiscount().setScale(0, java.math.RoundingMode.HALF_UP).intValue());
         b.setSub_total(o.getSubtotal().doubleValue());
 
         b.setLength(packageLength);

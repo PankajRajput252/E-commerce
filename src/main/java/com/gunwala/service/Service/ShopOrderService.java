@@ -10,8 +10,6 @@ import com.gunwala.entity.ShopOrderItem;
 import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
-import com.gunwala.model.entitities.gunwala.Product;
-import com.gunwala.repo.gunwala.ProductRepository;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import com.gunwala.repository.ShopOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,40 +20,36 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShopOrderService {
 
-    private static final String ACTIVE = "ACTIVE";
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     private static final String REF_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final ShopOrderRepository orderRepository;
-    private final ProductRepository productRepository;
     private final PaymentSubmissionRepository paymentRepository;
+    private final PromotionPricingService pricing;
+    private final VoucherService voucherService;
 
     // ============================================================ BUYER
 
-    /** Checkout: prices are taken from the products table, never from the browser. */
+    /**
+     * Checkout: prices are taken from the products table (with live sale discounts), never from the browser.
+     * An optional voucher is re-checked under a row lock and its amount copied onto the order.
+     */
     @Transactional
     public ShopOrderResponse create(String userId, CreateShopOrderRequest request) {
-        // Merge duplicate lines for the same product
-        Map<Integer, Integer> quantities = new LinkedHashMap<>();
-        for (CreateShopOrderRequest.Item item : request.items()) {
-            quantities.merge(item.productId(), item.quantity(), Integer::sum);
-        }
+        PromotionPricingService.PricedCart cart = pricing.priceCart(request.items());
 
         ShopOrder order = new ShopOrder();
         order.setOrderReference(newOrderReference());
@@ -63,30 +57,25 @@ public class ShopOrderService {
         order.setStatus(OrderStatus.PENDING_PAYMENT);
         order.setShippingStatus(ShippingStatus.NOT_STARTED);
 
-        BigDecimal subtotal = BigDecimal.ZERO;
-        for (Map.Entry<Integer, Integer> line : quantities.entrySet()) {
-            Product product = productRepository.findByProductPkIdAndActiveStateCodeFkId(line.getKey(), ACTIVE);
-            if (product == null) {
-                throw new BadRequestException("Product " + line.getKey() + " is no longer available. Please remove it from your cart.");
-            }
-            BigDecimal price = product.getPrice();
-            if (price == null || price.signum() <= 0) {
-                throw new BadRequestException("\"" + product.getTitle() + "\" can't be bought online. Please contact the seller.");
-            }
-            int units = Math.min(line.getValue(), 99);
-
+        for (PromotionPricingService.PricedLine line : cart.lines()) {
             ShopOrderItem item = new ShopOrderItem();
-            item.setProductId(product.getProductPkId());
-            item.setProductName(truncate(product.getTitle(), 255));
-            item.setUnits(units);
-            item.setUnitPrice(price.setScale(2, RoundingMode.HALF_UP));
-            item.setLicenceRequired(Boolean.TRUE.equals(product.getIsLicenseRequired()));
-            item.setStoreProduct(product.getIsStoreProduct());
+            item.setProductId(line.product().getProductPkId());
+            item.setProductName(truncate(line.product().getTitle(), 255));
+            item.setUnits(line.units());
+            item.setUnitPrice(line.unitPrice());
+            item.setOriginalUnitPrice(line.originalUnitPrice());
+            item.setLicenceRequired(Boolean.TRUE.equals(line.product().getIsLicenseRequired()));
+            item.setStoreProduct(line.product().getIsStoreProduct());
             order.addItem(item);
-
-            subtotal = subtotal.add(item.getUnitPrice().multiply(BigDecimal.valueOf(units)));
         }
-        order.setSubtotal(subtotal.setScale(2, RoundingMode.HALF_UP));
+        order.setSubtotal(cart.subtotal());
+
+        if (StringUtils.hasText(request.voucherCode())) {
+            VoucherService.Applied applied = voucherService.applyToNewOrder(request.voucherCode(), userId, cart.subtotal());
+            order.setVoucherId(applied.voucher().getId());
+            order.setVoucherCode(applied.voucher().getCode());
+            order.setVoucherDiscount(applied.discountAmount());
+        }
 
         CreateShopOrderRequest.ShippingAddress a = request.shipping();
         order.setCustomerName(a.fullName().trim());
@@ -123,9 +112,9 @@ public class ShopOrderService {
 
     /**
      * Called when a buyer submits a payment for an order: the order must be theirs, unpaid,
-     * and the amount must equal the order total.
+     * the amount must equal the order total (after the voucher), and the voucher must still be within its limits.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public void validatePayable(String orderReference, String userId, BigDecimal amount) {
         ShopOrder order = orderRepository.findByOrderReferenceAndUserId(orderReference, userId)
                 .orElseThrow(() -> new BadRequestException("Order " + orderReference + " not found"));
@@ -135,9 +124,11 @@ public class ShopOrderService {
         if (order.getStatus() == OrderStatus.CANCELLED) {
             throw new BadRequestException("Order " + orderReference + " was cancelled");
         }
-        if (amount == null || order.getSubtotal().compareTo(amount) != 0) {
-            throw new BadRequestException("Amount must be ₹" + order.getSubtotal().toPlainString() + ", the total of order " + orderReference);
+        BigDecimal payable = order.getPayableTotal();
+        if (amount == null || payable.compareTo(amount) != 0) {
+            throw new BadRequestException("Amount must be ₹" + payable.toPlainString() + ", the total of order " + orderReference);
         }
+        voucherService.recheckForPayment(order);
     }
 
     /** Runs inside the admin's approve transaction, so "payment approved" and "order paid" commit together. */

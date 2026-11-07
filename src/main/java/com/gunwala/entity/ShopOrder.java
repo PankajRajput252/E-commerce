@@ -21,7 +21,8 @@ import java.util.List;
 @Table(name = "shop_orders", indexes = {
         @Index(name = "idx_so_user", columnList = "user_id"),
         @Index(name = "idx_so_status", columnList = "status"),
-        @Index(name = "idx_so_shipping_status", columnList = "shipping_status")
+        @Index(name = "idx_so_shipping_status", columnList = "shipping_status"),
+        @Index(name = "idx_so_voucher", columnList = "voucher_id")
 })
 @Getter
 @Setter
@@ -45,6 +46,16 @@ public class ShopOrder {
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal;
+
+    // ---- Voucher (null when none). Code and amount are copied so the order is unaffected if the voucher changes. ----
+    @Column(name = "voucher_id")
+    private Long voucherId;
+
+    @Column(length = 20)
+    private String voucherCode;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal voucherDiscount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("id ASC")
@@ -115,6 +126,11 @@ public class ShopOrder {
 
     @UpdateTimestamp
     private Instant updatedAt;
+
+    /** What the buyer must pay: subtotal minus the voucher discount. */
+    public BigDecimal getPayableTotal() {
+        return voucherDiscount == null ? subtotal : subtotal.subtract(voucherDiscount);
+    }
 
     public void addItem(ShopOrderItem item) {
         item.setOrder(this);

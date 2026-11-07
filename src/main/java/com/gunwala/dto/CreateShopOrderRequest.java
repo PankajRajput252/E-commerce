@@ -16,7 +16,11 @@ public record CreateShopOrderRequest(
 
         @NotNull(message = "Shipping address is required")
         @Valid
-        ShippingAddress shipping
+        ShippingAddress shipping,
+
+        /* Optional voucher code entered in the cart; re-checked on the server. */
+        @Size(max = 20)
+        String voucherCode
 ) {
     public record Item(
             @NotNull Integer productId,

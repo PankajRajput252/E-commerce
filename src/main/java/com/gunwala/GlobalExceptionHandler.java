@@ -3,11 +3,13 @@ package com.gunwala;
 import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.DuplicateTransactionReferenceException;
+import com.gunwala.exception.FieldValidationException;
 import com.gunwala.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -69,6 +71,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ProblemDetail handleBadRequest(BadRequestException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    /** Bad value in one field: the UI shows the message under that field. */
+    @ExceptionHandler(FieldValidationException.class)
+    public ProblemDetail handleFieldValidation(FieldValidationException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        pd.setProperty("errors", Map.of(ex.getField(), ex.getMessage()));
+        return pd;
+    }
+
+    /** @PreAuthorize failures (e.g. a non-admin calling an admin endpoint); otherwise the catch-all turns them into 500. */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "You don't have permission to do this.");
     }
 
     @ExceptionHandler(ConflictException.class)

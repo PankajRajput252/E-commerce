@@ -96,6 +96,30 @@ public class Product extends StandardFieldClass {
     @Transient
     private List<ProductImage> productImageList;
 
+    /** Price after the best live sale discount; null when none applies. Filled by PromotionPricingService. */
+    @Transient
+    private BigDecimal salePrice;
+
+    /** e.g. "15% OFF"; null when no sale applies. */
+    @Transient
+    private String discountLabel;
+
+    public BigDecimal getSalePrice() {
+        return salePrice;
+    }
+
+    public void setSalePrice(BigDecimal salePrice) {
+        this.salePrice = salePrice;
+    }
+
+    public String getDiscountLabel() {
+        return discountLabel;
+    }
+
+    public void setDiscountLabel(String discountLabel) {
+        this.discountLabel = discountLabel;
+    }
+
     public int getProductPkId() {
         return productPkId;
     }

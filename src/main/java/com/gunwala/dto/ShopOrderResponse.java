@@ -15,6 +15,9 @@ public record ShopOrderResponse(
         String userId,
         OrderStatus status,
         BigDecimal subtotal,
+        String voucherCode,
+        BigDecimal voucherDiscount,
+        /* amount to pay = subtotal − voucherDiscount */ BigDecimal total,
         List<Item> items,
         Address shippingAddress,
         Long paidPaymentSubmissionId,
@@ -23,10 +26,10 @@ public record ShopOrderResponse(
         Instant createdAt
 ) {
     public record Item(Integer productId, String productName, int units, BigDecimal unitPrice,
-                       boolean licenceRequired, boolean storeProduct) {
+                       BigDecimal originalUnitPrice, boolean licenceRequired, boolean storeProduct) {
         static Item from(ShopOrderItem i) {
             return new Item(i.getProductId(), i.getProductName(), i.getUnits(), i.getUnitPrice(),
-                    i.isLicenceRequired(), i.isStoreProduct());
+                    i.getOriginalUnitPrice(), i.isLicenceRequired(), i.isStoreProduct());
         }
     }
 
@@ -64,6 +67,7 @@ public record ShopOrderResponse(
                 o.getOrderReference(),
                 adminView ? o.getUserId() : null,
                 o.getStatus(), o.getSubtotal(),
+                o.getVoucherCode(), o.getVoucherDiscount(), o.getPayableTotal(),
                 o.getItems().stream().map(Item::from).toList(),
                 address, o.getPaidPaymentSubmissionId(), o.getPaidAt(), shipping, o.getCreatedAt());
     }
