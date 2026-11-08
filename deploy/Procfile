@@ -1,1 +1,1 @@
-web: java -jar application.jar
+web: java -Xmx1200m -jar application.jar
