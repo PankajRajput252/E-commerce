@@ -14,6 +14,9 @@ public class ChatMessage {
     private String content;
     private String conversationId;
     private String timestamp;
+    /** Optional: product the conversation is about (sent by the chat UI so the inbox can show it). */
+    private String productTitle;
+    private String productImage;
 
     public ChatMessage() {}
 
@@ -46,4 +49,10 @@ public class ChatMessage {
 
     public String getTimestamp() { return timestamp; }
     public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
+
+    public String getProductTitle() { return productTitle; }
+    public void setProductTitle(String productTitle) { this.productTitle = productTitle; }
+
+    public String getProductImage() { return productImage; }
+    public void setProductImage(String productImage) { this.productImage = productImage; }
 }

@@ -58,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers("/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
                         .requestMatchers("/api/deposit/webhook").permitAll()
+                        // Website visitor counter: guests are counted too
+                        .requestMatchers(HttpMethod.POST, "/api/site-visits").permitAll()
 
                         // Admin endpoints: always require login, even for GET
                         .requestMatchers("/api/admin/**").authenticated()
