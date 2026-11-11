@@ -1,6 +1,7 @@
 package com.gunwala.controller;
 
 import com.gunwala.model.entitities.gunwala.ChatMessage;
+import com.gunwala.service.Service.PushNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -20,6 +21,10 @@ public class ChatController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    /** Push to the recipient's phone(s), so chats arrive even when the app is closed. */
+    @Autowired
+    private PushNotificationService pushService;
 
     // ── In-memory store (replace with DB/Redis in production) ─────────────────
     private final Map<String, List<ChatMessage>> chatHistory = new ConcurrentHashMap<>();
@@ -81,8 +86,21 @@ public class ChatController {
         Participants p = Participants.of(conversationId);
         String recipient = (p == null || message.getSenderId() == null) ? null : p.otherThan(message.getSenderId());
         if (recipient != null) {
-            unread.computeIfAbsent(recipient, k -> new ConcurrentHashMap<>()).merge(conversationId, 1, Integer::sum);
+            Map<String, Integer> recipientUnread = unread.computeIfAbsent(recipient, k -> new ConcurrentHashMap<>());
+            recipientUnread.merge(conversationId, 1, Integer::sum);
             messagingTemplate.convertAndSend("/topic/inbox/" + recipient, message);
+
+            // Mobile push (runs in the background; does nothing until Firebase is configured)
+            ConversationMeta m = meta.get(conversationId);
+            int unreadTotal = recipientUnread.values().stream().mapToInt(Integer::intValue).sum();
+            pushService.notifyChatMessage(
+                    recipient,
+                    message.getSenderId(),
+                    message.getSenderName(),
+                    message.getContent(),
+                    conversationId,
+                    m == null ? message.getProductTitle() : m.productTitle,
+                    unreadTotal);
         }
     }
 

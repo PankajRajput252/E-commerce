@@ -63,6 +63,8 @@ public class SecurityConfig {
 
                         // Admin endpoints: always require login, even for GET
                         .requestMatchers("/api/admin/**").authenticated()
+                        // The cart is per user, so reading it needs a login too
+                        .requestMatchers("/api/cart", "/api/cart/**").authenticated()
 
                         // Other GETs stay public (product listings etc.)
                         .requestMatchers(HttpMethod.GET).permitAll()
