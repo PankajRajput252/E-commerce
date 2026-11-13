@@ -134,6 +134,13 @@
 			<version>2.26.14</version>
 		</dependency>
 
+		<!-- Firebase Cloud Messaging: push notifications to the mobile app (Android + iOS via APNs) -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.4.3</version>
+		</dependency>
+
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
