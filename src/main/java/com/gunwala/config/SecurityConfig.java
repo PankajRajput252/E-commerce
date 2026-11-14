@@ -65,6 +65,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").authenticated()
                         // The cart is per user, so reading it needs a login too
                         .requestMatchers("/api/cart", "/api/cart/**").authenticated()
+                        // A user's own consultation bookings
+                        .requestMatchers("/api/consultations/bookings", "/api/consultations/bookings/**").authenticated()
 
                         // Other GETs stay public (product listings etc.)
                         .requestMatchers(HttpMethod.GET).permitAll()

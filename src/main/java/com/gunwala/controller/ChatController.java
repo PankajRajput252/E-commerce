@@ -2,6 +2,7 @@ package com.gunwala.controller;
 
 import com.gunwala.model.entitities.gunwala.ChatMessage;
 import com.gunwala.service.Service.PushNotificationService;
+import com.gunwala.service.Service.WebPushService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -25,6 +26,10 @@ public class ChatController {
     /** Push to the recipient's phone(s), so chats arrive even when the app is closed. */
     @Autowired
     private PushNotificationService pushService;
+
+    /** Push to the recipient's browser(s), so chats arrive even when the website isn't open. */
+    @Autowired
+    private WebPushService webPushService;
 
     // ── In-memory store (replace with DB/Redis in production) ─────────────────
     private final Map<String, List<ChatMessage>> chatHistory = new ConcurrentHashMap<>();
@@ -101,6 +106,14 @@ public class ChatController {
                     conversationId,
                     m == null ? message.getProductTitle() : m.productTitle,
                     unreadTotal);
+
+            // Browser push (runs in the background; does nothing until VAPID keys are configured)
+            webPushService.notifyChatMessage(
+                    recipient,
+                    message.getSenderName(),
+                    message.getContent(),
+                    conversationId,
+                    m == null ? message.getProductTitle() : m.productTitle);
         }
     }
 
