@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /** Something users can book a consultation about (Business, Guns, Accessories…). Managed by admins. */
@@ -15,6 +16,10 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 public class ConsultationTopic {
+
+    public boolean isPaid() {
+        return price != null && price.signum() > 0;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +34,10 @@ public class ConsultationTopic {
     /** Hidden from users when false; existing bookings keep their topic name. */
     @Column(nullable = false)
     private boolean active = true;
+
+    /** Fee in rupees users pay (by QR / bank transfer) to book this topic. Null = free. Set by admins. */
+    @Column(precision = 10, scale = 2)
+    private BigDecimal price;
 
     /** Lower numbers are shown first. */
     @Column(nullable = false)

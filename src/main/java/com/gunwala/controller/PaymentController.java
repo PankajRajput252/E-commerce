@@ -28,9 +28,9 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public PaymentSubmissionResponse submit(@Valid @ModelAttribute PaymentSubmissionRequest request,
                                             @RequestPart("receipt") MultipartFile receipt,
-                                            @RequestParam("productIds") List<Integer> productIds,
+                                            @RequestParam(value = "productIds", required = false) List<Integer> productIds,
                                             Principal user) {
-        List<ProductId> ids = productIds.stream().map(id -> new ProductId(id)).toList();
+        List<ProductId> ids = productIds == null ? List.of() : productIds.stream().map(id -> new ProductId(id)).toList();
         return service.submit(user.getName(), request, receipt, ids);
     }
 

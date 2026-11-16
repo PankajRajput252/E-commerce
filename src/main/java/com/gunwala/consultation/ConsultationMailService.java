@@ -95,7 +95,36 @@ public class ConsultationMailService {
                                 + p("Meeting link: <a href=\"" + attr(b.getMeetLink()) + "\" style=\"color:#a87912\">" + esc(b.getMeetLink()) + "</a>")));
     }
 
-    public void bookingCancelled(ConsultationBooking b) {
+    public void bookingRescheduled(ConsultationBooking b, java.time.Instant oldStartsAt) {
+        String when = when(b);
+        String previous = oldStartsAt == null ? "" : DATE.format(oldStartsAt.atZone(zone)) + ", " + TIME.format(oldStartsAt.atZone(zone)) + " " + zoneLabel();
+        String meet = StringUtils.hasText(b.getMeetLink())
+                ? button(b.getMeetLink(), "Join Google Meet")
+                  + p("Meeting link: <a href=\"" + attr(b.getMeetLink()) + "\" style=\"color:#a87912\">" + esc(b.getMeetLink()) + "</a>")
+                : p("<b>Your new Google Meet link is on its way</b> — we'll email it to you before the consultation.");
+
+        send(b.getUserEmail(),
+                "Consultation rescheduled: " + b.getTopicName() + " on " + shortWhen(b),
+                layout("Your consultation has been rescheduled",
+                        p("Hi " + esc(firstName(b)) + ",")
+                                + p("Your consultation has been moved to a new time" + (previous.isEmpty() ? "." : " (it was " + esc(previous) + ")."))
+                                + details(b, when)
+                                + meet
+                                + p("Please note: a booking can be rescheduled only once, so this new time is final.")));
+
+        if (StringUtils.hasText(adminEmail)) {
+            send(adminEmail,
+                    "Consultation rescheduled by user: " + b.getTopicName() + " — " + shortWhen(b),
+                    layout("A user rescheduled their consultation",
+                            details(b, when)
+                                    + (previous.isEmpty() ? "" : p("Previous time: " + esc(previous) + ". That slot is free again."))
+                                    + p("Email: " + esc(b.getUserEmail()) + (StringUtils.hasText(b.getPhone()) ? "<br>Phone: " + esc(b.getPhone()) : ""))
+                                    + (StringUtils.hasText(b.getMeetLink()) ? "" : p("<b style=\"color:#b91c1c\">No Meet link yet.</b> Add one from Admin → Consultations."))));
+        }
+    }
+
+    /** @param paid the user had paid for this (confirmed) consultation: the fee isn't refunded */
+    public void bookingCancelled(ConsultationBooking b, boolean paid) {
         boolean byUser = b.getCancelledBy() == ConsultationBooking.CancelledBy.USER;
         send(b.getUserEmail(),
                 "Consultation cancelled: " + b.getTopicName() + " on " + shortWhen(b),
@@ -105,6 +134,7 @@ public class ConsultationMailService {
                                 : "We're sorry — we had to cancel your consultation.")
                                 + details(b, when(b))
                                 + (!byUser && StringUtils.hasText(b.getCancelReason()) ? p("<b>Reason:</b> " + esc(b.getCancelReason())) : "")
+                                + (byUser && paid ? p("As per our policy, the consultation fee is non-refundable.") : "")
                                 + p("You can book another time whenever you like:")
                                 + button(frontendUrl + "/?view=consultation", "Book a consultation")));
 

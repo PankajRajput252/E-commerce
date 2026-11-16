@@ -2,6 +2,9 @@ package com.gunwala.consultation;
 
 import jakarta.validation.constraints.*;
 
+import com.gunwala.entity.PaymentSubmission;
+
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,17 +16,23 @@ public final class ConsultationDtos {
 
     // ─── Topics ─────────────────────────────────────────────────────────────
 
-    public record TopicResponse(Long id, String name, String description, boolean active, int sortOrder) {
+    /** price: fee in rupees, null when the topic is free. */
+    public record TopicResponse(Long id, String name, String description, boolean active, int sortOrder, BigDecimal price) {
         static TopicResponse of(ConsultationTopic t) {
-            return new TopicResponse(t.getId(), t.getName(), t.getDescription(), t.isActive(), t.getSortOrder());
+            return new TopicResponse(t.getId(), t.getName(), t.getDescription(), t.isActive(), t.getSortOrder(),
+                    t.isPaid() ? t.getPrice() : null);
         }
     }
 
+    /** price: null or 0 makes the topic free. */
     public record TopicRequest(
             @NotBlank @Size(max = 80) String name,
             @Size(max = 300) String description,
             Boolean active,
-            @Min(0) @Max(9999) Integer sortOrder
+            @Min(0) @Max(9999) Integer sortOrder,
+            @DecimalMin(value = "0.00", message = "can't be negative")
+            @DecimalMax(value = "1000000.00", message = "must be at most 10,00,000")
+            @Digits(integer = 7, fraction = 2) BigDecimal price
     ) {}
 
     // ─── Slots ──────────────────────────────────────────────────────────────
@@ -67,6 +76,9 @@ public final class ConsultationDtos {
 
     public record CancelRequest(@Size(max = 300) String reason) {}
 
+    /** Move a booking to another free slot. */
+    public record RescheduleRequest(@NotNull Long slotId) {}
+
     public record MeetLinkRequest(
             @NotBlank @Size(max = 300)
             @Pattern(regexp = "^https://\\S+$", message = "Enter the full https:// meeting link") String meetLink
@@ -89,14 +101,35 @@ public final class ConsultationDtos {
             Instant createdAt,
             Instant cancelledAt,
             String cancelledBy,
-            String cancelReason
+            String cancelReason,
+            /** Fee for this booking; null = free. */
+            BigDecimal amount,
+            /** PENDING_PAYMENT only: the slot is released if no payment is submitted by then. */
+            Instant paymentDueAt,
+            /** Latest payment for this booking: PENDING / APPROVED / REJECTED, or null if none yet. */
+            String paymentStatus,
+            Long paymentId,
+            String paymentRejectionReason,
+            /** How many more times the user may move this booking (0 once used). */
+            int reschedulesLeft
     ) {
         static BookingResponse of(ConsultationBooking b) {
+            return of(b, null);
+        }
+
+        /** @param payment the booking's latest payment submission, or null */
+        static BookingResponse of(ConsultationBooking b, PaymentSubmission payment) {
             return new BookingResponse(b.getId(), b.getSlot() == null ? null : b.getSlot().getId(),
                     b.getStartsAt(), b.getEndsAt(), b.getDurationMinutes(),
                     b.getTopicId(), b.getTopicName(), b.getStatus().name(), b.getMeetLink(), b.getPhone(), b.getNotes(),
                     b.getUserName(), b.getUserEmail(), b.getCreatedAt(), b.getCancelledAt(),
-                    b.getCancelledBy() == null ? null : b.getCancelledBy().name(), b.getCancelReason());
+                    b.getCancelledBy() == null ? null : b.getCancelledBy().name(), b.getCancelReason(),
+                    b.getAmount(),
+                    b.getStatus() == ConsultationBooking.Status.PENDING_PAYMENT ? b.getPaymentDueAt() : null,
+                    payment == null ? null : payment.getStatus().name(),
+                    payment == null ? null : payment.getId(),
+                    payment == null ? null : payment.getRejectionReason(),
+                    Math.max(0, ConsultationService.MAX_RESCHEDULES - b.getRescheduleCount()));
         }
     }
 

@@ -19,7 +19,8 @@ import java.time.LocalDate;
 @Table(name = "payment_submissions", indexes = {
         @Index(name = "idx_ps_user", columnList = "user_id"),
         @Index(name = "idx_ps_status", columnList = "status"),
-        @Index(name = "idx_ps_txn_ref", columnList = "transaction_reference")
+        @Index(name = "idx_ps_txn_ref", columnList = "transaction_reference"),
+        @Index(name = "idx_ps_consultation", columnList = "consultation_booking_id")
 }, uniqueConstraints = {
         @UniqueConstraint(name = PaymentSubmission.UK_ACTIVE_REFERENCE, columnNames = "active_reference")
 })
@@ -65,6 +66,10 @@ public class PaymentSubmission {
     /** The shop order this payment is for (ShopOrder.orderReference), if any. */
     @Column(name = "order_reference", length = 50)
     private String orderReference;
+
+    /** The consultation booking this payment is for (ConsultationBooking.id), if any. */
+    @Column(name = "consultation_booking_id")
+    private Long consultationBookingId;
 
     // ---- Receipt file ----
     @Column(nullable = false, length = 255)

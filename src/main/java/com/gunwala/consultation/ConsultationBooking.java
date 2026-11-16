@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /** A user's booked consultation. Topic and user details are copied in so history survives edits. */
@@ -21,7 +22,11 @@ import java.time.Instant;
 @NoArgsConstructor
 public class ConsultationBooking {
 
-    public enum Status { CONFIRMED, CANCELLED }
+    /**
+     * PENDING_PAYMENT: paid topic, slot held until the user's payment is approved (or the hold expires).
+     * CONFIRMED: free topic, or payment approved. CANCELLED: by user/admin, or unpaid hold expired.
+     */
+    public enum Status { PENDING_PAYMENT, CONFIRMED, CANCELLED }
 
     public enum CancelledBy { USER, ADMIN }
 
@@ -62,9 +67,21 @@ public class ConsultationBooking {
     @Column(length = 1000)
     private String notes;
 
+    /** varchar (not a MySQL enum) so new statuses don't need a column change; see ConsultationSchemaFix. */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 16)
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20)")
     private Status status = Status.CONFIRMED;
+
+    /** Fee copied from the topic when booked; null = free. */
+    @Column(precision = 10, scale = 2)
+    private BigDecimal amount;
+
+    /** Times the user has moved this booking to another slot (limited to MAX_RESCHEDULES). */
+    @Column(nullable = false, columnDefinition = "integer not null default 0")
+    private int rescheduleCount;
+
+    /** While PENDING_PAYMENT with no payment under review: the slot is released after this. */
+    private Instant paymentDueAt;
 
     /** Google Meet link; null until the calendar event is created (or an admin adds one). */
     @Column(length = 300)

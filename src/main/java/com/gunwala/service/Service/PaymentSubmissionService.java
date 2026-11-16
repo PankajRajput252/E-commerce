@@ -1,5 +1,6 @@
 package com.gunwala.service.Service;
 
+import com.gunwala.consultation.ConsultationService;
 import com.gunwala.dto.PageResponse;
 import com.gunwala.dto.PaymentSubmissionRequest;
 import com.gunwala.dto.PaymentSubmissionResponse;
@@ -45,6 +46,7 @@ public class PaymentSubmissionService {
     private final ApplicationEventPublisher events;
     private final ShopOrderService shopOrderService;
     private final ProductRepository productRepository;
+    private final ConsultationService consultationService;
 
     // ============================================================ END USER
 
@@ -57,6 +59,14 @@ public class PaymentSubmissionService {
         ensureReferenceNotUsed(reference, userId);
 
         String orderReference = StringUtils.hasText(request.getOrderReference()) ? request.getOrderReference().trim() : null;
+        Long consultationBookingId = request.getConsultationBookingId();
+        if (orderReference != null && consultationBookingId != null) {
+            throw new BadRequestException("A payment can be for an order or a consultation, not both");
+        }
+        if (consultationBookingId != null) {
+            // Checks owner, status and amount; locks the booking until this payment is saved
+            consultationService.attachPayment(consultationBookingId, userId, request.getAmount());
+        }
         if (orderReference != null) {
             shopOrderService.validatePayable(orderReference, userId, request.getAmount());
             if (submissionRepository.existsByOrderReferenceAndStatus(orderReference, PaymentStatus.PENDING)) {
@@ -76,6 +86,7 @@ public class PaymentSubmissionService {
         s.setPaymentDate(request.getPaymentDate());
         s.setUserRemarks(StringUtils.hasText(request.getRemarks()) ? request.getRemarks().trim() : null);
         s.setOrderReference(orderReference);
+        s.setConsultationBookingId(consultationBookingId);
         s.setReceiptPath(file.path());
         s.setReceiptContentType(file.contentType());
         s.setReceiptOriginalName(file.originalName());
@@ -183,6 +194,10 @@ public class PaymentSubmissionService {
         if (StringUtils.hasText(s.getOrderReference())) {
             shopOrderService.markPaid(s.getOrderReference(), s.getId());
         }
+        // Consultation becomes CONFIRMED in the same transaction; Meet link + email go out after commit.
+        if (s.getConsultationBookingId() != null) {
+            consultationService.markPaid(s.getConsultationBookingId());
+        }
 
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), s.getUserId(), PaymentStatus.APPROVED, null));
         return PaymentSubmissionResponse.from(s, true);
@@ -200,7 +215,10 @@ public class PaymentSubmissionService {
         s.setRejectionReason(reason.trim());
         s.setReviewedBy(adminUsername);
         s.setReviewedAt(Instant.now());
-        for( ProductId productId:ProductIds) {
+        if (s.getConsultationBookingId() != null) {
+            consultationService.paymentRejected(s.getConsultationBookingId());
+        }
+        for (ProductId productId : ProductIds == null ? List.<ProductId>of() : ProductIds) {
             Product product = productRepository.findByProductPkIdAndActiveStateCodeFkId(productId.getProductId(), "ACTIVE");
             if (Util.isDefined(product.getProductQuantity())) {
                     productRepository.updateProductCount(product.getProductPkId(), product.getProductQuantity() + 1);

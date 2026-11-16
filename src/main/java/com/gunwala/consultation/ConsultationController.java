@@ -24,6 +24,7 @@ import java.util.List;
  *   POST /api/consultations/bookings               (login)   book a slot
  *   GET  /api/consultations/bookings/mine          (login)   my bookings
  *   POST /api/consultations/bookings/{id}/cancel   (login)   cancel my booking
+ *   POST /api/consultations/bookings/{id}/reschedule (login) move my booking to another free slot
  *   GET  /api/consultations/google/callback        (public)  Google OAuth redirect (admin connect flow)
  */
 @Slf4j
@@ -66,6 +67,12 @@ public class ConsultationController {
     @PostMapping("/bookings/{id}/cancel")
     public BookingResponse cancel(@PathVariable Long id, @AuthenticationPrincipal User user) {
         return service.cancelByUser(user, id);
+    }
+
+    @PostMapping("/bookings/{id}/reschedule")
+    public BookingResponse reschedule(@PathVariable Long id, @Valid @RequestBody RescheduleRequest request,
+                                      @AuthenticationPrincipal User user) {
+        return service.rescheduleByUser(user, id, request.slotId());
     }
 
     /** Google sends the admin back here after they allow calendar access; then we return them to the admin page. */
