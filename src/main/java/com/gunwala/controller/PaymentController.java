@@ -3,6 +3,7 @@ package com.gunwala.controller;
 import com.gunwala.dto.PaymentSubmissionRequest;
 import com.gunwala.dto.PaymentSubmissionResponse;
 import com.gunwala.model.ProductId;
+import com.gunwala.model.User;
 import com.gunwala.service.Service.PaymentSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,9 +31,12 @@ public class PaymentController {
     public PaymentSubmissionResponse submit(@Valid @ModelAttribute PaymentSubmissionRequest request,
                                             @RequestPart("receipt") MultipartFile receipt,
                                             @RequestParam(value = "productIds", required = false) List<Integer> productIds,
-                                            Principal user) {
+                                            Principal user,
+                                            @AuthenticationPrincipal User currentUser) {
         List<ProductId> ids = productIds == null ? List.of() : productIds.stream().map(id -> new ProductId(id)).toList();
-        return service.submit(user.getName(), request, receipt, ids);
+        // Payments are keyed by the login name (email); consultation bookings by the user's nodeId
+        String nodeId = currentUser == null ? null : currentUser.getNodeId();
+        return service.submit(user.getName(), nodeId, request, receipt, ids);
     }
 
     @GetMapping

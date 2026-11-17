@@ -10,6 +10,8 @@ import com.gunwala.entity.ShopOrderItem;
 import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import com.gunwala.repository.ShopOrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class ShopOrderService {
     private final PaymentSubmissionRepository paymentRepository;
     private final PromotionPricingService pricing;
     private final VoucherService voucherService;
+    private final NotificationService notifications;
 
     // ============================================================ BUYER
 
@@ -89,6 +92,22 @@ public class ShopOrderService {
         order.setCountry("India");
 
         orderRepository.save(order);
+
+        int units = order.getItems().stream().mapToInt(ShopOrderItem::getUnits).sum();
+        java.math.BigDecimal total = order.getSubtotal()
+                .subtract(order.getVoucherDiscount() == null ? java.math.BigDecimal.ZERO : order.getVoucherDiscount());
+        String first = order.getItems().isEmpty() ? "" : order.getItems().get(0).getProductName();
+        notifications.send(NotificationEvent.toAdmins()
+                .actor(userId, null)
+                .category(NotificationEvent.ORDER)
+                .action("placed an order")
+                .title(NotificationEvent.inr(total) + " · " + first
+                        + (order.getItems().size() > 1 ? " +" + (order.getItems().size() - 1) + " more" : "")
+                        + " (" + units + " item" + (units == 1 ? "" : "s") + ") · " + order.getCity())
+                .reference("Order " + order.getOrderReference())
+                .status("Awaiting payment")
+                .link("/admin/shipments")
+                .group("order:" + order.getOrderReference()));
         return ShopOrderResponse.from(order, false);
     }
 

@@ -8,6 +8,8 @@ import com.gunwala.entity.ShopOrder;
 import com.gunwala.entity.ShopOrderItem;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import com.gunwala.repository.ShopOrderRepository;
 import com.gunwala.service.ServiceImpl.ShiprocketShipmentService;
@@ -52,6 +54,7 @@ public class ShiprocketOrderPlacementService {
     private final PaymentSubmissionRepository paymentRepository;
     private final ShiprocketShipmentService shiprocket;
     private final TransactionTemplate tx;
+    private final NotificationService notifications;
 
     @Value("${shiprocket.auto-ship.enabled:true}")
     private boolean autoShipEnabled;
@@ -110,6 +113,7 @@ public class ShiprocketOrderPlacementService {
             return load(orderReference);  // nothing to do (already complete, or sent to manual review)
         }
 
+        boolean hadAwb = StringUtils.hasText(order.getAwbCode());
         try {
             // ---- Step 1: create the Shiprocket order ----
             if (order.getShiprocketOrderId() == null) {
@@ -157,16 +161,36 @@ public class ShiprocketOrderPlacementService {
             }
 
             // ---- Done: settle the final status for whichever steps are enabled ----
-            return toResponse(save(orderReference, o -> {
+            ShopOrder done = save(orderReference, o -> {
                 o.setShippingError(null);
                 if (o.getShippingStatus() == ShippingStatus.PROCESSING) {   // e.g. AWB step disabled and nothing new happened
                     o.setShippingStatus(StringUtils.hasText(o.getAwbCode()) ? ShippingStatus.AWB_ASSIGNED : ShippingStatus.ORDER_CREATED);
                 }
-            }));
+            });
+            if (!hadAwb && StringUtils.hasText(done.getAwbCode())) {
+                notifications.send(NotificationEvent.toAdmins()
+                        .category(NotificationEvent.SHIPPING)
+                        .action("booked a courier for an order")
+                        .title("Order " + orderReference
+                                + (StringUtils.hasText(done.getCourierName()) ? " via " + done.getCourierName() : ""))
+                        .reference("AWB " + done.getAwbCode())
+                        .status("Shipped")
+                        .link("/admin/shipments")
+                        .group("order:" + orderReference));
+            }
+            return toResponse(done);
 
         } catch (Exception e) {
             String reason = ShiprocketShipmentService.describe(e);
             log.error("Shiprocket shipping failed for order {}: {}", orderReference, reason);
+            notifications.send(NotificationEvent.toAdmins()
+                    .category(NotificationEvent.SHIPPING)
+                    .action("couldn't ship an order")
+                    .title("Order " + orderReference + " — " + reason)
+                    .reference("Order " + orderReference)
+                    .status("Failed")
+                    .link("/admin/shipments")
+                    .group("order:" + orderReference));
             return toResponse(save(orderReference, o -> {
                 o.setShippingStatus(ShippingStatus.FAILED);
                 o.setShippingError(reason);
@@ -217,6 +241,14 @@ public class ShiprocketOrderPlacementService {
                         o.setShippingStatus(ShippingStatus.MANUAL_REVIEW);
                         o.setShippingError(manualReason);
                         log.info("Order {} needs manual handling: {}", orderReference, manualReason);
+                        notifications.send(NotificationEvent.toAdmins()
+                                .category(NotificationEvent.SHIPPING)
+                                .action("needs you to ship an order manually")
+                                .title("Order " + orderReference + " — " + manualReason)
+                                .reference("Order " + orderReference)
+                                .status("Manual review")
+                                .link("/admin/shipments")
+                                .group("order:" + orderReference));
                     }
                     if (triggeredByAdmin) {
                         throw new ConflictException(manualReason);

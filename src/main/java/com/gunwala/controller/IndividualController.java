@@ -12,6 +12,9 @@ import com.gunwala.shipRocket.model.AwbRequestBody;
 import com.gunwala.shipRocket.model.OrderRequestBody;
 import com.gunwala.shipRocket.model.ShiprocketTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
@@ -21,6 +24,8 @@ public class IndividualController {
 
     @Autowired
     private IndividualService individualService;
+    @Autowired
+    private NotificationService notifications;
 
     @GetMapping("/health")
     public String health() {
@@ -28,8 +33,21 @@ public class IndividualController {
     }
 
     @PostMapping("/addProduct")
-    public FinalResponse addProduct(@RequestBody Product product) throws FinalException {
-        return this.individualService.addProduct(product);
+    public FinalResponse addProduct(@RequestBody Product product, @AuthenticationPrincipal com.gunwala.model.User me) throws FinalException {
+        FinalResponse res = this.individualService.addProduct(product);
+        // Store items are added by admins; listings by users are what admins need to check
+        if (succeeded(res) && !product.getIsStoreProduct()) {
+            notifications.send(NotificationEvent.toAdmins()
+                    .actor(me == null ? product.getSellerId() : me.getNodeId(), me == null ? null : me.getName())
+                    .category(NotificationEvent.LISTING)
+                    .action("listed a product for sale")
+                    .title(product.getTitle()
+                            + (product.getPrice() != null ? " · " + NotificationEvent.inr(product.getPrice()) : "")
+                            + (product.getCity() != null ? " · " + product.getCity() : ""))
+                    .status("New listing")
+                    .link("/admin/listings"));
+        }
+        return res;
 
     }
 
@@ -188,8 +206,20 @@ public class IndividualController {
     }
 
     @PostMapping({"/addSupportTicket"})
-    public FinalResponse addSupportTicket(@RequestBody SupportTicket supportTicket) throws FinalException {
-        return this.individualService.addSupportTicket(supportTicket);
+    public FinalResponse addSupportTicket(@RequestBody SupportTicket supportTicket, @AuthenticationPrincipal com.gunwala.model.User me) throws FinalException {
+        FinalResponse res = this.individualService.addSupportTicket(supportTicket);
+        if (succeeded(res)) {
+            String msg = supportTicket.getMessage() == null ? "" : supportTicket.getMessage().trim();
+            notifications.send(NotificationEvent.toAdmins()
+                    .actor(me == null ? supportTicket.getUserNodeId() : me.getNodeId(), me == null ? supportTicket.getUserName() : me.getName())
+                    .category(NotificationEvent.SUPPORT)
+                    .action("raised a support ticket")
+                    .title((supportTicket.getCategory() != null ? supportTicket.getCategory() + ": " : "")
+                            + (msg.length() > 140 ? msg.substring(0, 139) + "…" : msg))
+                    .reference(supportTicket.getPriority() != null ? "Priority " + supportTicket.getPriority() : null)
+                    .status("Open"));
+        }
+        return res;
     }
 
     @PutMapping({"/updateSupportTicket/{id}"})
@@ -322,8 +352,24 @@ public class IndividualController {
     }
 
     @PostMapping("/postUserReview")
-    public FinalResponse postUserReview(@RequestBody UserReview userReview){
-        return individualService.postUserReview(userReview);
+    public FinalResponse postUserReview(@RequestBody UserReview userReview, @AuthenticationPrincipal com.gunwala.model.User me){
+        FinalResponse res = individualService.postUserReview(userReview);
+        if (succeeded(res)) {
+            String comment = userReview.getComment() == null ? "" : userReview.getComment().trim();
+            notifications.send(NotificationEvent.toAdmins()
+                    .actor(me == null ? userReview.getUserFkId() : me.getNodeId(), me == null ? userReview.getUserName() : me.getName())
+                    .category(NotificationEvent.REVIEW)
+                    .action("reviewed a product")
+                    .title("★".repeat(Math.max(0, Math.min(5, userReview.getRating())))
+                            + (comment.isEmpty() ? "" : " — " + (comment.length() > 140 ? comment.substring(0, 139) + "…" : comment)))
+                    .reference(userReview.getProductFkId() != null ? "Product #" + userReview.getProductFkId() : null)
+                    .link("/admin/listings"));
+        }
+        return res;
+    }
+
+    private static boolean succeeded(FinalResponse res) {
+        return res != null && ("200".equals(res.getStatusCode()) || "SUCCESS".equalsIgnoreCase(res.getStatus()));
     }
 
     @PutMapping("/putUserReview")

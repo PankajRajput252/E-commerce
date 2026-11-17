@@ -7,6 +7,8 @@ import com.gunwala.exception.BadRequestException;
 import com.gunwala.exception.ConflictException;
 import com.gunwala.exception.NotFoundException;
 import com.gunwala.model.User;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import com.gunwala.repository.PaymentSubmissionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +59,7 @@ public class ConsultationService {
     private final GoogleCalendarService google;
     private final ConsultationMailService mail;
     private final PaymentSubmissionRepository payments;
+    private final NotificationService notifications;
     private final TransactionTemplate tx;
     /** For DB writes from afterCommit callbacks, where the finished transaction is still bound. */
     private final TransactionTemplate txNew;
@@ -70,6 +73,7 @@ public class ConsultationService {
                                GoogleCalendarService google,
                                ConsultationMailService mail,
                                PaymentSubmissionRepository payments,
+                               NotificationService notifications,
                                PlatformTransactionManager txManager,
                                @Value("${consultation.timezone:Asia/Kolkata}") String timezone,
                                @Value("${consultation.min-lead-minutes:60}") long minLeadMinutes,
@@ -80,6 +84,7 @@ public class ConsultationService {
         this.google = google;
         this.mail = mail;
         this.payments = payments;
+        this.notifications = notifications;
         this.tx = new TransactionTemplate(txManager);
         this.txNew = new TransactionTemplate(txManager);
         this.txNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -152,10 +157,13 @@ public class ConsultationService {
             return bookings.save(b);
         });
 
-        if (booking.getStatus() == ConsultationBooking.Status.CONFIRMED) {
+        boolean paid = booking.getStatus() == ConsultationBooking.Status.PENDING_PAYMENT;
+        if (!paid) {
             attachMeeting(booking);
             mail.bookingConfirmed(booking);
         }
+        notifyAdmins(booking, userId, "booked a consultation", paid ? "Awaiting payment" : "Confirmed",
+                paid ? " — " + NotificationEvent.inr(booking.getAmount()) + " to pay" : "");
         return BookingResponse.of(booking);
     }
 
@@ -247,6 +255,8 @@ public class ConsultationService {
             if (!StringUtils.hasText(booking.getMeetLink())) attachMeeting(booking);
             mail.bookingRescheduled(booking, oldStart[0]);
         }
+        notifyAdmins(booking, userId, "rescheduled their consultation", "Rescheduled",
+                oldStart[0] == null ? "" : " (was " + shortWhen(oldStart[0]) + ")");
         return withPayments(List.of(booking)).get(0);
     }
 
@@ -256,9 +266,10 @@ public class ConsultationService {
      * Checks a payment the user is submitting for a consultation, inside the payment's transaction.
      * Locks the booking so the hold can't expire while the payment is being saved, and stops the hold timer.
      */
+    /** @param userId the paying user's nodeId (bookings are stored by nodeId, not by email) */
     public void attachPayment(Long bookingId, String userId, BigDecimal amount) {
         ConsultationBooking b = bookings.findByIdForUpdate(bookingId)
-                .filter(x -> x.getUserId().equals(userId))
+                .filter(x -> userId != null && x.getUserId().equals(userId))
                 .orElseThrow(() -> new NotFoundException("Consultation booking " + bookingId + " not found"));
         switch (b.getStatus()) {
             case CONFIRMED -> throw new ConflictException("This consultation is already paid and confirmed.");
@@ -327,6 +338,7 @@ public class ConsultationService {
                         slots.findByIdForUpdate(b.getSlot().getId()).ifPresent(s -> s.setBooked(false));
                     }
                     log.info("Released consultation booking {}: no payment received", b.getId());
+                    notifyAdmins(b, null, "released an unpaid consultation slot", "Cancelled", " — payment wasn't received in time");
                 });
             } catch (Exception e) {
                 log.warn("Could not release unpaid consultation booking {}: {}", candidate.getId(), e.getMessage());
@@ -546,6 +558,9 @@ public class ConsultationService {
             }
         }
         mail.bookingCancelled(b, paidAndConfirmed[0]);
+        if (b.getCancelledBy() == ConsultationBooking.CancelledBy.USER) {
+            notifyAdmins(b, b.getUserId(), "cancelled their consultation", "Cancelled", paidAndConfirmed[0] ? " (paid, no refund)" : "");
+        }
         return BookingResponse.of(b);
     }
 
@@ -563,6 +578,24 @@ public class ConsultationService {
         } catch (Exception e) {
             log.error("Could not create Google Meet for booking {}: {}", b.getId(), e.getMessage());
         }
+    }
+
+    // ============================================================ notifications
+
+    private void notifyAdmins(ConsultationBooking b, String actor, String action, String status, String suffix) {
+        notifications.send(NotificationEvent.toAdmins()
+                .actor(actor, actor == null ? null : b.getUserName())
+                .category(NotificationEvent.CONSULTATION)
+                .action(action)
+                .title(b.getTopicName() + " · " + shortWhen(b.getStartsAt()) + suffix)
+                .reference("Consultation #" + b.getId())
+                .status(status)
+                .link("/admin/consultations")
+                .group("consultation:" + b.getId()));
+    }
+
+    private String shortWhen(Instant t) {
+        return java.time.format.DateTimeFormatter.ofPattern("d MMM, h:mm a", java.util.Locale.ENGLISH).format(t.atZone(zone));
     }
 
     /** Bookings with their latest payment (if any), for showing payment status. */

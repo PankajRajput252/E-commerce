@@ -177,6 +177,20 @@ public class WebPushService {
         sender.execute(() -> sendToUser(recipientId, payload));
     }
 
+    /** Any other in-app notification (payments, orders, consultations…): shown when no tab is open. */
+    public void notifyGeneric(String recipientId, String title, String body, String tag, String url) {
+        if (!isEnabled() || !StringUtils.hasText(recipientId)) return;
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("type", "NOTIFICATION");
+        payload.put("title", title);
+        payload.put("body", body);
+        if (StringUtils.hasText(tag)) payload.put("tag", tag);
+        payload.put("url", StringUtils.hasText(url) ? url : "/");
+
+        sender.execute(() -> sendToUser(recipientId, payload));
+    }
+
     // ============================================================ sending
 
     private void sendToUser(String userId, Map<String, Object> payload) {

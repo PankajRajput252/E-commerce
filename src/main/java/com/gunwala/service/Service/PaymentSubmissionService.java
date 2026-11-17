@@ -2,6 +2,8 @@ package com.gunwala.service.Service;
 
 import com.gunwala.consultation.ConsultationService;
 import com.gunwala.dto.PageResponse;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import com.gunwala.dto.PaymentSubmissionRequest;
 import com.gunwala.dto.PaymentSubmissionResponse;
 import com.gunwala.entity.PaymentMethod;
@@ -47,11 +49,17 @@ public class PaymentSubmissionService {
     private final ShopOrderService shopOrderService;
     private final ProductRepository productRepository;
     private final ConsultationService consultationService;
+    private final NotificationService notifications;
 
     // ============================================================ END USER
 
     @Transactional
-    public PaymentSubmissionResponse submit(String userId, PaymentSubmissionRequest request, MultipartFile receipt,List<ProductId> productIds) {
+    /**
+     * @param userId     login name (email) — what payments and shop orders are stored under
+     * @param userNodeId the user's nodeId — what consultation bookings are stored under
+     */
+    public PaymentSubmissionResponse submit(String userId, String userNodeId, PaymentSubmissionRequest request,
+                                            MultipartFile receipt, List<ProductId> productIds) {
         PaymentMethod method = methodRepository.findByIdAndActiveTrue(request.getPaymentMethodId())
                 .orElseThrow(() -> new BadRequestException("Selected payment method is not available"));
 
@@ -65,7 +73,7 @@ public class PaymentSubmissionService {
         }
         if (consultationBookingId != null) {
             // Checks owner, status and amount; locks the booking until this payment is saved
-            consultationService.attachPayment(consultationBookingId, userId, request.getAmount());
+            consultationService.attachPayment(consultationBookingId, userNodeId, request.getAmount());
         }
         if (orderReference != null) {
             shopOrderService.validatePayable(orderReference, userId, request.getAmount());
@@ -112,6 +120,15 @@ public class PaymentSubmissionService {
             }
         }
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), userId, PaymentStatus.PENDING, null));
+        notifications.send(NotificationEvent.toAdmins()
+                .actor(userId, null)
+                .category(NotificationEvent.PAYMENT)
+                .action("submitted a payment for review")
+                .title(paymentTitle(s))
+                .reference("Payment #" + s.getId() + " · UTR " + reference)
+                .status("Pending review")
+                .link("/admin/payments")
+                .group(groupOf(s)));
         return PaymentSubmissionResponse.from(s, false);
     }
 
@@ -200,6 +217,7 @@ public class PaymentSubmissionService {
         }
 
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), s.getUserId(), PaymentStatus.APPROVED, null));
+        notifyReviewed(s, adminUsername, "approved", "Approved");
         return PaymentSubmissionResponse.from(s, true);
     }
 
@@ -225,10 +243,40 @@ public class PaymentSubmissionService {
             }
         }
         events.publishEvent(new PaymentStatusChangedEvent(s.getId(), s.getUserId(), PaymentStatus.REJECTED, s.getRejectionReason()));
+        notifyReviewed(s, adminUsername, "rejected", "Rejected");
         return PaymentSubmissionResponse.from(s, true);
     }
 
     // ============================================================ helpers
+
+    /** Tells the other admins that a payment was approved / rejected. */
+    private void notifyReviewed(PaymentSubmission s, String adminUsername, String verb, String status) {
+        String title = paymentTitle(s)
+                + ("Rejected".equals(status) && StringUtils.hasText(s.getRejectionReason()) ? " — " + s.getRejectionReason() : "");
+        notifications.send(NotificationEvent.toAdmins()
+                .actor(adminUsername, null)
+                .category(NotificationEvent.PAYMENT)
+                .action(verb + " a payment")
+                .title(title)
+                .reference("Payment #" + s.getId())
+                .status(status)
+                .link("/admin/payments")
+                .group(groupOf(s)));
+    }
+
+    /** Payment updates are grouped with their order / consultation booking in the bell. */
+    private static String groupOf(PaymentSubmission s) {
+        if (StringUtils.hasText(s.getOrderReference())) return "order:" + s.getOrderReference();
+        if (s.getConsultationBookingId() != null) return "consultation:" + s.getConsultationBookingId();
+        return "payment:" + s.getId();
+    }
+
+    /** "₹566 for Consultation #8" / "₹1,500 for order BW-…". */
+    private static String paymentTitle(PaymentSubmission s) {
+        String what = s.getConsultationBookingId() != null ? "Consultation #" + s.getConsultationBookingId()
+                : StringUtils.hasText(s.getOrderReference()) ? "order " + s.getOrderReference() : "your account";
+        return NotificationEvent.inr(s.getAmount()) + " for " + what;
+    }
 
     private void ensurePending(PaymentSubmission s) {
         if (s.getStatus() != PaymentStatus.PENDING) {

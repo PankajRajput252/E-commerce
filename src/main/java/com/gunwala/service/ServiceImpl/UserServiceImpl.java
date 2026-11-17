@@ -3,6 +3,8 @@ package com.gunwala.service.ServiceImpl;
 import com.gunwala.FinalException;
 import com.gunwala.model.*;
 import com.gunwala.model.entitities.gunwala.UserInfo;
+import com.gunwala.notification.NotificationEvent;
+import com.gunwala.notification.NotificationService;
 import com.gunwala.repo.RoleRepository;
 import com.gunwala.repo.UserRepository;
 import com.gunwala.service.Service.ImageUploadService;
@@ -27,6 +29,8 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private ImageUploadService imageUploadService;
+    @Autowired
+    private NotificationService notifications;
 
     //creating user
     @Override
@@ -271,6 +275,14 @@ public class UserServiceImpl implements UserService {
 
         }
         userRepository.save(user);
+        notifications.send(NotificationEvent.toAdmins()
+                .actor(nodeId, user.getName())
+                .category(NotificationEvent.USER)
+                .action("signed up")
+                .title((user.getName() != null ? user.getName() : "New user") + " · " + user.getEmail())
+                .reference("ADMIN_USER".equals(user.getUserType()) ? "Admin account" : "Customer account")
+                .status("New")
+                .link("/admin/users"));
         finalResponse = Util.setSuccessMessage(finalResponse);
         finalResponse.setMessage(nodeId);
         return finalResponse;
